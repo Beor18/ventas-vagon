@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import XLSX from "xlsx";
 import { connectToDatabase } from "../lib/mongodb";
-import { Order } from "../models/Order";
+import Order from "../models/Order";
 
 export default function Manufacture() {
   const [orders, setOrders] = useState<any>([]);

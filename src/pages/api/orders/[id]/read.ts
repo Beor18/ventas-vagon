@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { getToken } from "next-auth/jwt";
 import { connectToDatabase } from "../../../../lib/mongodb";
 import Order from "../../../../models/Order";
 
@@ -7,6 +8,13 @@ export default async function handler(
   res: NextApiResponse
 ) {
   await connectToDatabase();
+
+  const token = await getToken({ req, secret: process.env.JWT_SECRET });
+
+  console.log("token orders: ", token);
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   const { id } = req.query;
 

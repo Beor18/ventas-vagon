@@ -1,10 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import * as XLSX from "xlsx";
 
 export default function Select({ product, onClose }: any) {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (session) {
+      fetchAccessToken().then((token) => {
+        setAccessToken(token);
+      });
+    }
+  }, [session]);
+
+  const fetchAccessToken = async () => {
+    const response = await fetch("/api/jwt");
+    const data = await response.json();
+    return data.accessToken;
+  };
 
   const handleOptionSelect = (option: any) => {
     setSelectedOptions({ ...selectedOptions, [option.type]: option });
@@ -29,6 +46,7 @@ export default function Select({ product, onClose }: any) {
       total: calculateTotal(),
       discount,
       tax,
+      session,
     };
 
     try {
@@ -36,6 +54,7 @@ export default function Select({ product, onClose }: any) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(order),
       });
@@ -47,11 +66,11 @@ export default function Select({ product, onClose }: any) {
       // Opcional: Si deseas manejar alguna acción adicional al guardar la orden
       alert("Orden guardada exitosamente");
 
-      // Generar y descargar el archivo Excel
-      const worksheet = XLSX.utils.json_to_sheet([order]);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Order");
-      XLSX.writeFile(workbook, "order.xlsx");
+      // // Generar y descargar el archivo Excel
+      // const worksheet = XLSX.utils.json_to_sheet([order]);
+      // const workbook = XLSX.utils.book_new();
+      // XLSX.utils.book_append_sheet(workbook, worksheet, "Order");
+      // XLSX.writeFile(workbook, "order.xlsx");
 
       onClose();
     } catch (error) {
@@ -65,15 +84,22 @@ export default function Select({ product, onClose }: any) {
       <h2 className="text-xl font-semibold mb-2">{product?.name}</h2>
       <p className="text-gray-700 mb-4">Base Price: ${product?.basePrice}</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-        {product?.options.map((option: any) => (
-          <button
-            key={option._id}
-            onClick={() => handleOptionSelect(option)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-          >
-            {option.name} - ${option.price}
-          </button>
-        ))}
+        <div className="flex flex-col gap-4">
+          <div>
+            <h2>Opciones: </h2>
+          </div>
+          <div>
+            {product?.options.map((option: any) => (
+              <button
+                key={option._id}
+                onClick={() => handleOptionSelect(option)}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+              >
+                {option.name} - ${option.price}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
@@ -109,7 +135,7 @@ export default function Select({ product, onClose }: any) {
           onClick={exportOrder}
           className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
         >
-          Export Order
+          Crear Orden
         </button>
       </div>
     </div>

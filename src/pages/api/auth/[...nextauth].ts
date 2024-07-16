@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "../../../lib/mongodb";
 import { User } from "../../../models/User";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 export default NextAuth({
   providers: [
@@ -24,32 +25,50 @@ export default NextAuth({
           .update(credentials.password)
           .digest("hex");
         if (user && user.password === hashedPassword) {
+          const secret = process.env.JWT_SECRET as string;
+          const accessToken = jwt.sign(
+            { userId: user.id, email: user.email },
+            secret,
+            { expiresIn: "3h" }
+          );
           return {
             id: user._id,
             email: user.email,
             role: user.role,
+            accessToken,
           };
         }
         return null;
       },
     }),
   ],
+  jwt: {
+    secret: process.env.JWT_SECRET,
+  },
   callbacks: {
     async jwt({ token, user }: any) {
+      const secret = process.env.JWT_SECRET as string;
       if (user) {
         token.role = user.role;
+        token.accessToken = jwt.sign(
+          { userId: user.id, email: user.email },
+          secret,
+          { expiresIn: "3h" }
+        );
       }
       return token;
     },
     async session({ session, token }: any) {
+      console.log("Token backend: ", token);
       if (token) {
         session.user.role = token.role;
+        session.user.accessToken = token.accessToken;
       }
       return session;
     },
   },
   pages: {
     signIn: "/login",
-    error: "/unauthorized", // Aquí puedes definir la página de error
+    error: "/unauthorized",
   },
 });

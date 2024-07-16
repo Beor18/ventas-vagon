@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import withAuth from "@Src/lib/withAuth";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [role, setRole] = useState("Vendedor");
   const router = useRouter();
 
@@ -18,6 +20,7 @@ const Register = () => {
         body: JSON.stringify({
           email,
           password,
+          name,
           role,
         }),
       });
@@ -74,6 +77,22 @@ const Register = () => {
         </div>
         <div className="mb-4">
           <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Nombre
+          </label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label
             htmlFor="role"
             className="block text-sm font-medium text-gray-700"
           >
@@ -101,4 +120,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default withAuth(Register, ["Administrador"]);

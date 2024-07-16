@@ -46,7 +46,8 @@ export default function Select({ product, onClose }: any) {
       total: calculateTotal(),
       discount,
       tax,
-      session,
+      vendedorEmail: session?.user?.email,
+      vendedorName: session?.user?.name,
     };
 
     try {
@@ -65,12 +66,6 @@ export default function Select({ product, onClose }: any) {
 
       // Opcional: Si deseas manejar alguna acción adicional al guardar la orden
       alert("Orden guardada exitosamente");
-
-      // // Generar y descargar el archivo Excel
-      // const worksheet = XLSX.utils.json_to_sheet([order]);
-      // const workbook = XLSX.utils.book_new();
-      // XLSX.utils.book_append_sheet(workbook, worksheet, "Order");
-      // XLSX.writeFile(workbook, "order.xlsx");
 
       onClose();
     } catch (error) {

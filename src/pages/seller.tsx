@@ -7,7 +7,7 @@ import Modal from "@Src/components/Modal";
 import Select from "@Src/components/Select";
 import withAuth from "../lib/withAuth";
 
-function Vendor({ products }: any) {
+function Seller({ products }: any) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const openModal = (product: any) => {
@@ -53,4 +53,4 @@ export async function getServerSideProps() {
   return { props: { products: JSON.parse(JSON.stringify(products)) } };
 }
 
-export default withAuth(Vendor, ["Administrador"]);
+export default withAuth(Seller, ["Administrador", "Vendedor"]);

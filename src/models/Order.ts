@@ -22,6 +22,9 @@ const orderSchema = new mongoose.Schema({
   tax: { type: Number, default: 0 },
   status: { type: String, default: "Pending" },
   createdAt: { type: Date, default: Date.now },
+  vendedorEmail: { type: String, required: true },
+  vendedorName: { type: String, required: true },
+  comentaries: { type: String, default: "" },
 });
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);

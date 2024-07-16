@@ -34,6 +34,7 @@ export default NextAuth({
           return {
             id: user._id,
             email: user.email,
+            name: user.name,
             role: user.role,
             accessToken,
           };
@@ -50,6 +51,7 @@ export default NextAuth({
       const secret = process.env.JWT_SECRET as string;
       if (user) {
         token.role = user.role;
+        token.name = user.name;
         token.accessToken = jwt.sign(
           { userId: user.id, email: user.email },
           secret,
@@ -61,6 +63,7 @@ export default NextAuth({
     async session({ session, token }: any) {
       console.log("Token backend: ", token);
       if (token) {
+        session.user.name = token.name;
         session.user.role = token.role;
         session.user.accessToken = token.accessToken;
       }

@@ -30,8 +30,17 @@ export default async function handler(
     res.status(200).json(orders);
   } else if (req.method === "POST") {
     try {
-      const { productId, productName, options, total, discount, tax } =
-        req.body;
+      const {
+        productId,
+        productName,
+        options,
+        total,
+        discount,
+        tax,
+        vendedorEmail,
+        vendedorName,
+        comentaries,
+      } = req.body;
 
       const newOrder = new Order({
         productId,
@@ -41,6 +50,9 @@ export default async function handler(
         discount,
         tax,
         status: "Pending",
+        vendedorEmail,
+        vendedorName,
+        comentaries,
       });
 
       await newOrder.save();

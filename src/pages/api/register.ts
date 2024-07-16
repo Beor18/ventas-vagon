@@ -10,7 +10,7 @@ export default async function handler(
   await connectToDatabase();
 
   if (req.method === "POST") {
-    const { email, password, role } = req.body;
+    const { email, password, name, role } = req.body;
 
     // Verifica si el usuario ya existe
     const existingUser = await User.findOne({ email });
@@ -27,6 +27,7 @@ export default async function handler(
     const newUser = new User({
       email,
       password: hashedPassword,
+      name,
       role,
     });
 

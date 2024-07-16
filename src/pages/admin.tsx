@@ -36,13 +36,20 @@ function Admin({ products, orders }: any) {
     setProduct({ ...product, [name]: value });
   };
 
-  const handleOptionChange = (e: any) => {
+  const handleOptionChange = (e: any, index: number) => {
+    const { name, value } = e.target;
+    const updatedOptions = [...options];
+    updatedOptions[index] = { ...updatedOptions[index], [name]: value };
+    setOptions(updatedOptions);
+  };
+
+  const handleNewOptionChange = (e: any) => {
     const { name, value } = e.target;
     setNewOption({ ...newOption, [name]: value });
   };
 
   const addOption = () => {
-    setOptions([...options, newOption]);
+    setOptions([...options, { ...newOption }]);
     setNewOption({
       name: "",
       price: 0,
@@ -280,121 +287,198 @@ function Admin({ products, orders }: any) {
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                           />
                         </div>
-                        <div className="mt-4 border-t border-gray-300 pt-4">
-                          <h4 className="text-md leading-6 font-medium text-gray-900 mb-2">
-                            Add Options
-                          </h4>
-                          {options.map((option: any, index: number) => (
-                            <div
-                              key={index}
-                              className="mb-2 p-2 border border-gray-300 rounded-md"
-                            >
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-gray-700">
-                                  {option.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => removeOption(index)}
-                                  className="bg-red-500 text-white px-2 py-1 rounded-md text-sm"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Option Name
-                                </label>
-                                <input
-                                  type="text"
-                                  name="name"
-                                  value={option.name}
-                                  onChange={(e) => handleOptionChange(e)}
-                                  placeholder="Option Name"
-                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                />
-                              </div>
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Option Price
-                                </label>
-                                <input
-                                  type="number"
-                                  name="price"
-                                  value={option.price}
-                                  onChange={(e) => handleOptionChange(e)}
-                                  placeholder="Option Price"
-                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                />
-                              </div>
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Option Type
-                                </label>
-                                <input
-                                  type="text"
-                                  name="type"
-                                  value={option.type}
-                                  onChange={(e) => handleOptionChange(e)}
-                                  placeholder="Option Type"
-                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                />
-                              </div>
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Option Specification
-                                </label>
-                                <input
-                                  type="text"
-                                  name="specification"
-                                  value={option.specification}
-                                  onChange={(e) => handleOptionChange(e)}
-                                  placeholder="Option Specification"
-                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                />
-                              </div>
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Option PCS
-                                </label>
-                                <input
-                                  type="number"
-                                  name="pcs"
-                                  value={option.pcs}
-                                  onChange={(e) => handleOptionChange(e)}
-                                  placeholder="Option PCS"
-                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                />
-                              </div>
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Option Image
-                                </label>
-                                <input
-                                  type="file"
-                                  name="image"
-                                  onChange={(e) =>
-                                    handleImageUpload(e, (filePath: string) =>
-                                      setNewOption({
-                                        ...newOption,
-                                        imageUrl: filePath,
-                                      })
-                                    )
-                                  }
-                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                />
-                              </div>
+                        {/* Opciones */}
+                        <h4 className="text-lg font-medium text-gray-900 mt-4">
+                          Options
+                        </h4>
+                        {options.map((option: any, index: number) => (
+                          <div key={index} className="mb-2 border-b pb-2">
+                            <div className="mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Option Name
+                              </label>
+                              <input
+                                type="text"
+                                name="name"
+                                value={option.name}
+                                onChange={(e) => handleOptionChange(e, index)}
+                                placeholder="Option Name"
+                                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                              />
                             </div>
-                          ))}
-                          <div className="border-t border-gray-300 mt-4 pt-4">
+                            <div className="mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Option Price
+                              </label>
+                              <input
+                                type="number"
+                                name="price"
+                                value={option.price}
+                                onChange={(e) => handleOptionChange(e, index)}
+                                placeholder="Option Price"
+                                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                              />
+                            </div>
+                            <div className="mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Option Image
+                              </label>
+                              <input
+                                type="file"
+                                name="image"
+                                onChange={(e) =>
+                                  handleImageUpload(e, (filePath: string) => {
+                                    const updatedOptions = [...options];
+                                    updatedOptions[index] = {
+                                      ...updatedOptions[index],
+                                      imageUrl: filePath,
+                                    };
+                                    setOptions(updatedOptions);
+                                  })
+                                }
+                                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                              />
+                            </div>
+                            <div className="mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Option Type
+                              </label>
+                              <input
+                                type="text"
+                                name="type"
+                                value={option.type}
+                                onChange={(e) => handleOptionChange(e, index)}
+                                placeholder="Option Type"
+                                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                              />
+                            </div>
+                            <div className="mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Specification
+                              </label>
+                              <input
+                                type="text"
+                                name="specification"
+                                value={option.specification}
+                                onChange={(e) => handleOptionChange(e, index)}
+                                placeholder="Specification"
+                                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                              />
+                            </div>
+                            <div className="mb-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                PCS
+                              </label>
+                              <input
+                                type="number"
+                                name="pcs"
+                                value={option.pcs}
+                                onChange={(e) => handleOptionChange(e, index)}
+                                placeholder="PCS"
+                                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                              />
+                            </div>
                             <button
-                              type="button"
-                              onClick={addOption}
-                              className="bg-green-500 text-white px-4 py-2 rounded-md"
+                              onClick={() => removeOption(index)}
+                              className="bg-red-500 text-white px-4 py-2 rounded-md"
                             >
-                              Add Option
+                              Remove Option
                             </button>
                           </div>
+                        ))}
+                        <div className="border-t pt-2 mt-2">
+                          <h4 className="text-lg font-medium text-gray-900 mt-4">
+                            Add New Option
+                          </h4>
+                          <div className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Option Name
+                            </label>
+                            <input
+                              type="text"
+                              name="name"
+                              value={newOption.name}
+                              onChange={handleNewOptionChange}
+                              placeholder="Option Name"
+                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            />
+                          </div>
+                          <div className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Option Price
+                            </label>
+                            <input
+                              type="number"
+                              name="price"
+                              value={newOption.price}
+                              onChange={handleNewOptionChange}
+                              placeholder="Option Price"
+                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            />
+                          </div>
+                          <div className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Option Image
+                            </label>
+                            <input
+                              type="file"
+                              name="image"
+                              onChange={(e) =>
+                                handleImageUpload(e, (filePath: string) =>
+                                  setNewOption({
+                                    ...newOption,
+                                    imageUrl: filePath,
+                                  })
+                                )
+                              }
+                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            />
+                          </div>
+                          <div className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Option Type
+                            </label>
+                            <input
+                              type="text"
+                              name="type"
+                              value={newOption.type}
+                              onChange={handleNewOptionChange}
+                              placeholder="Option Type"
+                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            />
+                          </div>
+                          <div className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              Specification
+                            </label>
+                            <input
+                              type="text"
+                              name="specification"
+                              value={newOption.specification}
+                              onChange={handleNewOptionChange}
+                              placeholder="Specification"
+                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            />
+                          </div>
+                          <div className="mb-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              PCS
+                            </label>
+                            <input
+                              type="number"
+                              name="pcs"
+                              value={newOption.pcs}
+                              onChange={handleNewOptionChange}
+                              placeholder="PCS"
+                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            />
+                          </div>
+                          <button
+                            onClick={addOption}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                          >
+                            Add Option
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -402,16 +486,14 @@ function Admin({ products, orders }: any) {
                 </div>
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
-                    type="button"
                     onClick={saveProduct}
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                   >
-                    Save Product
+                    Save
                   </button>
                   <button
-                    type="button"
                     onClick={() => setModalOpen(false)}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     Cancel
                   </button>
@@ -421,24 +503,7 @@ function Admin({ products, orders }: any) {
           </div>
         )}
 
-        {loading && <p>Loading...</p>}
-        {message && <p>{message}</p>}
-
-        <ul>
-          {products.map((product: any) => (
-            <li
-              key={product._id}
-              className="mb-2 p-2 border border-gray-300 rounded-md"
-            >
-              {product.name} - {product.description}
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-32 h-32 object-cover"
-              />
-            </li>
-          ))}
-        </ul>
+        {message && <div className="mt-4 text-red-500">{message}</div>}
       </section>
 
       {/* Gestión de Órdenes */}

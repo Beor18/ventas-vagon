@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "../models/Product";
@@ -28,7 +30,10 @@ function Vendor({ products }: any) {
               onClick={() => openModal(product)}
             >
               <h2 className="text-xl font-semibold">{product.name}</h2>
-              <p className="text-gray-700">Base Price: ${product.basePrice}</p>
+              <p className="text-gray-700 pb-4">
+                Base Price: ${product.basePrice}
+              </p>
+              <img src={product.imageUrl} />
             </div>
           ))}
         </div>

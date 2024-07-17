@@ -15,6 +15,30 @@ const Navbar = () => {
         <div className="flex space-x-4 items-center">
           {status === "authenticated" ? (
             <>
+              {session?.user.role === "Vendedor" && (
+                <Link
+                  className="text-white bg-blue-500 px-3 py-2 rounded-md"
+                  href="/seller"
+                >
+                  Productos
+                </Link>
+              )}
+              {session?.user.role === "Fabricante" && (
+                <Link
+                  className="text-white bg-blue-500 px-3 py-2 rounded-md"
+                  href="/manufacture"
+                >
+                  Fabricante
+                </Link>
+              )}
+              {session?.user.role === "Administrador" && (
+                <Link
+                  className="text-white bg-blue-500 px-3 py-2 rounded-md"
+                  href="/admin"
+                >
+                  Administrador
+                </Link>
+              )}
               <span className="text-white">Hello, {session.user.email}</span>
               <button
                 onClick={() => signOut()}
@@ -32,12 +56,12 @@ const Navbar = () => {
                 Login
               </Link>
 
-              <Link
+              {/* <Link
                 className="text-white bg-green-500 px-3 py-2 rounded-md"
                 href="/register"
               >
                 Register
-              </Link>
+              </Link> */}
             </>
           )}
         </div>

@@ -507,7 +507,7 @@ function Admin({ products, orders }: any) {
       </section>
 
       {/* Gestión de Órdenes */}
-      {/* <section>
+      <section>
         <h2 className="text-xl font-bold mb-2">Gestión de Órdenes</h2>
         <ul>
           {orders.map((order: any) => (
@@ -516,7 +516,7 @@ function Admin({ products, orders }: any) {
               className="mb-2 p-2 border border-gray-300 rounded-md"
             >
               <p>Order ID: {order._id}</p>
-              <p>Client Name: {order.clientName}</p>
+              <p>Vendedor Name: {order.vendedorName}</p>
               <p>Total Price: {order.totalPrice}</p>
               <ul>
                 {order.items.map((item: any) => (
@@ -528,7 +528,7 @@ function Admin({ products, orders }: any) {
             </li>
           ))}
         </ul>
-      </section> */}
+      </section>
     </div>
   );
 }

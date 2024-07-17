@@ -43,8 +43,9 @@ const Navbar = () => {
               <button
                 onClick={() =>
                   signOut({
-                    callbackUrl:
-                      "https://ventas-vagon-production.up.railway.app/",
+                    // callbackUrl:
+                    //   "https://ventas-vagon-production.up.railway.app/",
+                    redirect: false,
                   })
                 }
                 className="text-white bg-red-500 px-3 py-2 rounded-md"

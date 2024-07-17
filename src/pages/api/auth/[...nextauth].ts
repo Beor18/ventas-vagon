@@ -47,6 +47,11 @@ export default NextAuth({
     secret: process.env.JWT_SECRET,
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     async jwt({ token, user }: any) {
       const secret = process.env.JWT_SECRET as string;
       if (user) {

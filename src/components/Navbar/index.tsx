@@ -41,7 +41,12 @@ const Navbar = () => {
               )}
               <span className="text-white">Hello, {session.user.email}</span>
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() =>
+                  signOut({
+                    callbackUrl:
+                      "https://ventas-vagon-production.up.railway.app/",
+                  })
+                }
                 className="text-white bg-red-500 px-3 py-2 rounded-md"
               >
                 Logout

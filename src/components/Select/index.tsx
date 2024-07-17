@@ -1,9 +1,37 @@
+/* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import * as XLSX from "xlsx";
+
+interface ProductOption {
+  _id: string;
+  name: string;
+  price: number;
+  suboptions?: ProductSubOption[];
+}
+
+interface ProductSubOption {
+  _id: string;
+  name: string;
+  price: number;
+  code?: string;
+  details?: string;
+  imageUrl?: string;
+}
+
+interface SelectedOptions {
+  [key: string]: ProductOption;
+}
+
+interface SelectedSubOptions {
+  [key: string]: {
+    [key: string]: ProductSubOption;
+  };
+}
 
 export default function Select({ product, onClose }: any) {
-  const [selectedOptions, setSelectedOptions] = useState({});
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
+  const [selectedSubOptions, setSelectedSubOptions] =
+    useState<SelectedSubOptions>({});
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -23,26 +51,56 @@ export default function Select({ product, onClose }: any) {
     return data.accessToken;
   };
 
-  const handleOptionSelect = (option: any) => {
-    setSelectedOptions({ ...selectedOptions, [option.type]: option });
+  const handleOptionSelect = (option: ProductOption) => {
+    setSelectedOptions({ ...selectedOptions, [option._id]: option });
+  };
+
+  const handleSubOptionSelect = (
+    optionId: string,
+    subOption: ProductSubOption
+  ) => {
+    setSelectedSubOptions({
+      ...selectedSubOptions,
+      [optionId]: {
+        ...selectedSubOptions[optionId],
+        [subOption._id]: subOption,
+      },
+    });
   };
 
   const calculateTotal = () => {
     const basePrice = product?.basePrice;
     const optionsPrice = Object.values(selectedOptions).reduce(
-      (sum, option: any) => sum + option.price,
+      (sum, option) => sum + option.price,
       0
     );
-    const subtotal = basePrice + optionsPrice;
+    const subOptionsPrice = Object.values(selectedSubOptions).reduce(
+      (sum, subOptions) =>
+        sum +
+        Object.values(subOptions).reduce(
+          (subSum, subOption) => subSum + subOption.price,
+          0
+        ),
+      0
+    );
+    const subtotal = basePrice + optionsPrice + subOptionsPrice;
     const total = subtotal + subtotal * (tax / 100) - discount;
     return total;
   };
 
   const exportOrder = async () => {
+    // Preparamos las opciones con sus subopciones
+    const preparedOptions = Object.values(selectedOptions).map((option) => ({
+      ...option,
+      suboptions: selectedSubOptions[option._id]
+        ? Object.values(selectedSubOptions[option._id])
+        : [],
+    }));
+
     const order = {
       productId: product?._id,
       productName: product?.name,
-      options: selectedOptions,
+      options: preparedOptions,
       total: calculateTotal(),
       discount,
       tax,
@@ -84,14 +142,34 @@ export default function Select({ product, onClose }: any) {
             <h2>Opciones: </h2>
           </div>
           <div>
-            {product?.options.map((option: any) => (
-              <button
-                key={option._id}
-                onClick={() => handleOptionSelect(option)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-              >
-                {option.name} - ${option.price}
-              </button>
+            {product?.options.map((option: ProductOption) => (
+              <div key={option._id}>
+                <button
+                  onClick={() => handleOptionSelect(option)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-2"
+                >
+                  {option.name} - ${option.price}
+                </button>
+                {selectedOptions[option._id] && option.suboptions && (
+                  <div className="ml-4">
+                    {option.suboptions.map((subOption: ProductSubOption) => (
+                      <div key={subOption._id} className="border p-2">
+                        <img src={subOption.imageUrl} alt="" />
+                        <br />
+                        <button
+                          key={subOption._id}
+                          onClick={() =>
+                            handleSubOptionSelect(option._id, subOption)
+                          }
+                          className="bg-gray-500 text-white px-2 py-1 rounded-md hover:bg-gray-600 transition-colors mb-1"
+                        >
+                          {subOption.name} - ${subOption.price}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

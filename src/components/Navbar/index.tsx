@@ -41,16 +41,21 @@ const Navbar = () => {
               )}
               <span className="text-white">Hello, {session.user.email}</span>
               <button
-                onClick={() =>
+                onClick={(e) => {
+                  e.preventDefault();
                   signOut({
-                    // callbackUrl:
-                    //   "https://ventas-vagon-production.up.railway.app/",
-                    redirect: false,
-                  })
-                }
+                    redirect: true,
+                    callbackUrl: process.env.NEXT_PUBLIC_FRONTEND_BASE_URL,
+                  });
+                }}
                 className="text-white bg-red-500 px-3 py-2 rounded-md"
               >
-                Logout
+                <a
+                  style={{ textDecoration: "none", color: "#fff" }}
+                  href={`/api/auth/signout`}
+                >
+                  Logout
+                </a>
               </button>
             </>
           ) : (

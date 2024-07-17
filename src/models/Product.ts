@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
+const subOptionSchema = new mongoose.Schema({
+  code: String,
+  price: Number,
+  imageUrl: String,
+  details: String,
+  name: String,
+});
+
 const optionSchema = new mongoose.Schema({
   name: String,
   price: Number,
@@ -7,19 +15,20 @@ const optionSchema = new mongoose.Schema({
   type: String,
   specification: String,
   pcs: Number,
+  suboptions: [subOptionSchema],
 });
 
 const productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  imageUrl: { type: String, required: true },
-  quantity: { type: Number, required: true },
-  material: { type: String, required: true },
-  externalDimensions: { type: String, required: true },
-  internalDimensions: { type: String, required: true },
-  foldingState: { type: String, required: true },
-  totalWeight: { type: Number, required: true },
-  basePrice: { type: Number, required: true },
+  name: { type: String },
+  description: { type: String },
+  imageUrl: { type: String },
+  quantity: { type: Number },
+  material: { type: String },
+  externalDimensions: { type: String },
+  internalDimensions: { type: String },
+  foldingState: { type: String },
+  totalWeight: { type: Number },
+  basePrice: { type: Number },
   options: [optionSchema],
 });
 

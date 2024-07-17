@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
+const subOptionSchema = new mongoose.Schema({
+  code: String,
+  price: Number,
+  imageUrl: String,
+  details: String,
+  name: String,
+});
+
 const optionSchema = new mongoose.Schema({
   name: String,
   price: Number,
@@ -7,23 +15,23 @@ const optionSchema = new mongoose.Schema({
   type: String,
   specification: String,
   pcs: Number,
+  suboptions: [subOptionSchema],
 });
 
 const orderSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
-    required: true,
   },
-  productName: { type: String, required: true },
+  productName: { type: String },
   options: [optionSchema],
-  total: { type: Number, required: true },
+  total: { type: Number },
   discount: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },
   status: { type: String, default: "Pending" },
   createdAt: { type: Date, default: Date.now },
-  vendedorEmail: { type: String, required: true },
-  vendedorName: { type: String, required: true },
+  vendedorEmail: { type: String },
+  vendedorName: { type: String },
   comentaries: { type: String, default: "" },
 });
 

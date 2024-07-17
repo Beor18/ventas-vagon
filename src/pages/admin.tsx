@@ -7,6 +7,7 @@ import withAuth from "../lib/withAuth";
 
 function Admin({ products, orders }: any) {
   const [product, setProduct] = useState({
+    _id: "",
     name: "",
     description: "",
     imageUrl: "",
@@ -85,7 +86,16 @@ function Admin({ products, orders }: any) {
     }
   };
 
-  const saveProduct = async () => {
+  const saveProduct = async (id: string) => {
+    if (id) {
+      console.log("ID Product: ", id);
+      updateProduct(id);
+    } else {
+      createProduct();
+    }
+  };
+
+  const createProduct = async () => {
     setLoading(true);
     try {
       await fetch("/api/products", {
@@ -96,6 +106,7 @@ function Admin({ products, orders }: any) {
         body: JSON.stringify({ ...product, options }),
       });
       setProduct({
+        _id: "",
         name: "",
         description: "",
         imageUrl: "",
@@ -114,6 +125,45 @@ function Admin({ products, orders }: any) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const updateProduct = async (id: string) => {
+    setLoading(true);
+    try {
+      await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...product, options }),
+      });
+      setMessage("Product updated successfully");
+      setModalOpen(false);
+    } catch (error) {
+      setMessage("Error updating product");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteProduct = async (id: string) => {
+    setLoading(true);
+    try {
+      await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+      });
+      setMessage("Product deleted successfully");
+    } catch (error) {
+      setMessage("Error deleting product");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const editProduct = (product: any) => {
+    setProduct(product);
+    setOptions(product.options);
+    setModalOpen(true);
   };
 
   return (
@@ -486,7 +536,7 @@ function Admin({ products, orders }: any) {
                 </div>
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
-                    onClick={saveProduct}
+                    onClick={() => saveProduct(product._id)}
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     Save
@@ -506,25 +556,38 @@ function Admin({ products, orders }: any) {
         {message && <div className="mt-4 text-red-500">{message}</div>}
       </section>
 
-      {/* Gestión de Órdenes */}
       <section>
-        <h2 className="text-xl font-bold mb-2">Gestión de Órdenes</h2>
-        <ul>
-          {orders.map((order: any) => (
+        <ul className="divide-y divide-gray-200">
+          {products.map((product: any) => (
             <li
-              key={order._id}
-              className="mb-2 p-2 border border-gray-300 rounded-md"
+              key={product._id}
+              className="py-4 flex justify-between items-center"
             >
-              <p>Order ID: {order._id}</p>
-              <p>Vendedor Name: {order.vendedorName}</p>
-              <p>Total Price: {order.totalPrice}</p>
-              <ul>
-                {order.items.map((item: any) => (
-                  <li key={item._id} className="ml-4">
-                    {item.name} - {item.quantity} pcs
-                  </li>
-                ))}
-              </ul>
+              <div className="flex flex-row gap-4">
+                <div>
+                  <img src={product.imageUrl} alt="" width={100} height={100} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-500">{product.description}</p>
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => editProduct(product)}
+                  className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteProduct(product._id)}
+                  className="bg-red-500 text-white px-4 py-2 rounded-md"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>

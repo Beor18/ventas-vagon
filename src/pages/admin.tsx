@@ -27,6 +27,14 @@ function Admin({ products, orders }: any) {
     type: "",
     specification: "",
     pcs: 0,
+    suboptions: [],
+  });
+  const [newSubOption, setNewSubOption] = useState<any>({
+    code: "",
+    price: 0,
+    imageUrl: "",
+    details: "",
+    name: "",
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,10 +45,27 @@ function Admin({ products, orders }: any) {
     setProduct({ ...product, [name]: value });
   };
 
-  const handleOptionChange = (e: any, index: number) => {
+  const handleOptionChange = (e: any, optionIndex: number) => {
     const { name, value } = e.target;
     const updatedOptions = [...options];
-    updatedOptions[index] = { ...updatedOptions[index], [name]: value };
+    updatedOptions[optionIndex] = {
+      ...updatedOptions[optionIndex],
+      [name]: value,
+    };
+    setOptions(updatedOptions);
+  };
+
+  const handleSubOptionChange = (
+    e: any,
+    optionIndex: number,
+    subOptionIndex: number
+  ) => {
+    const { name, value } = e.target;
+    const updatedOptions = [...options];
+    updatedOptions[optionIndex].suboptions[subOptionIndex] = {
+      ...updatedOptions[optionIndex].suboptions[subOptionIndex],
+      [name]: value,
+    };
     setOptions(updatedOptions);
   };
 
@@ -49,8 +74,13 @@ function Admin({ products, orders }: any) {
     setNewOption({ ...newOption, [name]: value });
   };
 
+  const handleNewSubOptionChange = (e: any) => {
+    const { name, value } = e.target;
+    setNewSubOption({ ...newSubOption, [name]: value });
+  };
+
   const addOption = () => {
-    setOptions([...options, { ...newOption }]);
+    setOptions([...options, { ...newOption, suboptions: [] }]);
     setNewOption({
       name: "",
       price: 0,
@@ -58,11 +88,35 @@ function Admin({ products, orders }: any) {
       type: "",
       specification: "",
       pcs: 0,
+      suboptions: [],
     });
   };
 
-  const removeOption = (index: number) => {
-    const updatedOptions = options.filter((_: any, i: number) => i !== index);
+  const addSubOption = (optionIndex: number) => {
+    const updatedOptions = [...options];
+    updatedOptions[optionIndex].suboptions.push({ ...newSubOption });
+    setOptions(updatedOptions);
+    setNewSubOption({
+      code: "",
+      price: 0,
+      imageUrl: "",
+      details: "",
+      name: "",
+    });
+  };
+
+  const removeOption = (optionIndex: number) => {
+    const updatedOptions = options.filter(
+      (_: any, i: number) => i !== optionIndex
+    );
+    setOptions(updatedOptions);
+  };
+
+  const removeSubOption = (optionIndex: number, subOptionIndex: number) => {
+    const updatedOptions = [...options];
+    updatedOptions[optionIndex].suboptions = updatedOptions[
+      optionIndex
+    ].suboptions.filter((_: any, i: number) => i !== subOptionIndex);
     setOptions(updatedOptions);
   };
 
@@ -88,7 +142,6 @@ function Admin({ products, orders }: any) {
 
   const saveProduct = async (id: string) => {
     if (id) {
-      console.log("ID Product: ", id);
       updateProduct(id);
     } else {
       createProduct();
@@ -203,7 +256,7 @@ function Admin({ products, orders }: any) {
                         className="text-lg leading-6 font-medium text-gray-900"
                         id="modal-title"
                       >
-                        New Product
+                        {product._id ? "Edit Product" : "New Product"}
                       </h3>
                       <div className="mt-2">
                         <div className="mb-2">
@@ -341,8 +394,8 @@ function Admin({ products, orders }: any) {
                         <h4 className="text-lg font-medium text-gray-900 mt-4">
                           Options
                         </h4>
-                        {options.map((option: any, index: number) => (
-                          <div key={index} className="mb-2 border-b pb-2">
+                        {options.map((option: any, optionIndex: number) => (
+                          <div key={optionIndex} className="mb-2 border-b pb-2">
                             <div className="mb-2">
                               <label className="block text-sm font-medium text-gray-700">
                                 Option Name
@@ -351,7 +404,9 @@ function Admin({ products, orders }: any) {
                                 type="text"
                                 name="name"
                                 value={option.name}
-                                onChange={(e) => handleOptionChange(e, index)}
+                                onChange={(e) =>
+                                  handleOptionChange(e, optionIndex)
+                                }
                                 placeholder="Option Name"
                                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                               />
@@ -364,7 +419,9 @@ function Admin({ products, orders }: any) {
                                 type="number"
                                 name="price"
                                 value={option.price}
-                                onChange={(e) => handleOptionChange(e, index)}
+                                onChange={(e) =>
+                                  handleOptionChange(e, optionIndex)
+                                }
                                 placeholder="Option Price"
                                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                               />
@@ -379,8 +436,8 @@ function Admin({ products, orders }: any) {
                                 onChange={(e) =>
                                   handleImageUpload(e, (filePath: string) => {
                                     const updatedOptions = [...options];
-                                    updatedOptions[index] = {
-                                      ...updatedOptions[index],
+                                    updatedOptions[optionIndex] = {
+                                      ...updatedOptions[optionIndex],
                                       imageUrl: filePath,
                                     };
                                     setOptions(updatedOptions);
@@ -397,7 +454,9 @@ function Admin({ products, orders }: any) {
                                 type="text"
                                 name="type"
                                 value={option.type}
-                                onChange={(e) => handleOptionChange(e, index)}
+                                onChange={(e) =>
+                                  handleOptionChange(e, optionIndex)
+                                }
                                 placeholder="Option Type"
                                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                               />
@@ -410,7 +469,9 @@ function Admin({ products, orders }: any) {
                                 type="text"
                                 name="specification"
                                 value={option.specification}
-                                onChange={(e) => handleOptionChange(e, index)}
+                                onChange={(e) =>
+                                  handleOptionChange(e, optionIndex)
+                                }
                                 placeholder="Specification"
                                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                               />
@@ -423,106 +484,229 @@ function Admin({ products, orders }: any) {
                                 type="number"
                                 name="pcs"
                                 value={option.pcs}
-                                onChange={(e) => handleOptionChange(e, index)}
+                                onChange={(e) =>
+                                  handleOptionChange(e, optionIndex)
+                                }
                                 placeholder="PCS"
                                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                               />
                             </div>
+                            {/* Subopciones */}
+                            <h5 className="text-md font-medium text-gray-700 mt-2">
+                              Suboptions
+                            </h5>
+                            {option.suboptions.map(
+                              (suboption: any, subOptionIndex: number) => (
+                                <div
+                                  key={subOptionIndex}
+                                  className="mb-2 border-b pb-2 ml-4"
+                                >
+                                  <div className="mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                      Suboption Name
+                                    </label>
+                                    <input
+                                      type="text"
+                                      name="name"
+                                      value={suboption.name}
+                                      onChange={(e) =>
+                                        handleSubOptionChange(
+                                          e,
+                                          optionIndex,
+                                          subOptionIndex
+                                        )
+                                      }
+                                      placeholder="Suboption Name"
+                                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    />
+                                  </div>
+                                  <div className="mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                      Suboption Price
+                                    </label>
+                                    <input
+                                      type="number"
+                                      name="price"
+                                      value={suboption.price}
+                                      onChange={(e) =>
+                                        handleSubOptionChange(
+                                          e,
+                                          optionIndex,
+                                          subOptionIndex
+                                        )
+                                      }
+                                      placeholder="Suboption Price"
+                                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    />
+                                  </div>
+                                  <div className="mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                      Suboption Image
+                                    </label>
+                                    <input
+                                      type="file"
+                                      name="image"
+                                      onChange={(e) =>
+                                        handleImageUpload(
+                                          e,
+                                          (filePath: string) => {
+                                            const updatedOptions = [...options];
+                                            updatedOptions[
+                                              optionIndex
+                                            ].suboptions[subOptionIndex] = {
+                                              ...updatedOptions[optionIndex]
+                                                .suboptions[subOptionIndex],
+                                              imageUrl: filePath,
+                                            };
+                                            setOptions(updatedOptions);
+                                          }
+                                        )
+                                      }
+                                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    />
+                                  </div>
+                                  <div className="mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                      Suboption Code
+                                    </label>
+                                    <input
+                                      type="text"
+                                      name="code"
+                                      value={suboption.code}
+                                      onChange={(e) =>
+                                        handleSubOptionChange(
+                                          e,
+                                          optionIndex,
+                                          subOptionIndex
+                                        )
+                                      }
+                                      placeholder="Suboption Code"
+                                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    />
+                                  </div>
+                                  <div className="mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                      Details
+                                    </label>
+                                    <input
+                                      type="text"
+                                      name="details"
+                                      value={suboption.details}
+                                      onChange={(e) =>
+                                        handleSubOptionChange(
+                                          e,
+                                          optionIndex,
+                                          subOptionIndex
+                                        )
+                                      }
+                                      placeholder="Details"
+                                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    />
+                                  </div>
+                                  <button
+                                    onClick={() =>
+                                      removeSubOption(
+                                        optionIndex,
+                                        subOptionIndex
+                                      )
+                                    }
+                                    className="bg-red-500 text-white px-4 py-2 rounded-md"
+                                  >
+                                    Remove Suboption
+                                  </button>
+                                </div>
+                              )
+                            )}
+                            <div className="border-t pt-2 mt-2 ml-4">
+                              <h6 className="text-md font-medium text-gray-900 mt-4">
+                                Add New Suboption
+                              </h6>
+                              <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                  Suboption Name
+                                </label>
+                                <input
+                                  type="text"
+                                  name="name"
+                                  value={newSubOption.name}
+                                  onChange={handleNewSubOptionChange}
+                                  placeholder="Suboption Name"
+                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                />
+                              </div>
+                              <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                  Suboption Price
+                                </label>
+                                <input
+                                  type="number"
+                                  name="price"
+                                  value={newSubOption.price}
+                                  onChange={handleNewSubOptionChange}
+                                  placeholder="Suboption Price"
+                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                />
+                              </div>
+                              <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                  Suboption Image
+                                </label>
+                                <input
+                                  type="file"
+                                  name="image"
+                                  onChange={(e) =>
+                                    handleImageUpload(e, (filePath: string) =>
+                                      setNewSubOption({
+                                        ...newSubOption,
+                                        imageUrl: filePath,
+                                      })
+                                    )
+                                  }
+                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                />
+                              </div>
+                              <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                  Suboption Code
+                                </label>
+                                <input
+                                  type="text"
+                                  name="code"
+                                  value={newSubOption.code}
+                                  onChange={handleNewSubOptionChange}
+                                  placeholder="Suboption Code"
+                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                />
+                              </div>
+                              <div className="mb-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                  Details
+                                </label>
+                                <input
+                                  type="text"
+                                  name="details"
+                                  value={newSubOption.details}
+                                  onChange={handleNewSubOptionChange}
+                                  placeholder="Details"
+                                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                />
+                              </div>
+                              <button
+                                onClick={() => addSubOption(optionIndex)}
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                              >
+                                Add Suboption
+                              </button>
+                            </div>
                             <button
-                              onClick={() => removeOption(index)}
-                              className="bg-red-500 text-white px-4 py-2 rounded-md"
+                              onClick={() => removeOption(optionIndex)}
+                              className="bg-red-500 text-white px-4 py-2 rounded-md mt-2"
                             >
                               Remove Option
                             </button>
                           </div>
                         ))}
                         <div className="border-t pt-2 mt-2">
-                          <h4 className="text-lg font-medium text-gray-900 mt-4">
-                            Add New Option
-                          </h4>
-                          <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              Option Name
-                            </label>
-                            <input
-                              type="text"
-                              name="name"
-                              value={newOption.name}
-                              onChange={handleNewOptionChange}
-                              placeholder="Option Name"
-                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                            />
-                          </div>
-                          <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              Option Price
-                            </label>
-                            <input
-                              type="number"
-                              name="price"
-                              value={newOption.price}
-                              onChange={handleNewOptionChange}
-                              placeholder="Option Price"
-                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                            />
-                          </div>
-                          <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              Option Image
-                            </label>
-                            <input
-                              type="file"
-                              name="image"
-                              onChange={(e) =>
-                                handleImageUpload(e, (filePath: string) =>
-                                  setNewOption({
-                                    ...newOption,
-                                    imageUrl: filePath,
-                                  })
-                                )
-                              }
-                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                            />
-                          </div>
-                          <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              Option Type
-                            </label>
-                            <input
-                              type="text"
-                              name="type"
-                              value={newOption.type}
-                              onChange={handleNewOptionChange}
-                              placeholder="Option Type"
-                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                            />
-                          </div>
-                          <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              Specification
-                            </label>
-                            <input
-                              type="text"
-                              name="specification"
-                              value={newOption.specification}
-                              onChange={handleNewOptionChange}
-                              placeholder="Specification"
-                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                            />
-                          </div>
-                          <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-700">
-                              PCS
-                            </label>
-                            <input
-                              type="number"
-                              name="pcs"
-                              value={newOption.pcs}
-                              onChange={handleNewOptionChange}
-                              placeholder="PCS"
-                              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                            />
-                          </div>
                           <button
                             onClick={addOption}
                             className="bg-blue-500 text-white px-4 py-2 rounded-md"

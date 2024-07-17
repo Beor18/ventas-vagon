@@ -5,9 +5,41 @@ import Product from "@Src/models/Product";
 import Order from "@Src/models/Order";
 import withAuth from "../lib/withAuth";
 
-function Admin({ products, orders }: any) {
-  const [product, setProduct] = useState({
-    _id: "",
+interface ProductType {
+  _id?: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  quantity: number;
+  material: string;
+  externalDimensions: string;
+  internalDimensions: string;
+  foldingState: string;
+  totalWeight: number;
+  basePrice: number;
+  options: OptionType[];
+}
+
+interface OptionType {
+  name: string;
+  price: number;
+  imageUrl: string;
+  type: string;
+  specification: string;
+  pcs: number;
+  suboptions: SubOptionType[];
+}
+
+interface SubOptionType {
+  code: string;
+  price: number;
+  imageUrl: string;
+  details: string;
+  name: string;
+}
+
+const Admin = ({ products, orders }: any) => {
+  const [product, setProduct] = useState<ProductType>({
     name: "",
     description: "",
     imageUrl: "",
@@ -18,9 +50,10 @@ function Admin({ products, orders }: any) {
     foldingState: "",
     totalWeight: 0,
     basePrice: 0,
+    options: [],
   });
-  const [options, setOptions] = useState<any>([]);
-  const [newOption, setNewOption] = useState<any>({
+  const [imagePreview, setImagePreview] = useState("");
+  const [newOption, setNewOption] = useState<OptionType>({
     name: "",
     price: 0,
     imageUrl: "",
@@ -29,7 +62,7 @@ function Admin({ products, orders }: any) {
     pcs: 0,
     suboptions: [],
   });
-  const [newSubOption, setNewSubOption] = useState<any>({
+  const [newSubOption, setNewSubOption] = useState<SubOptionType>({
     code: "",
     price: 0,
     imageUrl: "",
@@ -47,12 +80,12 @@ function Admin({ products, orders }: any) {
 
   const handleOptionChange = (e: any, optionIndex: number) => {
     const { name, value } = e.target;
-    const updatedOptions = [...options];
+    const updatedOptions = [...product.options];
     updatedOptions[optionIndex] = {
       ...updatedOptions[optionIndex],
       [name]: value,
     };
-    setOptions(updatedOptions);
+    setProduct({ ...product, options: updatedOptions });
   };
 
   const handleSubOptionChange = (
@@ -61,12 +94,12 @@ function Admin({ products, orders }: any) {
     subOptionIndex: number
   ) => {
     const { name, value } = e.target;
-    const updatedOptions = [...options];
+    const updatedOptions = [...product.options];
     updatedOptions[optionIndex].suboptions[subOptionIndex] = {
       ...updatedOptions[optionIndex].suboptions[subOptionIndex],
       [name]: value,
     };
-    setOptions(updatedOptions);
+    setProduct({ ...product, options: updatedOptions });
   };
 
   const handleNewOptionChange = (e: any) => {
@@ -80,7 +113,10 @@ function Admin({ products, orders }: any) {
   };
 
   const addOption = () => {
-    setOptions([...options, { ...newOption, suboptions: [] }]);
+    setProduct({
+      ...product,
+      options: [...product.options, { ...newOption, suboptions: [] }],
+    });
     setNewOption({
       name: "",
       price: 0,
@@ -93,9 +129,9 @@ function Admin({ products, orders }: any) {
   };
 
   const addSubOption = (optionIndex: number) => {
-    const updatedOptions = [...options];
+    const updatedOptions = [...product.options];
     updatedOptions[optionIndex].suboptions.push({ ...newSubOption });
-    setOptions(updatedOptions);
+    setProduct({ ...product, options: updatedOptions });
     setNewSubOption({
       code: "",
       price: 0,
@@ -106,18 +142,18 @@ function Admin({ products, orders }: any) {
   };
 
   const removeOption = (optionIndex: number) => {
-    const updatedOptions = options.filter(
+    const updatedOptions = product.options.filter(
       (_: any, i: number) => i !== optionIndex
     );
-    setOptions(updatedOptions);
+    setProduct({ ...product, options: updatedOptions });
   };
 
   const removeSubOption = (optionIndex: number, subOptionIndex: number) => {
-    const updatedOptions = [...options];
+    const updatedOptions = [...product.options];
     updatedOptions[optionIndex].suboptions = updatedOptions[
       optionIndex
     ].suboptions.filter((_: any, i: number) => i !== subOptionIndex);
-    setOptions(updatedOptions);
+    setProduct({ ...product, options: updatedOptions });
   };
 
   const handleImageUpload = async (e: any, callback: any) => {
@@ -140,15 +176,24 @@ function Admin({ products, orders }: any) {
     }
   };
 
-  const saveProduct = async (id: string) => {
-    if (id) {
-      updateProduct(id);
+  const handleImagePreview = (e: any) => {
+    const file = e.target.files[0];
+    setImagePreview(URL.createObjectURL(file));
+    handleImageUpload(e, (filePath: string) =>
+      setProduct({ ...product, imageUrl: filePath })
+    );
+  };
+
+  const saveProduct = async () => {
+    const productToSave = { ...product, options: product.options };
+    if (!productToSave._id) {
+      await createProduct(productToSave);
     } else {
-      createProduct();
+      await updateProduct(productToSave);
     }
   };
 
-  const createProduct = async () => {
+  const createProduct = async (productData: ProductType) => {
     setLoading(true);
     try {
       await fetch("/api/products", {
@@ -156,10 +201,9 @@ function Admin({ products, orders }: any) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...product, options }),
+        body: JSON.stringify(productData),
       });
       setProduct({
-        _id: "",
         name: "",
         description: "",
         imageUrl: "",
@@ -170,8 +214,18 @@ function Admin({ products, orders }: any) {
         foldingState: "",
         totalWeight: 0,
         basePrice: 0,
+        options: [],
       });
-      setOptions([]);
+      setNewOption({
+        name: "",
+        price: 0,
+        imageUrl: "",
+        type: "",
+        specification: "",
+        pcs: 0,
+        suboptions: [],
+      });
+      setImagePreview("");
       setMessage("Product saved successfully");
     } catch (error) {
       setMessage("Error saving product");
@@ -180,15 +234,15 @@ function Admin({ products, orders }: any) {
     }
   };
 
-  const updateProduct = async (id: string) => {
+  const updateProduct = async (productData: ProductType) => {
     setLoading(true);
     try {
-      await fetch(`/api/products/${id}`, {
+      await fetch(`/api/products/${productData._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...product, options }),
+        body: JSON.stringify(productData),
       });
       setMessage("Product updated successfully");
       setModalOpen(false);
@@ -213,9 +267,9 @@ function Admin({ products, orders }: any) {
     }
   };
 
-  const editProduct = (product: any) => {
+  const editProduct = (product: ProductType) => {
     setProduct(product);
-    setOptions(product.options);
+    setImagePreview(product.imageUrl);
     setModalOpen(true);
   };
 
@@ -227,7 +281,23 @@ function Admin({ products, orders }: any) {
       <section className="mb-8">
         <h2 className="text-xl font-bold mb-2">Gestión de Productos</h2>
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={() => {
+            setProduct({
+              name: "",
+              description: "",
+              imageUrl: "",
+              quantity: 1,
+              material: "",
+              externalDimensions: "",
+              internalDimensions: "",
+              foldingState: "",
+              totalWeight: 0,
+              basePrice: 0,
+              options: [],
+            });
+            setImagePreview("");
+            setModalOpen(true);
+          }}
           className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
         >
           Add New Product
@@ -291,13 +361,16 @@ function Admin({ products, orders }: any) {
                           <input
                             type="file"
                             name="image"
-                            onChange={(e) =>
-                              handleImageUpload(e, (filePath: string) =>
-                                setProduct({ ...product, imageUrl: filePath })
-                              )
-                            }
+                            onChange={handleImagePreview}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                           />
+                          {imagePreview && (
+                            <img
+                              src={imagePreview}
+                              alt="Image Preview"
+                              className="mt-2 h-32 w-32 object-cover"
+                            />
+                          )}
                         </div>
                         <div className="mb-2">
                           <label className="block text-sm font-medium text-gray-700">
@@ -394,7 +467,7 @@ function Admin({ products, orders }: any) {
                         <h4 className="text-lg font-medium text-gray-900 mt-4">
                           Options
                         </h4>
-                        {options.map((option: any, optionIndex: number) => (
+                        {product.options.map((option, optionIndex) => (
                           <div key={optionIndex} className="mb-2 border-b pb-2">
                             <div className="mb-2">
                               <label className="block text-sm font-medium text-gray-700">
@@ -435,16 +508,26 @@ function Admin({ products, orders }: any) {
                                 name="image"
                                 onChange={(e) =>
                                   handleImageUpload(e, (filePath: string) => {
-                                    const updatedOptions = [...options];
+                                    const updatedOptions = [...product.options];
                                     updatedOptions[optionIndex] = {
                                       ...updatedOptions[optionIndex],
                                       imageUrl: filePath,
                                     };
-                                    setOptions(updatedOptions);
+                                    setProduct({
+                                      ...product,
+                                      options: updatedOptions,
+                                    });
                                   })
                                 }
                                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                               />
+                              {option.imageUrl && (
+                                <img
+                                  src={option.imageUrl}
+                                  alt="Option Image"
+                                  className="mt-2 h-20 w-20 object-cover"
+                                />
+                              )}
                             </div>
                             <div className="mb-2">
                               <label className="block text-sm font-medium text-gray-700">
@@ -496,7 +579,7 @@ function Admin({ products, orders }: any) {
                               Suboptions
                             </h5>
                             {option.suboptions.map(
-                              (suboption: any, subOptionIndex: number) => (
+                              (suboption, subOptionIndex) => (
                                 <div
                                   key={subOptionIndex}
                                   className="mb-2 border-b pb-2 ml-4"
@@ -550,7 +633,9 @@ function Admin({ products, orders }: any) {
                                         handleImageUpload(
                                           e,
                                           (filePath: string) => {
-                                            const updatedOptions = [...options];
+                                            const updatedOptions = [
+                                              ...product.options,
+                                            ];
                                             updatedOptions[
                                               optionIndex
                                             ].suboptions[subOptionIndex] = {
@@ -558,12 +643,22 @@ function Admin({ products, orders }: any) {
                                                 .suboptions[subOptionIndex],
                                               imageUrl: filePath,
                                             };
-                                            setOptions(updatedOptions);
+                                            setProduct({
+                                              ...product,
+                                              options: updatedOptions,
+                                            });
                                           }
                                         )
                                       }
                                       className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                                     />
+                                    {suboption.imageUrl && (
+                                      <img
+                                        src={suboption.imageUrl}
+                                        alt="Suboption Image"
+                                        className="mt-2 h-16 w-16 object-cover"
+                                      />
+                                    )}
                                   </div>
                                   <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
@@ -664,6 +759,13 @@ function Admin({ products, orders }: any) {
                                   }
                                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                                 />
+                                {newSubOption.imageUrl && (
+                                  <img
+                                    src={newSubOption.imageUrl}
+                                    alt="New Suboption Image"
+                                    className="mt-2 h-16 w-16 object-cover"
+                                  />
+                                )}
                               </div>
                               <div className="mb-2">
                                 <label className="block text-sm font-medium text-gray-700">
@@ -707,6 +809,9 @@ function Admin({ products, orders }: any) {
                           </div>
                         ))}
                         <div className="border-t pt-2 mt-2">
+                          <h4 className="text-lg font-medium text-gray-900 mt-4">
+                            Add New Option
+                          </h4>
                           <button
                             onClick={addOption}
                             className="bg-blue-500 text-white px-4 py-2 rounded-md"
@@ -720,7 +825,7 @@ function Admin({ products, orders }: any) {
                 </div>
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
-                    onClick={() => saveProduct(product._id)}
+                    onClick={saveProduct}
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     Save
@@ -778,7 +883,7 @@ function Admin({ products, orders }: any) {
       </section>
     </div>
   );
-}
+};
 
 export async function getServerSideProps() {
   await connectToDatabase();

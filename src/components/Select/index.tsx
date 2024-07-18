@@ -55,6 +55,16 @@ export default function Select({ product, onClose }: any) {
     setSelectedOptions({ ...selectedOptions, [option._id]: option });
   };
 
+  const handleOptionDeselect = (optionId: string) => {
+    const newSelectedOptions = { ...selectedOptions };
+    delete newSelectedOptions[optionId];
+    setSelectedOptions(newSelectedOptions);
+
+    const newSelectedSubOptions = { ...selectedSubOptions };
+    delete newSelectedSubOptions[optionId];
+    setSelectedSubOptions(newSelectedSubOptions);
+  };
+
   const handleSubOptionSelect = (
     optionId: string,
     subOption: ProductSubOption
@@ -68,8 +78,19 @@ export default function Select({ product, onClose }: any) {
     });
   };
 
+  const handleSubOptionDeselect = (optionId: string, subOptionId: string) => {
+    const newSelectedSubOptions = { ...selectedSubOptions };
+    if (newSelectedSubOptions[optionId]) {
+      delete newSelectedSubOptions[optionId][subOptionId];
+      if (Object.keys(newSelectedSubOptions[optionId]).length === 0) {
+        delete newSelectedSubOptions[optionId];
+      }
+    }
+    setSelectedSubOptions(newSelectedSubOptions);
+  };
+
   const calculateTotal = () => {
-    const basePrice = product?.basePrice;
+    const basePrice = product?.basePrice || 0;
     const optionsPrice = Object.values(selectedOptions).reduce(
       (sum, option) => sum + option.price,
       0
@@ -89,7 +110,6 @@ export default function Select({ product, onClose }: any) {
   };
 
   const exportOrder = async () => {
-    // Preparamos las opciones con sus subopciones
     const preparedOptions = Object.values(selectedOptions).map((option) => ({
       ...option,
       suboptions: selectedSubOptions[option._id]
@@ -122,7 +142,6 @@ export default function Select({ product, onClose }: any) {
         throw new Error("Error al guardar la orden");
       }
 
-      // Opcional: Si deseas manejar alguna acción adicional al guardar la orden
       alert("Orden guardada exitosamente");
 
       onClose();
@@ -150,6 +169,14 @@ export default function Select({ product, onClose }: any) {
                 >
                   {option.name} - ${option.price}
                 </button>
+                {selectedOptions[option._id] && (
+                  <button
+                    onClick={() => handleOptionDeselect(option._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors mb-2 ml-2"
+                  >
+                    Remove {option.name}
+                  </button>
+                )}
                 {selectedOptions[option._id] && option.suboptions && (
                   <div className="ml-4">
                     {option.suboptions.map((subOption: ProductSubOption) => (
@@ -157,7 +184,6 @@ export default function Select({ product, onClose }: any) {
                         <img src={subOption.imageUrl} alt="" />
                         <br />
                         <button
-                          key={subOption._id}
                           onClick={() =>
                             handleSubOptionSelect(option._id, subOption)
                           }
@@ -165,6 +191,20 @@ export default function Select({ product, onClose }: any) {
                         >
                           {subOption.name} - ${subOption.price}
                         </button>
+                        {selectedSubOptions[option._id] &&
+                          selectedSubOptions[option._id][subOption._id] && (
+                            <button
+                              onClick={() =>
+                                handleSubOptionDeselect(
+                                  option._id,
+                                  subOption._id
+                                )
+                              }
+                              className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors mb-1 ml-2"
+                            >
+                              Remove {subOption.name}
+                            </button>
+                          )}
                       </div>
                     ))}
                   </div>

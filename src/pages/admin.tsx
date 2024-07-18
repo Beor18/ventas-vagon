@@ -1,5 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState } from "react";
+import { type PutBlobResult } from "@vercel/blob";
+import { upload } from "@vercel/blob/client";
+import { useState, useRef } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "@Src/models/Product";
 import Order from "@Src/models/Order";
@@ -72,6 +74,9 @@ const Admin = ({ products, orders }: any) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const inputFileRef = useRef<HTMLInputElement>(null);
+  const inputFileRefOption = useRef<HTMLInputElement>(null);
+  const inputFileRefSubOption = useRef<HTMLInputElement>(null);
 
   const handleProductChange = (e: any) => {
     const { name, value } = e.target;
@@ -156,19 +161,14 @@ const Admin = ({ products, orders }: any) => {
     setProduct({ ...product, options: updatedOptions });
   };
 
-  const handleImageUpload = async (e: any, callback: any) => {
-    const file = e.target.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
+  const handleImageUpload = async (file: File, callback: any) => {
     setLoading(true);
-
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+      const newBlob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload",
       });
-      const data = await res.json();
-      callback(data.filePath);
+      callback(newBlob.url);
     } catch (error) {
       setMessage("Error uploading image");
     } finally {
@@ -176,12 +176,14 @@ const Admin = ({ products, orders }: any) => {
     }
   };
 
-  const handleImagePreview = (e: any) => {
+  const handleImagePreview = async (
+    e: any,
+    setImageUrlCallback: any,
+    setPreviewCallback: any
+  ) => {
     const file = e.target.files[0];
-    setImagePreview(URL.createObjectURL(file));
-    handleImageUpload(e, (filePath: string) =>
-      setProduct({ ...product, imageUrl: filePath })
-    );
+    setPreviewCallback(URL.createObjectURL(file));
+    await handleImageUpload(file, setImageUrlCallback);
   };
 
   const saveProduct = async () => {
@@ -361,7 +363,15 @@ const Admin = ({ products, orders }: any) => {
                           <input
                             type="file"
                             name="image"
-                            onChange={handleImagePreview}
+                            ref={inputFileRef}
+                            onChange={(e) =>
+                              handleImagePreview(
+                                e,
+                                (url: string) =>
+                                  setProduct({ ...product, imageUrl: url }),
+                                setImagePreview
+                              )
+                            }
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                           />
                           {imagePreview && (
@@ -506,18 +516,35 @@ const Admin = ({ products, orders }: any) => {
                               <input
                                 type="file"
                                 name="image"
+                                ref={inputFileRefOption}
                                 onChange={(e) =>
-                                  handleImageUpload(e, (filePath: string) => {
-                                    const updatedOptions = [...product.options];
-                                    updatedOptions[optionIndex] = {
-                                      ...updatedOptions[optionIndex],
-                                      imageUrl: filePath,
-                                    };
-                                    setProduct({
-                                      ...product,
-                                      options: updatedOptions,
-                                    });
-                                  })
+                                  handleImagePreview(
+                                    e,
+                                    (url: string) => {
+                                      const updatedOptions = [
+                                        ...product.options,
+                                      ];
+                                      updatedOptions[optionIndex] = {
+                                        ...updatedOptions[optionIndex],
+                                        imageUrl: url,
+                                      };
+                                      setProduct({
+                                        ...product,
+                                        options: updatedOptions,
+                                      });
+                                    },
+                                    (url: string) => {
+                                      const updatedOptions = [
+                                        ...product.options,
+                                      ];
+                                      updatedOptions[optionIndex].imageUrl =
+                                        url;
+                                      setProduct({
+                                        ...product,
+                                        options: updatedOptions,
+                                      });
+                                    }
+                                  )
                                 }
                                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                               />
@@ -629,10 +656,11 @@ const Admin = ({ products, orders }: any) => {
                                     <input
                                       type="file"
                                       name="image"
+                                      ref={inputFileRefSubOption}
                                       onChange={(e) =>
-                                        handleImageUpload(
+                                        handleImagePreview(
                                           e,
-                                          (filePath: string) => {
+                                          (url: string) => {
                                             const updatedOptions = [
                                               ...product.options,
                                             ];
@@ -641,8 +669,22 @@ const Admin = ({ products, orders }: any) => {
                                             ].suboptions[subOptionIndex] = {
                                               ...updatedOptions[optionIndex]
                                                 .suboptions[subOptionIndex],
-                                              imageUrl: filePath,
+                                              imageUrl: url,
                                             };
+                                            setProduct({
+                                              ...product,
+                                              options: updatedOptions,
+                                            });
+                                          },
+                                          (url: string) => {
+                                            const updatedOptions = [
+                                              ...product.options,
+                                            ];
+                                            updatedOptions[
+                                              optionIndex
+                                            ].suboptions[
+                                              subOptionIndex
+                                            ].imageUrl = url;
                                             setProduct({
                                               ...product,
                                               options: updatedOptions,
@@ -750,11 +792,14 @@ const Admin = ({ products, orders }: any) => {
                                   type="file"
                                   name="image"
                                   onChange={(e) =>
-                                    handleImageUpload(e, (filePath: string) =>
-                                      setNewSubOption({
-                                        ...newSubOption,
-                                        imageUrl: filePath,
-                                      })
+                                    handleImagePreview(
+                                      e,
+                                      (url: string) =>
+                                        setNewSubOption({
+                                          ...newSubOption,
+                                          imageUrl: url,
+                                        }),
+                                      setImagePreview
                                     )
                                   }
                                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"

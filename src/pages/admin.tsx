@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { type PutBlobResult } from "@vercel/blob";
 import { upload } from "@vercel/blob/client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "@Src/models/Product";
 import Order from "@Src/models/Order";
@@ -40,7 +40,8 @@ interface SubOptionType {
   name: string;
 }
 
-const Admin = ({ products, orders }: any) => {
+const Admin = ({ initialProducts, orders }: any) => {
+  const [products, setProducts] = useState<ProductType[]>(initialProducts);
   const [product, setProduct] = useState<ProductType>({
     name: "",
     description: "",
@@ -77,6 +78,20 @@ const Admin = ({ products, orders }: any) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const inputFileRefOption = useRef<HTMLInputElement>(null);
   const inputFileRefSubOption = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      setProducts(data);
+    } catch (error) {
+      setMessage("Error fetching products");
+    }
+  };
 
   const handleProductChange = (e: any) => {
     const { name, value } = e.target;
@@ -193,6 +208,7 @@ const Admin = ({ products, orders }: any) => {
     } else {
       await updateProduct(productToSave);
     }
+    fetchProducts();
   };
 
   const createProduct = async (productData: ProductType) => {
@@ -266,6 +282,7 @@ const Admin = ({ products, orders }: any) => {
       setMessage("Error deleting product");
     } finally {
       setLoading(false);
+      fetchProducts();
     }
   };
 
@@ -938,7 +955,7 @@ export async function getServerSideProps() {
 
   return {
     props: {
-      products: JSON.parse(JSON.stringify(products)),
+      initialProducts: JSON.parse(JSON.stringify(products)),
       orders: JSON.parse(JSON.stringify(orders)),
     },
   };

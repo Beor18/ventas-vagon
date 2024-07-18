@@ -9,10 +9,21 @@ export default async function handler(
   await connectToDatabase();
 
   if (req.method === "POST") {
-    const product = new Product(req.body);
-    await product.save();
-    res.status(201).json(product);
+    try {
+      const product = new Product(req.body);
+      await product.save();
+      res.status(201).json(product);
+    } catch (error) {
+      res.status(500).json({ error: "Error saving product" });
+    }
+  } else if (req.method === "GET") {
+    try {
+      const products = await Product.find().lean();
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(500).json({ error: "Error fetching products" });
+    }
   } else {
-    res.status(405).end();
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

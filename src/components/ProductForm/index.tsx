@@ -63,6 +63,7 @@ interface ProductFormProps {
   ) => void;
   saveProduct: () => void;
   setModalOpen: (open: boolean) => void;
+  loading: boolean;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -86,6 +87,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   handleImagePreview,
   saveProduct,
   setModalOpen,
+  loading,
 }) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const inputFileRefOption = useRef<HTMLInputElement>(null);
@@ -570,6 +572,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </div>
         </div>
       </div>
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 rounded-md">
+            <h2 className="text-lg font-semibold">Uploading...</h2>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

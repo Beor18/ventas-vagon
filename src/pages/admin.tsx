@@ -334,6 +334,7 @@ const Admin = ({ initialProducts, orders }: any) => {
             handleImagePreview={handleImagePreview}
             saveProduct={saveProduct}
             setModalOpen={setModalOpen}
+            loading={loading}
           />
         )}
 
@@ -376,6 +377,14 @@ const Admin = ({ initialProducts, orders }: any) => {
           ))}
         </ul>
       </section>
+
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 rounded-md">
+            <h2 className="text-lg font-semibold">Uploading...</h2>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

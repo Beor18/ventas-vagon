@@ -152,59 +152,76 @@ export default function Select({ product, onClose }: any) {
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-2">{product?.name}</h2>
+    <div className="p-4 bg-white rounded-lg">
+      <h2 className="text-2xl font-semibold mb-4">{product?.name}</h2>
       <p className="text-gray-700 mb-4">Base Price: ${product?.basePrice}</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 mb-4">
         <div className="flex flex-col gap-4">
           <div>
-            <h2>Opciones: </h2>
+            <h3 className="text-lg font-medium mb-2">Opciones: </h3>
           </div>
-          <div>
+          <div className="overflow-auto max-h-96 border p-2 rounded-lg">
             {product?.options.map((option: ProductOption) => (
-              <div key={option._id}>
-                <button
-                  onClick={() => handleOptionSelect(option)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-2"
-                >
-                  {option.name} - ${option.price}
-                </button>
-                {selectedOptions[option._id] && (
-                  <button
-                    onClick={() => handleOptionDeselect(option._id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors mb-2 ml-2"
-                  >
-                    Remove {option.name}
-                  </button>
-                )}
+              <div key={option._id} className="mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-800">
+                    {option.name}
+                  </span>
+                  <span className="text-gray-600">${option.price}</span>
+                  {selectedOptions[option._id] ? (
+                    <button
+                      onClick={() => handleOptionDeselect(option._id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleOptionSelect(option)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 transition-colors"
+                    >
+                      Select
+                    </button>
+                  )}
+                </div>
                 {selectedOptions[option._id] && option.suboptions && (
-                  <div className="ml-4">
+                  <div className="ml-4 mt-2 overflow-auto max-h-48 border-l-2 border-gray-200 pl-2">
                     {option.suboptions.map((subOption: ProductSubOption) => (
-                      <div key={subOption._id} className="border p-2">
-                        <img src={subOption.imageUrl} alt="" />
-                        <br />
-                        <button
-                          onClick={() =>
-                            handleSubOptionSelect(option._id, subOption)
-                          }
-                          className="bg-gray-500 text-white px-2 py-1 rounded-md hover:bg-gray-600 transition-colors mb-1"
-                        >
-                          {subOption.name} - ${subOption.price}
-                        </button>
+                      <div
+                        key={subOption._id}
+                        className="flex items-center justify-between mb-2"
+                      >
+                        <img
+                          src={subOption.imageUrl}
+                          alt={subOption.name}
+                          className="w-10 h-10 mr-2"
+                        />
+                        <span className="font-medium text-gray-800">
+                          {subOption.name}
+                        </span>
+                        <span className="text-gray-600">
+                          ${subOption.price}
+                        </span>
                         {selectedSubOptions[option._id] &&
-                          selectedSubOptions[option._id][subOption._id] && (
-                            <button
-                              onClick={() =>
-                                handleSubOptionDeselect(
-                                  option._id,
-                                  subOption._id
-                                )
-                              }
-                              className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors mb-1 ml-2"
-                            >
-                              Remove {subOption.name}
-                            </button>
-                          )}
+                        selectedSubOptions[option._id][subOption._id] ? (
+                          <button
+                            onClick={() =>
+                              handleSubOptionDeselect(option._id, subOption._id)
+                            }
+                            className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              handleSubOptionSelect(option._id, subOption)
+                            }
+                            className="bg-gray-500 text-white px-2 py-1 rounded-md hover:bg-gray-600 transition-colors"
+                          >
+                            Select
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -241,7 +258,7 @@ export default function Select({ product, onClose }: any) {
         </div>
       </div>
       <div className="text-right">
-        <h3 className="text-lg font-semibold mb-2">
+        <h3 className="text-lg font-semibold mb-4">
           Total: ${calculateTotal()}
         </h3>
         <button

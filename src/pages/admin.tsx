@@ -285,33 +285,71 @@ const Admin = ({ initialProducts, orders }: any) => {
 
   return (
     <div className="min-h-screen flex flex-col container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+      <div className="flex flex-row gap-4 items-center mb-8 mt-8">
+        <div>
+          {" "}
+          <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
+        </div>
+        <div>
+          {" "}
+          <button
+            onClick={() => {
+              setProduct({
+                name: "",
+                description: "",
+                imageUrl: "",
+                quantity: 1,
+                material: "",
+                externalDimensions: "",
+                internalDimensions: "",
+                foldingState: "",
+                totalWeight: 0,
+                basePrice: 0,
+                options: [],
+              });
+              setImagePreview("");
+              setModalOpen(true);
+            }}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
+          >
+            Add New Product
+          </button>
+        </div>
+      </div>
 
-      <section className="mb-8">
-        <h2 className="text-xl font-bold mb-2">Gestión de Productos</h2>
-        <button
-          onClick={() => {
-            setProduct({
-              name: "",
-              description: "",
-              imageUrl: "",
-              quantity: 1,
-              material: "",
-              externalDimensions: "",
-              internalDimensions: "",
-              foldingState: "",
-              totalWeight: 0,
-              basePrice: 0,
-              options: [],
-            });
-            setImagePreview("");
-            setModalOpen(true);
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
-        >
-          Add New Product
-        </button>
+      <h1 className="text-2xl font-bold mb-4 border-t-4 border-red-700 pt-4">
+        All Orders - <span>({orders.length})</span>
+      </h1>
+      <div className="grid grid-cols-1 gap-4">
+        {orders.map((order: any) => (
+          <div
+            key={order._id}
+            className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
+            //onClick={() => openModal(product)}
+          >
+            <div>
+              <h2 className="text-xl font-semibold">{order.productName}</h2>
+              <p className="text-gray-700 pb-4">Status: {order.status}</p>
+              <p className="text-gray-700 pb-4">
+                Comentarios:{" "}
+                {order.comentaries === "" ? (
+                  <span className="font-bold">Todavía sin comentarios!</span>
+                ) : (
+                  order.comentaries
+                )}
+              </p>
+            </div>
+            {/* <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                  Ver Producto
+                </button> */}
+          </div>
+        ))}
+      </div>
 
+      <section className="mb-8 mt-8">
+        <h2 className="text-xl font-bold mb-2">
+          Gestión de Productos - <span>({products.length})</span>
+        </h2>
         {modalOpen && (
           <ProductForm
             product={product}
@@ -346,7 +384,7 @@ const Admin = ({ initialProducts, orders }: any) => {
           {products.map((product: ProductType) => (
             <li
               key={product._id}
-              className="py-4 flex justify-between items-center"
+              className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow mb-4"
             >
               <div className="flex flex-row gap-4">
                 <div>

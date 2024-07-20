@@ -1,14 +1,43 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "../models/Product";
 import Modal from "@Src/components/Modal";
 import Select from "@Src/components/Select";
 import withAuth from "../lib/withAuth";
+import { useSession } from "next-auth/react";
 
 function Seller({ products }: any) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session) {
+      fetchAccessToken().then((token) => {
+        setAccessToken(token);
+      });
+      fetchOrders();
+    }
+  }, [session]);
+
+  const fetchAccessToken = async () => {
+    const response = await fetch("/api/jwt");
+    const data = await response.json();
+    return data.accessToken;
+  };
+
+  const fetchOrders = async () => {
+    const response = await fetch("/api/orders", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    setOrders(data);
+  };
 
   const openModal = (product: any) => {
     setSelectedProduct(product);
@@ -21,22 +50,69 @@ function Seller({ products }: any) {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="container mx-auto py-4 flex-grow">
-        <h1 className="text-2xl font-bold mb-4">Product List</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h1 className="text-2xl font-bold mb-4 border-t-4 border-red-700 pt-4">
+          My Orders
+        </h1>
+        <div className="grid grid-cols-1 gap-4">
+          {orders
+            .filter(
+              (order: any) => order.vendedorEmail === session?.user?.email
+            )
+            .map((order: any) => (
+              <div
+                key={order._id}
+                className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
+                //onClick={() => openModal(product)}
+              >
+                <div>
+                  <h2 className="text-xl font-semibold">{order.productName}</h2>
+                  <p className="text-gray-700 pb-4">Status: {order.status}</p>
+                  <p className="text-gray-700 pb-4">
+                    Comentarios:{" "}
+                    {order.comentaries === "" ? (
+                      <span className="font-bold">
+                        Todavía sin comentarios!
+                      </span>
+                    ) : (
+                      order.comentaries
+                    )}
+                  </p>
+                </div>
+                {/* <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                  Ver Producto
+                </button> */}
+              </div>
+            ))}
+        </div>
+
+        <br />
+        <h1 className="text-2xl font-bold mb-4 border-t-4 border-red-700 pt-4">
+          Product List
+        </h1>
+        <div className="grid grid-cols-1 gap-4">
           {products.map((product: any) => (
             <div
               key={product._id}
-              className="bg-white p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+              className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => openModal(product)}
             >
-              <h2 className="text-xl font-semibold">{product.name}</h2>
-              <p className="text-gray-700 pb-4">
-                Base Price: ${product.basePrice}
-              </p>
-              <img src={product.imageUrl} />
+              <div>
+                <h2 className="text-xl font-semibold">{product.name}</h2>
+                <p className="text-gray-700 pb-4">
+                  Base Price: ${product.basePrice}
+                </p>
+                <img
+                  src={product.imageUrl}
+                  className="w-16 h-16 object-cover"
+                />
+              </div>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                Ver Producto
+              </button>
             </div>
           ))}
         </div>
+
         {selectedProduct && (
           <Modal onClose={closeModal}>
             <Select product={selectedProduct} onClose={closeModal} />

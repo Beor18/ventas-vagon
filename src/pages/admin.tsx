@@ -318,7 +318,7 @@ const Admin = ({ initialProducts, orders }: any) => {
       </div>
 
       <h1 className="text-2xl font-bold mb-4 border-t-4 border-red-700 pt-4">
-        All Orders - <span>({orders.length})</span>
+        Todas las ordenes - <span>({orders.length})</span>
       </h1>
       <div className="grid grid-cols-1 gap-4">
         {orders.map((order: any) => (
@@ -330,6 +330,9 @@ const Admin = ({ initialProducts, orders }: any) => {
             <div>
               <h2 className="text-xl font-semibold">{order.productName}</h2>
               <p className="text-gray-700 pb-4">Status: {order.status}</p>
+              <p className="text-gray-700 pb-4">
+                Vendedor: {order.vendedorName}
+              </p>
               <p className="text-gray-700 pb-4">
                 Comentarios:{" "}
                 {order.comentaries === "" ? (

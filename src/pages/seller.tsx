@@ -54,9 +54,7 @@ function Seller({ products }: any) {
         <div className="flex text-2xl border-b-4 border-red-700 mb-4">
           <button
             className={`px-4 py-2 ${
-              activeTab === "orders"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-500"
+              activeTab === "orders" ? "text-blue-500" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("orders")}
           >
@@ -64,9 +62,7 @@ function Seller({ products }: any) {
           </button>
           <button
             className={`px-4 py-2 ${
-              activeTab === "products"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-500"
+              activeTab === "products" ? "text-blue-500" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("products")}
           >

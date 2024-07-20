@@ -18,11 +18,11 @@ export default async function handler(
   const { id } = req.query;
 
   if (req.method === "POST") {
-    const { comment } = req.body;
+    const { comentaries } = req.body;
     const order = await Order.findById(id);
     if (order) {
       order.status = "reject";
-      order.comment = comment;
+      order.comentaries = comentaries;
       await order.save();
       res.status(200).json(order);
     } else {

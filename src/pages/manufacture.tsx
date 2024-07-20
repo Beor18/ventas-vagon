@@ -88,7 +88,7 @@ function Manufacture() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ comment }),
+        body: JSON.stringify({ comentaries: comment }),
       })
         .then((res) => res.json())
         .then((updatedOrder) => {

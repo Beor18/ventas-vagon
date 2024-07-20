@@ -77,7 +77,7 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [activeTab, setActiveTab] = useState("orders");
+  const [activeTab, setActiveTab] = useState("products");
 
   const fetchProducts = async () => {
     const res = await fetch("/api/products");
@@ -322,19 +322,19 @@ const Admin = ({ initialProducts, orders }: any) => {
       <div className="flex text-2xl border-b-4 border-red-700 mb-4">
         <button
           className={`px-4 py-2 ${
-            activeTab === "orders" ? "text-blue-500" : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("orders")}
-        >
-          Todas las Ordenes
-        </button>
-        <button
-          className={`px-4 py-2 ${
             activeTab === "products" ? "text-blue-500" : "text-gray-500"
           }`}
           onClick={() => setActiveTab("products")}
         >
           Lista de Productos
+        </button>
+        <button
+          className={`px-4 py-2 ${
+            activeTab === "orders" ? "text-blue-500" : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("orders")}
+        >
+          Todas las Ordenes
         </button>
       </div>
 

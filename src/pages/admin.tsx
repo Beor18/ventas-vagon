@@ -328,7 +328,9 @@ const Admin = ({ initialProducts, orders }: any) => {
             //onClick={() => openModal(product)}
           >
             <div>
-              <h2 className="text-xl font-semibold">{order.productName}</h2>
+              <h2 className="text-xl font-semibold uppercase">
+                {order.productName}
+              </h2>
               <p className="text-gray-800 font-normal">
                 Total precio: ${order.total}
               </p>

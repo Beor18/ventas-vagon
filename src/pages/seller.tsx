@@ -51,7 +51,7 @@ function Seller({ products }: any) {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="container mx-auto py-4 flex-grow">
         <h1 className="text-2xl font-bold mb-4 border-t-4 border-red-700 pt-4">
-          My Orders
+          Mis Ordenes
         </h1>
         <div className="grid grid-cols-1 gap-4">
           {orders
@@ -65,8 +65,20 @@ function Seller({ products }: any) {
                 //onClick={() => openModal(product)}
               >
                 <div>
-                  <h2 className="text-xl font-semibold">{order.productName}</h2>
+                  <h2 className="text-xl font-semibold uppercase">
+                    {order.productName}
+                  </h2>
+                  <p className="text-gray-800 font-normal">
+                    Total precio: ${order.total}
+                  </p>
+                  <p className="text-gray-800 font-normal">
+                    Descuento: {order.discount}%
+                  </p>
+                  <p className="text-gray-800 font-normal">Tax: {order.tax}%</p>
                   <p className="text-gray-700 pb-4">Status: {order.status}</p>
+                  <p className="text-gray-700 pb-4 border-t-2 border-red-400 pt-2">
+                    Vendedor: {order.vendedorName}
+                  </p>
                   <p className="text-gray-700 pb-4">
                     Comentarios:{" "}
                     {order.comentaries === "" ? (
@@ -78,16 +90,16 @@ function Seller({ products }: any) {
                     )}
                   </p>
                 </div>
-                {/* <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                  Ver Producto
-                </button> */}
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                  Próximamente ver detalle de la orden...
+                </button>
               </div>
             ))}
         </div>
 
         <br />
         <h1 className="text-2xl font-bold mb-4 border-t-4 border-red-700 pt-4">
-          Product List
+          Lista de Productos
         </h1>
         <div className="grid grid-cols-1 gap-4">
           {products.map((product: any) => (

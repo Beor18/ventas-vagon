@@ -77,6 +77,8 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  const [activeTab, setActiveTab] = useState("orders");
+
   const fetchProducts = async () => {
     const res = await fetch("/api/products");
     const data = await res.json();
@@ -317,116 +319,150 @@ const Admin = ({ initialProducts, orders }: any) => {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold mb-4 border-t-4 border-red-700 pt-4">
-        Todas las ordenes - <span>({orders.length})</span>
-      </h1>
-      <div className="grid grid-cols-1 gap-4">
-        {orders.map((order: any) => (
-          <div
-            key={order._id}
-            className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
-            //onClick={() => openModal(product)}
-          >
-            <div>
-              <h2 className="text-xl font-semibold uppercase">
-                {order.productName}
-              </h2>
-              <p className="text-gray-800 font-normal">
-                Total precio: ${order.total}
-              </p>
-              <p className="text-gray-800 font-normal">
-                Descuento: {order.discount}%
-              </p>
-              <p className="text-gray-800 font-normal">Tax: {order.tax}%</p>
-              <p className="text-gray-700 pb-4">Status: {order.status}</p>
-              <p className="text-gray-700 pb-4 border-t-2 border-red-400 pt-2">
-                Vendedor: {order.vendedorName}
-              </p>
-              <p className="text-gray-700 pb-4">
-                Comentarios:{" "}
-                {order.comentaries === "" ? (
-                  <span className="font-bold">Todavía sin comentarios!</span>
-                ) : (
-                  order.comentaries
-                )}
-              </p>
-            </div>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-              Próximamente ver detalle de la orden...
-            </button>
-          </div>
-        ))}
+      <div className="flex text-2xl border-b-4 border-red-700 mb-4">
+        <button
+          className={`px-4 py-2 ${
+            activeTab === "orders" ? "text-blue-500" : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("orders")}
+        >
+          Todas las Ordenes
+        </button>
+        <button
+          className={`px-4 py-2 ${
+            activeTab === "products" ? "text-blue-500" : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("products")}
+        >
+          Lista de Productos
+        </button>
       </div>
 
-      <section className="mb-8 mt-8">
-        <h2 className="text-xl font-bold mb-2">
-          Gestión de Productos - <span>({products.length})</span>
-        </h2>
-        {modalOpen && (
-          <ProductForm
-            product={product}
-            setProduct={setProduct}
-            imagePreview={imagePreview}
-            setImagePreview={setImagePreview}
-            newOption={newOption}
-            setNewOption={setNewOption}
-            newSubOption={newSubOption}
-            setNewSubOption={setNewSubOption}
-            handleProductChange={handleProductChange}
-            handleOptionChange={handleOptionChange}
-            handleSubOptionChange={handleSubOptionChange}
-            handleNewOptionChange={handleNewOptionChange}
-            handleNewSubOptionChange={handleNewSubOptionChange}
-            addOption={addOption}
-            addSubOption={addSubOption}
-            removeOption={removeOption}
-            removeSubOption={removeSubOption}
-            handleImagePreview={handleImagePreview}
-            saveProduct={saveProduct}
-            setModalOpen={setModalOpen}
-            loading={loading}
-          />
-        )}
-
-        {message && <div className="mt-4 text-red-500">{message}</div>}
-      </section>
-
-      <section>
-        <ul className="divide-y divide-gray-200">
-          {products.map((product: ProductType) => (
-            <li
-              key={product._id}
-              className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow mb-4"
-            >
-              <div className="flex flex-row gap-4">
+      {activeTab === "orders" && (
+        <section>
+          <h1 className="text-2xl font-bold pt-4 pb-4">
+            Todas las ordenes - <span>({orders.length})</span>
+          </h1>
+          <div className="grid grid-cols-1 gap-4">
+            {orders.map((order: any) => (
+              <div
+                key={order._id}
+                className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
+                //onClick={() => openModal(product)}
+              >
                 <div>
-                  <img src={product.imageUrl} alt="" width={100} height={100} />
+                  <h2 className="text-xl font-semibold uppercase">
+                    {order.productName}
+                  </h2>
+                  <p className="text-gray-800 font-normal">
+                    Total precio: ${order.total}
+                  </p>
+                  <p className="text-gray-800 font-normal">
+                    Descuento: {order.discount}%
+                  </p>
+                  <p className="text-gray-800 font-normal">Tax: {order.tax}%</p>
+                  <p className="text-gray-700 pb-4">Status: {order.status}</p>
+                  <p className="text-gray-700 pb-4 border-t-2 border-red-400 pt-2">
+                    Vendedor: {order.vendedorName}
+                  </p>
+                  <p className="text-gray-700 pb-4">
+                    Comentarios:{" "}
+                    {order.comentaries === "" ? (
+                      <span className="font-bold">
+                        Todavía sin comentarios!
+                      </span>
+                    ) : (
+                      order.comentaries
+                    )}
+                  </p>
                 </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-500">{product.description}</p>
-                </div>
-              </div>
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => editProduct(product)}
-                  className="bg-yellow-500 text-white px-4 py-2 rounded-md"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => deleteProduct(product._id!)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-md"
-                >
-                  Delete
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                  Próximamente ver detalle de la orden...
                 </button>
               </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {activeTab === "products" && (
+        <>
+          <section>
+            <h1 className="text-2xl font-bold pt-4 pb-4">
+              Gestión de Productos - <span>({products.length})</span>
+            </h1>
+            {modalOpen && (
+              <ProductForm
+                product={product}
+                setProduct={setProduct}
+                imagePreview={imagePreview}
+                setImagePreview={setImagePreview}
+                newOption={newOption}
+                setNewOption={setNewOption}
+                newSubOption={newSubOption}
+                setNewSubOption={setNewSubOption}
+                handleProductChange={handleProductChange}
+                handleOptionChange={handleOptionChange}
+                handleSubOptionChange={handleSubOptionChange}
+                handleNewOptionChange={handleNewOptionChange}
+                handleNewSubOptionChange={handleNewSubOptionChange}
+                addOption={addOption}
+                addSubOption={addSubOption}
+                removeOption={removeOption}
+                removeSubOption={removeSubOption}
+                handleImagePreview={handleImagePreview}
+                saveProduct={saveProduct}
+                setModalOpen={setModalOpen}
+                loading={loading}
+              />
+            )}
+
+            {message && <div className="mt-4 text-red-500">{message}</div>}
+          </section>
+
+          <section>
+            <ul className="divide-y divide-gray-200">
+              {products.map((product: ProductType) => (
+                <li
+                  key={product._id}
+                  className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow mb-4"
+                >
+                  <div className="flex flex-row gap-4">
+                    <div>
+                      <img
+                        src={product.imageUrl}
+                        alt=""
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-500">{product.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => editProduct(product)}
+                      className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteProduct(product._id!)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-md"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </>
+      )}
 
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

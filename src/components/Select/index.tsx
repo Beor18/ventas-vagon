@@ -34,6 +34,8 @@ export default function Select({ product, onClose }: any) {
     useState<SelectedSubOptions>({});
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
+  const [clients, setClients] = useState<any[]>([]);
+  const [selectedClient, setSelectedClient] = useState("");
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const { data: session, status } = useSession();
 
@@ -41,6 +43,7 @@ export default function Select({ product, onClose }: any) {
     if (session) {
       fetchAccessToken().then((token) => {
         setAccessToken(token);
+        fetchClients(token);
       });
     }
   }, [session]);
@@ -49,6 +52,16 @@ export default function Select({ product, onClose }: any) {
     const response = await fetch("/api/jwt");
     const data = await response.json();
     return data.accessToken;
+  };
+
+  const fetchClients = async (token: string) => {
+    const response = await fetch("/api/client", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    setClients(data);
   };
 
   const handleOptionSelect = (option: ProductOption) => {
@@ -110,6 +123,11 @@ export default function Select({ product, onClose }: any) {
   };
 
   const exportOrder = async () => {
+    if (!selectedClient) {
+      alert("Por favor seleccione un cliente");
+      return;
+    }
+
     const preparedOptions = Object.values(selectedOptions).map((option) => ({
       ...option,
       suboptions: selectedSubOptions[option._id]
@@ -126,6 +144,7 @@ export default function Select({ product, onClose }: any) {
       tax,
       vendedorEmail: session?.user?.email,
       vendedorName: session?.user?.name,
+      cliente: selectedClient,
     };
 
     try {
@@ -255,6 +274,25 @@ export default function Select({ product, onClose }: any) {
             placeholder="Discount"
             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Cliente
+          </label>
+          <select
+            value={selectedClient}
+            onChange={(e) => setSelectedClient(e.target.value)}
+            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+          >
+            <option value="" disabled>
+              Seleccione un cliente
+            </option>
+            {clients.map((client: any) => (
+              <option key={client._id} value={client._id}>
+                {client.nombre}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <div className="text-right">

@@ -1,12 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { type PutBlobResult } from "@vercel/blob";
 import { upload } from "@vercel/blob/client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "@Src/models/Product";
 import Order from "@Src/models/Order";
 import withAuth from "../lib/withAuth";
 import ProductForm from "@Src/components/ProductForm";
+import { useSession } from "next-auth/react";
 
 interface ProductType {
   _id?: string;
@@ -79,11 +80,41 @@ const Admin = ({ initialProducts, orders }: any) => {
 
   const [activeTab, setActiveTab] = useState("products");
 
+  const { data: session } = useSession();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [clients, setClients] = useState<any[]>([]);
+
+  const fetchAccessToken = async () => {
+    const response = await fetch("/api/jwt");
+    const data = await response.json();
+    return data.accessToken;
+  };
+
+  const fetchClients = async () => {
+    const response = await fetch("/api/client", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    setClients(data);
+  };
+
   const fetchProducts = async () => {
     const res = await fetch("/api/products");
     const data = await res.json();
     setProducts(data);
   };
+
+  useEffect(() => {
+    if (session) {
+      fetchAccessToken().then((token) => {
+        setAccessToken(token);
+      });
+
+      fetchClients();
+    }
+  }, [session]);
 
   const handleProductChange = (e: any) => {
     const { name, value } = e.target;
@@ -292,31 +323,6 @@ const Admin = ({ initialProducts, orders }: any) => {
           {" "}
           <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
         </div>
-        <div>
-          {" "}
-          <button
-            onClick={() => {
-              setProduct({
-                name: "",
-                description: "",
-                imageUrl: "",
-                quantity: 1,
-                material: "",
-                externalDimensions: "",
-                internalDimensions: "",
-                foldingState: "",
-                totalWeight: 0,
-                basePrice: 0,
-                options: [],
-              });
-              setImagePreview("");
-              setModalOpen(true);
-            }}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mb-4"
-          >
-            Add New Product
-          </button>
-        </div>
       </div>
 
       <div className="flex text-2xl border-b-4 border-red-700 mb-4">
@@ -382,6 +388,9 @@ const Admin = ({ initialProducts, orders }: any) => {
                     Vendedor: {order.vendedorName}
                   </p>
                   <p className="text-gray-700 pb-4">
+                    Cliente: {order.cliente?.nombre || "N/A"}
+                  </p>
+                  <p className="text-gray-700 pb-4">
                     Comentarios:{" "}
                     {order.comentaries === "" ? (
                       <span className="font-bold">
@@ -404,9 +413,38 @@ const Admin = ({ initialProducts, orders }: any) => {
       {activeTab === "products" && (
         <>
           <section>
-            <h1 className="text-2xl font-bold pt-4 pb-4">
-              Gestión de Productos - <span>({products.length})</span>
-            </h1>
+            <div className="flex flex-row gap-4 items-center pt-4 pb-4">
+              <div>
+                {" "}
+                <h1 className="text-2xl font-bold pt-4 pb-4">
+                  Gestión de Productos - <span>({products.length})</span>
+                </h1>
+              </div>
+              <div>
+                <button
+                  onClick={() => {
+                    setProduct({
+                      name: "",
+                      description: "",
+                      imageUrl: "",
+                      quantity: 1,
+                      material: "",
+                      externalDimensions: "",
+                      internalDimensions: "",
+                      foldingState: "",
+                      totalWeight: 0,
+                      basePrice: 0,
+                      options: [],
+                    });
+                    setImagePreview("");
+                    setModalOpen(true);
+                  }}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                >
+                  Add New Product
+                </button>
+              </div>
+            </div>
             {modalOpen && (
               <ProductForm
                 product={product}
@@ -480,6 +518,48 @@ const Admin = ({ initialProducts, orders }: any) => {
         </>
       )}
 
+      {activeTab === "clients" && (
+        <div>
+          <div className="flex flex-row gap-4 items-center mt-4">
+            <div>
+              <h1 className="text-2xl font-bold mb-4">Todos los Clientes</h1>
+            </div>
+            <div>
+              {/* <button
+             onClick={() => setIsClientFormModalOpen(true)}
+             className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+           >
+             Crear Nuevo Cliente
+           </button> */}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {clients.map((client: any) => (
+              <div
+                key={client._id}
+                className="bg-white p-4 rounded-lg shadow-md"
+              >
+                <h3 className="text-lg font-semibold">{client.nombre}</h3>
+                <p>Dirección Residencial: {client.direccion_residencial}</p>
+                <p>Dirección de la Unidad: {client.direccion_unidad}</p>
+                <p>Propietario del Terreno: {client.propietario_terreno}</p>
+                <p>Propósito de la Unidad: {client.proposito_unidad}</p>
+                <p>Estado Civil: {client.estado_civil}</p>
+                <p>Lugar de Empleo: {client.lugar_empleo}</p>
+                <p>Email: {client.email}</p>
+                <p>Identificación: {client.identificacion}</p>
+                <p>Teléfono: {client.telefono}</p>
+                <p>Teléfono Alterno: {client.telefono_alterno}</p>
+                <p>Forma de Pago: {client.forma_pago}</p>
+                <p>Contacto de Referencia: {client.contacto_referencia}</p>
+                <p>Asegurador: {client.asegurador}</p>
+                <p>Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-4 rounded-md">
@@ -495,7 +575,7 @@ export async function getServerSideProps() {
   await connectToDatabase();
 
   const products = await Product.find().lean();
-  const orders = await Order.find().lean();
+  const orders = await Order.find().populate("cliente").lean();
 
   return {
     props: {

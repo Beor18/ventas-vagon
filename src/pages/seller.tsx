@@ -7,7 +7,7 @@ import Modal from "@Src/components/Modal";
 import Select from "@Src/components/Select";
 import withAuth from "../lib/withAuth";
 import { useSession } from "next-auth/react";
-import ClientForm from "@Src/components/ClientForm"; // Ajustar la ruta según tu estructura de archivos
+import ClientForm from "@Src/components/ClientForm";
 
 function Seller({ products }: any) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -143,8 +143,12 @@ function Seller({ products }: any) {
                       <p className="text-gray-700 pb-4">
                         Status: {order.status}
                       </p>
+
                       <p className="text-gray-700 pb-4 border-t-2 border-red-400 pt-2">
                         Vendedor: {order.vendedorName}
+                      </p>
+                      <p className="text-gray-700 pb-4">
+                        Cliente: {order.cliente?.nombre || "N/A"}
                       </p>
                       <p className="text-gray-700 pb-4">
                         Comentarios:{" "}

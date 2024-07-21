@@ -156,7 +156,7 @@ function ClientForm({ onSubmit }: any) {
         <input
           type="text"
           name="identificacion"
-          placeholder="Identificación"
+          placeholder="Identificación (único)"
           value={newClient.identificacion}
           onChange={handleInputChange}
           className="border p-2 rounded"

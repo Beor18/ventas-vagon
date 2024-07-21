@@ -26,7 +26,7 @@ export default async function handler(
       query = { status: status };
     }
 
-    const orders = await Order.find(query).lean();
+    const orders = await Order.find(query).populate("cliente").lean();
     res.status(200).json(orders);
   } else if (req.method === "POST") {
     try {
@@ -40,6 +40,7 @@ export default async function handler(
         vendedorEmail,
         vendedorName,
         comentaries,
+        cliente,
       } = req.body;
 
       const newOrder = new Order({
@@ -53,6 +54,7 @@ export default async function handler(
         vendedorEmail,
         vendedorName,
         comentaries,
+        cliente,
       });
 
       await newOrder.save();

@@ -1,5 +1,6 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 
 const Navbar = () => {
   const { data: session, status }: any = useSession();
@@ -7,10 +8,16 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-800 p-4">
       <div className="container mx-auto flex justify-between items-center">
-        <div>
-          <Link className="text-white font-bold text-xl" href="/">
+        <div className="flex items-center space-x-2 gap-4">
+          <Image
+            src="/vagon_5_Transparent.png"
+            alt="Logo"
+            width={77}
+            height={0}
+          />
+          {/* <Link className="text-white font-bold text-xl" href="/">
             Home
-          </Link>
+          </Link> */}
         </div>
         <div className="flex space-x-4 items-center">
           {status === "authenticated" ? (
@@ -66,13 +73,6 @@ const Navbar = () => {
               >
                 Login
               </Link>
-
-              {/* <Link
-                className="text-white bg-green-500 px-3 py-2 rounded-md"
-                href="/register"
-              >
-                Register
-              </Link> */}
             </>
           )}
         </div>

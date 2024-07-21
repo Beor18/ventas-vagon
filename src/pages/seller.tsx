@@ -7,13 +7,16 @@ import Modal from "@Src/components/Modal";
 import Select from "@Src/components/Select";
 import withAuth from "../lib/withAuth";
 import { useSession } from "next-auth/react";
+import ClientForm from "@Src/components/ClientForm"; // Ajustar la ruta según tu estructura de archivos
 
 function Seller({ products }: any) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [orders, setOrders] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
   const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState("orders");
+  const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -21,6 +24,7 @@ function Seller({ products }: any) {
         setAccessToken(token);
       });
       fetchOrders();
+      fetchClients();
     }
   }, [session]);
 
@@ -38,6 +42,38 @@ function Seller({ products }: any) {
     });
     const data = await response.json();
     setOrders(data);
+  };
+
+  const fetchClients = async () => {
+    const response = await fetch("/api/client", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    setClients(data);
+  };
+
+  const handleCreateClient = async (client: any) => {
+    try {
+      const response = await fetch("/api/client", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ ...client, vendedor: session?.user?.email }),
+      });
+
+      if (response.ok) {
+        fetchClients();
+        setIsClientFormModalOpen(false);
+      } else {
+        console.error("Failed to create client");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const openModal = (product: any) => {
@@ -67,6 +103,14 @@ function Seller({ products }: any) {
             onClick={() => setActiveTab("products")}
           >
             Lista de Productos
+          </button>
+          <button
+            className={`px-4 py-2 ${
+              activeTab === "clients" ? "text-blue-500" : "text-gray-500"
+            }`}
+            onClick={() => setActiveTab("clients")}
+          >
+            Mis Clientes
           </button>
         </div>
 
@@ -151,9 +195,58 @@ function Seller({ products }: any) {
           </div>
         )}
 
+        {activeTab === "clients" && (
+          <div>
+            <div className="flex flex-row gap-4 items-center mb-8 mt-8">
+              <div>
+                {" "}
+                <h1 className="text-2xl font-bold mb-4 pt-4">Mis Clientes</h1>
+              </div>
+              <div>
+                <button
+                  onClick={() => setIsClientFormModalOpen(true)}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  Crear Nuevo Cliente
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {clients.map((client: any) => (
+                <div
+                  key={client._id}
+                  className="bg-white p-4 rounded-lg shadow-md"
+                >
+                  <h3 className="text-lg font-semibold">{client.nombre}</h3>
+                  <p>Dirección Residencial: {client.direccion_residencial}</p>
+                  <p>Dirección de la Unidad: {client.direccion_unidad}</p>
+                  <p>Propietario del Terreno: {client.propietario_terreno}</p>
+                  <p>Propósito de la Unidad: {client.proposito_unidad}</p>
+                  <p>Estado Civil: {client.estado_civil}</p>
+                  <p>Lugar de Empleo: {client.lugar_empleo}</p>
+                  <p>Email: {client.email}</p>
+                  <p>Identificación: {client.identificacion}</p>
+                  <p>Teléfono: {client.telefono}</p>
+                  <p>Teléfono Alterno: {client.telefono_alterno}</p>
+                  <p>Forma de Pago: {client.forma_pago}</p>
+                  <p>Contacto de Referencia: {client.contacto_referencia}</p>
+                  <p>Asegurador: {client.asegurador}</p>
+                  <p>Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {selectedProduct && (
           <Modal onClose={closeModal}>
             <Select product={selectedProduct} onClose={closeModal} />
+          </Modal>
+        )}
+
+        {isClientFormModalOpen && (
+          <Modal onClose={() => setIsClientFormModalOpen(false)}>
+            <ClientForm onSubmit={handleCreateClient} />
           </Modal>
         )}
       </div>

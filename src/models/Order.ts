@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
 
-const subOptionSchema = new mongoose.Schema({
+const subOptionSchema = new Schema({
   code: String,
   price: Number,
   imageUrl: String,
@@ -8,7 +9,7 @@ const subOptionSchema = new mongoose.Schema({
   name: String,
 });
 
-const optionSchema = new mongoose.Schema({
+const optionSchema = new Schema({
   name: String,
   price: Number,
   imageUrl: String,
@@ -18,11 +19,8 @@ const optionSchema = new mongoose.Schema({
   suboptions: [subOptionSchema],
 });
 
-const orderSchema = new mongoose.Schema({
-  productId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-  },
+const orderSchema = new Schema({
+  productId: { type: Schema.Types.ObjectId, ref: "Product" },
   productName: { type: String },
   options: [optionSchema],
   total: { type: Number },
@@ -33,6 +31,7 @@ const orderSchema = new mongoose.Schema({
   vendedorEmail: { type: String },
   vendedorName: { type: String },
   comentaries: { type: String, default: "" },
+  cliente: { type: Schema.Types.ObjectId, ref: "Client" },
 });
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);

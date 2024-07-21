@@ -48,7 +48,7 @@ const Navbar = () => {
                   </Link>
                   <Link
                     className="text-white bg-blue-500 px-3 py-2 rounded-md"
-                    href="/registro"
+                    href="/register"
                   >
                     Registrar Usuarios
                   </Link>

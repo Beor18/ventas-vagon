@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "@Src/models/Product";
 import Order from "@Src/models/Order";
+import Client from "@Src/models/Client";
 import withAuth from "../lib/withAuth";
 import ProductForm from "@Src/components/ProductForm";
 import { useSession } from "next-auth/react";
@@ -574,6 +575,7 @@ const Admin = ({ initialProducts, orders }: any) => {
 export async function getServerSideProps() {
   await connectToDatabase();
 
+  const clients = await Client.find().lean();
   const products = await Product.find().lean();
   const orders = await Order.find().populate("cliente").lean();
 

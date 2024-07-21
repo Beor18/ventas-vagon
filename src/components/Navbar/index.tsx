@@ -39,12 +39,20 @@ const Navbar = () => {
                 </Link>
               )}
               {session?.user.role === "Administrador" && (
-                <Link
-                  className="text-white bg-blue-500 px-3 py-2 rounded-md"
-                  href="/admin"
-                >
-                  Administrador
-                </Link>
+                <>
+                  <Link
+                    className="text-white bg-blue-500 px-3 py-2 rounded-md"
+                    href="/admin"
+                  >
+                    Administrador
+                  </Link>
+                  <Link
+                    className="text-white bg-blue-500 px-3 py-2 rounded-md"
+                    href="/registro"
+                  >
+                    Registrar Usuarios
+                  </Link>
+                </>
               )}
               <span className="text-white">Hello, {session.user.email}</span>
               <button

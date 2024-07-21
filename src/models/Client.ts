@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
-const { Schema } = mongoose;
 
-const ClienteSchema = new Schema(
+const ClienteSchema = new mongoose.Schema(
   {
     nombre: {
       type: String,
@@ -69,7 +68,7 @@ const ClienteSchema = new Schema(
       type: Boolean,
     },
     vendedor: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   },

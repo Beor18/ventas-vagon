@@ -9,6 +9,8 @@ import Client from "@Src/models/Client";
 import withAuth from "../lib/withAuth";
 import ProductForm from "@Src/components/ProductForm";
 import { useSession } from "next-auth/react";
+import Modal from "@Src/components/Modal";
+import ClientForm from "@Src/components/ClientForm";
 
 interface ProductType {
   _id?: string;
@@ -84,6 +86,8 @@ const Admin = ({ initialProducts, orders }: any) => {
   const { data: session } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [clients, setClients] = useState<any[]>([]);
+
+  const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
 
   const fetchAccessToken = async () => {
     const response = await fetch("/api/jwt");
@@ -317,6 +321,28 @@ const Admin = ({ initialProducts, orders }: any) => {
     setModalOpen(true);
   };
 
+  const handleCreateClient = async (client: any) => {
+    try {
+      const response = await fetch("/api/client", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ ...client, vendedor: session?.user?.email }),
+      });
+
+      if (response.ok) {
+        fetchClients();
+        setIsClientFormModalOpen(false);
+      } else {
+        console.error("Failed to create client");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col container mx-auto p-4">
       <div className="flex flex-row gap-4 items-center mb-8 mt-8">
@@ -521,17 +547,19 @@ const Admin = ({ initialProducts, orders }: any) => {
 
       {activeTab === "clients" && (
         <div>
-          <div className="flex flex-row gap-4 items-center mt-4">
+          <div className="flex flex-row gap-4 items-center pt-4 pb-4">
             <div>
-              <h1 className="text-2xl font-bold mb-4">Todos los Clientes</h1>
+              <h1 className="text-2xl font-bold pt-4 pb-4">
+                Todos los Clientes
+              </h1>
             </div>
             <div>
-              {/* <button
-             onClick={() => setIsClientFormModalOpen(true)}
-             className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-           >
-             Crear Nuevo Cliente
-           </button> */}
+              <button
+                onClick={() => setIsClientFormModalOpen(true)}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+              >
+                Crear Nuevo Cliente
+              </button>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4">
@@ -559,6 +587,12 @@ const Admin = ({ initialProducts, orders }: any) => {
             ))}
           </div>
         </div>
+      )}
+
+      {isClientFormModalOpen && (
+        <Modal onClose={() => setIsClientFormModalOpen(false)}>
+          <ClientForm onSubmit={handleCreateClient} />
+        </Modal>
       )}
 
       {loading && (

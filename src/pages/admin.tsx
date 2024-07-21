@@ -336,6 +336,22 @@ const Admin = ({ initialProducts, orders }: any) => {
         >
           Todas las Ordenes
         </button>
+        <button
+          className={`px-4 py-2 ${
+            activeTab === "clients" ? "text-blue-500" : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("clients")}
+        >
+          Todos los Clientes
+        </button>
+        <button
+          className={`px-4 py-2 ${
+            activeTab === "seguros" ? "text-blue-500" : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("seguros")}
+        >
+          Todos los Seguros
+        </button>
       </div>
 
       {activeTab === "orders" && (

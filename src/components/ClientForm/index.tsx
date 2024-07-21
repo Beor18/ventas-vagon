@@ -22,6 +22,11 @@ function ClientForm({ onSubmit }: any) {
     seguro_comprado: false,
   });
 
+  const [errors, setErrors] = useState({
+    email: "",
+    identificacion: "",
+  });
+
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setNewClient({ ...newClient, [name]: value });
@@ -54,8 +59,36 @@ function ClientForm({ onSubmit }: any) {
     });
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    // Validación de identificación única
+    const idCheckResponse = await fetch(
+      `/api/client/check?identificacion=${newClient.identificacion}`
+    );
+    const idCheckResult = await idCheckResponse.json();
+    if (idCheckResult.exists) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        identificacion: "La identificación ya está registrada",
+      }));
+      return;
+    }
+
+    // Validación de correo único
+    const emailCheckResponse = await fetch(
+      `/api/client/check?email=${newClient.email}`
+    );
+    const emailCheckResult = await emailCheckResponse.json();
+    if (emailCheckResult.exists) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: "El correo ya está registrado",
+      }));
+      return;
+    }
+
+    setErrors({ email: "", identificacion: "" });
     onSubmit(newClient);
   };
 
@@ -90,7 +123,6 @@ function ClientForm({ onSubmit }: any) {
           onChange={handleInputChange}
           className="border p-2 rounded"
         />
-
         <div className="flex flex-col">
           <label>Latitud</label>
           <input
@@ -129,14 +161,19 @@ function ClientForm({ onSubmit }: any) {
           onChange={handleInputChange}
           className="border p-2 rounded"
         />
-        <input
-          type="text"
-          name="estado_civil"
-          placeholder="Estado Civil"
-          value={newClient.estado_civil}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
+        <div className="flex flex-col">
+          <label>Estado Civil</label>
+          <select
+            name="estado_civil"
+            value={newClient.estado_civil}
+            onChange={handleInputChange}
+            className="border p-2 rounded"
+          >
+            <option value="">Seleccione</option>
+            <option value="Casado">Casado</option>
+            <option value="Soltero">Soltero</option>
+          </select>
+        </div>
         <input
           type="text"
           name="lugar_empleo"
@@ -153,6 +190,7 @@ function ClientForm({ onSubmit }: any) {
           onChange={handleInputChange}
           className="border p-2 rounded"
         />
+        {errors.email && <p className="text-red-500">{errors.email}</p>}
         <input
           type="text"
           name="identificacion"
@@ -161,6 +199,9 @@ function ClientForm({ onSubmit }: any) {
           onChange={handleInputChange}
           className="border p-2 rounded"
         />
+        {errors.identificacion && (
+          <p className="text-red-500">{errors.identificacion}</p>
+        )}
         <input
           type="tel"
           name="telefono"

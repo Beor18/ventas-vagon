@@ -86,7 +86,7 @@ const Admin = ({ initialProducts, orders }: any) => {
   const { data: session } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [clients, setClients] = useState<any[]>([]);
-
+  const [currentClient, setCurrentClient] = useState<any>(null);
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
 
   const fetchAccessToken = async () => {
@@ -343,6 +343,48 @@ const Admin = ({ initialProducts, orders }: any) => {
     }
   };
 
+  const handleUpdateClient = async (client: any) => {
+    try {
+      const response = await fetch(`/api/client?id=${client._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(client),
+      });
+
+      if (response.ok) {
+        fetchClients();
+        setIsClientFormModalOpen(false);
+        setCurrentClient(null);
+      } else {
+        console.error("Failed to update client");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteClient = async (id: string) => {
+    try {
+      const response = await fetch(`/api/client?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        fetchClients();
+      } else {
+        console.error("Failed to delete client");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col container mx-auto p-4">
       <div className="flex flex-row gap-4 items-center mb-8 mt-8">
@@ -397,7 +439,6 @@ const Admin = ({ initialProducts, orders }: any) => {
               <div
                 key={order._id}
                 className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
-                //onClick={() => openModal(product)}
               >
                 <div>
                   <h2 className="text-xl font-semibold uppercase">
@@ -555,7 +596,10 @@ const Admin = ({ initialProducts, orders }: any) => {
             </div>
             <div>
               <button
-                onClick={() => setIsClientFormModalOpen(true)}
+                onClick={() => {
+                  setCurrentClient(null);
+                  setIsClientFormModalOpen(true);
+                }}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
               >
                 Crear Nuevo Cliente
@@ -563,26 +607,45 @@ const Admin = ({ initialProducts, orders }: any) => {
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            {clients.map((client: any) => (
+            {clients.map((client) => (
               <div
                 key={client._id}
-                className="bg-white p-4 rounded-lg shadow-md"
+                className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
               >
-                <h3 className="text-lg font-semibold">{client.nombre}</h3>
-                <p>Dirección Residencial: {client.direccion_residencial}</p>
-                <p>Dirección de la Unidad: {client.direccion_unidad}</p>
-                <p>Propietario del Terreno: {client.propietario_terreno}</p>
-                <p>Propósito de la Unidad: {client.proposito_unidad}</p>
-                <p>Estado Civil: {client.estado_civil}</p>
-                <p>Lugar de Empleo: {client.lugar_empleo}</p>
-                <p>Email: {client.email}</p>
-                <p>Identificación: {client.identificacion}</p>
-                <p>Teléfono: {client.telefono}</p>
-                <p>Teléfono Alterno: {client.telefono_alterno}</p>
-                <p>Forma de Pago: {client.forma_pago}</p>
-                <p>Contacto de Referencia: {client.contacto_referencia}</p>
-                <p>Asegurador: {client.asegurador}</p>
-                <p>Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}</p>
+                <div>
+                  <h3 className="text-lg font-semibold">{client.nombre}</h3>
+                  <p>Dirección Residencial: {client.direccion_residencial}</p>
+                  <p>Dirección de la Unidad: {client.direccion_unidad}</p>
+                  <p>Propietario del Terreno: {client.propietario_terreno}</p>
+                  <p>Propósito de la Unidad: {client.proposito_unidad}</p>
+                  <p>Estado Civil: {client.estado_civil}</p>
+                  <p>Lugar de Empleo: {client.lugar_empleo}</p>
+                  <p>Email: {client.email}</p>
+                  <p>Identificación: {client.identificacion}</p>
+                  <p>Teléfono: {client.telefono}</p>
+                  <p>Teléfono Alterno: {client.telefono_alterno}</p>
+                  <p>Forma de Pago: {client.forma_pago}</p>
+                  <p>Contacto de Referencia: {client.contacto_referencia}</p>
+                  <p>Asegurador: {client.asegurador}</p>
+                  <p>Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}</p>
+                </div>
+                <div className="flex space-x-4">
+                  {/* <button
+                    onClick={() => {
+                      setCurrentClient(client);
+                      setIsClientFormModalOpen(true);
+                    }}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                  >
+                    Editar
+                  </button> */}
+                  <button
+                    onClick={() => handleDeleteClient(client._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-md"
+                  >
+                    Eliminar
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -591,7 +654,10 @@ const Admin = ({ initialProducts, orders }: any) => {
 
       {isClientFormModalOpen && (
         <Modal onClose={() => setIsClientFormModalOpen(false)}>
-          <ClientForm onSubmit={handleCreateClient} />
+          <ClientForm
+            onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
+            initialClientData={currentClient}
+          />
         </Modal>
       )}
 

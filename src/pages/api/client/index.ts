@@ -82,6 +82,39 @@ export default async function handler(
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
+  } else if (req.method === "PUT") {
+    try {
+      const { id } = req.query;
+      const updatedData = req.body;
+
+      const updatedClient = await Client.findByIdAndUpdate(id, updatedData, {
+        new: true,
+      });
+
+      if (!updatedClient) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
+      res.status(200).json(updatedClient);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  } else if (req.method === "DELETE") {
+    try {
+      const { id } = req.query;
+
+      const deletedClient = await Client.findByIdAndDelete(id);
+
+      if (!deletedClient) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
+      res.status(200).json({ message: "Client deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   } else {
     res.status(405).end();
   }

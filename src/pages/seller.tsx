@@ -76,6 +76,25 @@ function Seller({ products }: any) {
     }
   };
 
+  const handleDeleteClient = async (id: string) => {
+    try {
+      const response = await fetch(`/api/client?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        fetchClients();
+      } else {
+        console.error("Failed to delete client");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const openModal = (product: any) => {
     setSelectedProduct(product);
   };
@@ -219,23 +238,35 @@ function Seller({ products }: any) {
               {clients.map((client: any) => (
                 <div
                   key={client._id}
-                  className="bg-white p-4 rounded-lg shadow-md"
+                  className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
                 >
-                  <h3 className="text-lg font-semibold">{client.nombre}</h3>
-                  <p>Dirección Residencial: {client.direccion_residencial}</p>
-                  <p>Dirección de la Unidad: {client.direccion_unidad}</p>
-                  <p>Propietario del Terreno: {client.propietario_terreno}</p>
-                  <p>Propósito de la Unidad: {client.proposito_unidad}</p>
-                  <p>Estado Civil: {client.estado_civil}</p>
-                  <p>Lugar de Empleo: {client.lugar_empleo}</p>
-                  <p>Email: {client.email}</p>
-                  <p>Identificación: {client.identificacion}</p>
-                  <p>Teléfono: {client.telefono}</p>
-                  <p>Teléfono Alterno: {client.telefono_alterno}</p>
-                  <p>Forma de Pago: {client.forma_pago}</p>
-                  <p>Contacto de Referencia: {client.contacto_referencia}</p>
-                  <p>Asegurador: {client.asegurador}</p>
-                  <p>Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}</p>
+                  <div>
+                    <h3 className="text-lg font-semibold">{client.nombre}</h3>
+                    <p>Dirección Residencial: {client.direccion_residencial}</p>
+                    <p>Dirección de la Unidad: {client.direccion_unidad}</p>
+                    <p>Propietario del Terreno: {client.propietario_terreno}</p>
+                    <p>Propósito de la Unidad: {client.proposito_unidad}</p>
+                    <p>Estado Civil: {client.estado_civil}</p>
+                    <p>Lugar de Empleo: {client.lugar_empleo}</p>
+                    <p>Email: {client.email}</p>
+                    <p>Identificación: {client.identificacion}</p>
+                    <p>Teléfono: {client.telefono}</p>
+                    <p>Teléfono Alterno: {client.telefono_alterno}</p>
+                    <p>Forma de Pago: {client.forma_pago}</p>
+                    <p>Contacto de Referencia: {client.contacto_referencia}</p>
+                    <p>Asegurador: {client.asegurador}</p>
+                    <p>
+                      Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}
+                    </p>
+                  </div>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => handleDeleteClient(client._id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-md"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

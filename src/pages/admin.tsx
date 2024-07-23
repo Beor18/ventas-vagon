@@ -690,10 +690,18 @@ const Admin = ({ initialProducts, orders }: any) => {
                 />
               </div>
             </div>
-            <div>
+            <div className="flex flex-col gap-2">
               <h1>{selectedProduct?.name}</h1>
               <p className="text-gray-500">{selectedProduct.description}</p>
               <p className="text-gray-500">USD {selectedProduct.basePrice}</p>
+              <p className="text-gray-500">
+                <span className="font-bold">Dimensiones externas: </span>
+                {selectedProduct.externalDimensions}
+              </p>
+              <p className="text-gray-500">
+                <span className="font-bold">Dimensiones internas: </span>
+                {selectedProduct.internalDimensions}
+              </p>
             </div>
           </div>
         </Modal>

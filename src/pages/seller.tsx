@@ -199,15 +199,22 @@ function Seller({ products }: any) {
                   className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
                   onClick={() => openModal(product)}
                 >
-                  <div>
-                    <h2 className="text-xl font-semibold">{product.name}</h2>
-                    <p className="text-gray-700 pb-4">
-                      Base Price: ${product.basePrice}
-                    </p>
-                    <img
-                      src={product.imageUrl}
-                      className="w-16 h-16 object-cover"
-                    />
+                  <div className="flex flex-row gap-4">
+                    <div>
+                      <img
+                        src={product.imageUrl}
+                        alt=""
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-500">{product.description}</p>
+                      <p className="text-gray-500">USD {product.basePrice}</p>
+                    </div>
                   </div>
                   <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
                     Ver Producto

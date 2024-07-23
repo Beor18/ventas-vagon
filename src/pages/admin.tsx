@@ -88,6 +88,15 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [clients, setClients] = useState<any[]>([]);
   const [currentClient, setCurrentClient] = useState<any>(null);
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+
+  const openModal = (product: any) => {
+    setSelectedProduct(product);
+  };
+
+  const closeModal = () => {
+    setSelectedProduct(null);
+  };
 
   const fetchAccessToken = async () => {
     const response = await fetch("/api/jwt");
@@ -563,20 +572,27 @@ const Admin = ({ initialProducts, orders }: any) => {
                         {product.name}
                       </h3>
                       <p className="text-gray-500">{product.description}</p>
+                      <p className="text-gray-500">USD {product.basePrice}</p>
                     </div>
                   </div>
                   <div className="flex space-x-4">
                     <button
+                      onClick={() => openModal(product)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-md"
+                    >
+                      Ver
+                    </button>
+                    <button
                       onClick={() => editProduct(product)}
                       className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                     >
-                      Edit
+                      Editar
                     </button>
                     <button
                       onClick={() => deleteProduct(product._id!)}
                       className="bg-red-500 text-white px-4 py-2 rounded-md"
                     >
-                      Delete
+                      Eliminar
                     </button>
                   </div>
                 </li>
@@ -658,6 +674,28 @@ const Admin = ({ initialProducts, orders }: any) => {
             onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
             initialClientData={currentClient}
           />
+        </Modal>
+      )}
+
+      {selectedProduct && (
+        <Modal onClose={closeModal}>
+          <div className="flex gap-4">
+            <div>
+              <div>
+                <img
+                  src={selectedProduct.imageUrl}
+                  alt=""
+                  width={200}
+                  height={100}
+                />
+              </div>
+            </div>
+            <div>
+              <h1>{selectedProduct?.name}</h1>
+              <p className="text-gray-500">{selectedProduct.description}</p>
+              <p className="text-gray-500">USD {selectedProduct.basePrice}</p>
+            </div>
+          </div>
         </Modal>
       )}
 

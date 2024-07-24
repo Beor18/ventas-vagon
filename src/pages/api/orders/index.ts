@@ -63,6 +63,27 @@ export default async function handler(
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
+  } else if (req.method === "DELETE") {
+    try {
+      const { id } = req.query;
+
+      if (!id) {
+        return res.status(400).json({ error: "Order ID is required" });
+      }
+
+      const deletedOrder = await Order.findByIdAndDelete(id);
+
+      if (!deletedOrder) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      res
+        .status(200)
+        .json({ message: "Order deleted successfully", deletedOrder });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   } else {
     res.status(405).end(); // Method Not Allowed
   }

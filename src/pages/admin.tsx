@@ -89,6 +89,7 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [currentClient, setCurrentClient] = useState<any>(null);
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [ordersList, setOrdersList] = useState([]);
 
   const openModal = (product: any) => {
     setSelectedProduct(product);
@@ -102,6 +103,16 @@ const Admin = ({ initialProducts, orders }: any) => {
     const response = await fetch("/api/jwt");
     const data = await response.json();
     return data.accessToken;
+  };
+
+  const fetchOrders = async () => {
+    const response = await fetch("/api/orders", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    setOrdersList(data);
   };
 
   const fetchClients = async () => {
@@ -127,6 +138,7 @@ const Admin = ({ initialProducts, orders }: any) => {
       });
 
       fetchClients();
+      fetchOrders();
     }
   }, [session]);
 
@@ -335,6 +347,22 @@ const Admin = ({ initialProducts, orders }: any) => {
     setIsClientFormModalOpen(true);
   };
 
+  const deleteOrder = async (orderId: any) => {
+    try {
+      await fetch(`/api/orders?id=${orderId}`, {
+        method: "DELETE",
+      });
+
+      alert("Orden eliminada exitosamente.");
+      fetchOrders();
+    } catch (error) {
+      console.error("Error al eliminar la orden:", error);
+      alert(
+        "Hubo un error al intentar eliminar la orden. Por favor, intenta de nuevo."
+      );
+    }
+  };
+
   const handleCreateClient = async (client: any) => {
     try {
       const response = await fetch("/api/client", {
@@ -446,10 +474,10 @@ const Admin = ({ initialProducts, orders }: any) => {
       {activeTab === "orders" && (
         <section>
           <h1 className="text-2xl font-bold pt-4 pb-4">
-            Todas las ordenes - <span>({orders.length})</span>
+            Todas las ordenes - <span>({ordersList.length})</span>
           </h1>
           <div className="grid grid-cols-1 gap-4">
-            {orders.map((order: any) => (
+            {ordersList.map((order: any) => (
               <div
                 key={order._id}
                 className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
@@ -483,8 +511,11 @@ const Admin = ({ initialProducts, orders }: any) => {
                     )}
                   </p>
                 </div>
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                  Próximamente ver detalle de la orden...
+                <button
+                  onClick={() => deleteOrder(order._id)}
+                  className="bg-red-500 text-white px-4 py-2 rounded-md"
+                >
+                  Eliminar
                 </button>
               </div>
             ))}

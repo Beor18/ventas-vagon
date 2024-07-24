@@ -17,6 +17,7 @@ function Seller({ products }: any) {
   const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState("orders");
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
+  const [currentClient, setCurrentClient] = useState<any>(null);
 
   useEffect(() => {
     if (session) {
@@ -101,6 +102,34 @@ function Seller({ products }: any) {
 
   const closeModal = () => {
     setSelectedProduct(null);
+  };
+
+  const editClient = (client: any) => {
+    setCurrentClient(client);
+    setIsClientFormModalOpen(true);
+  };
+
+  const handleUpdateClient = async (client: any) => {
+    try {
+      const response = await fetch(`/api/client?id=${client._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(client),
+      });
+
+      if (response.ok) {
+        fetchClients();
+        setIsClientFormModalOpen(false);
+        setCurrentClient(null);
+      } else {
+        console.error("Failed to update client");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -268,6 +297,14 @@ function Seller({ products }: any) {
                   </div>
                   <div className="flex space-x-4">
                     <button
+                      onClick={() => {
+                        editClient(client);
+                      }}
+                      className="bg-yellow-500 text-white px-4 py-2 rounded-md"
+                    >
+                      Editar
+                    </button>
+                    <button
                       onClick={() => handleDeleteClient(client._id)}
                       className="bg-red-500 text-white px-4 py-2 rounded-md"
                     >
@@ -288,7 +325,10 @@ function Seller({ products }: any) {
 
         {isClientFormModalOpen && (
           <Modal onClose={() => setIsClientFormModalOpen(false)}>
-            <ClientForm onSubmit={handleCreateClient} />
+            <ClientForm
+              onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
+              initialClientData={currentClient}
+            />
           </Modal>
         )}
       </div>

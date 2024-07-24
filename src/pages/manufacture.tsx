@@ -1,6 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import withAuth from "@Src/lib/withAuth";
+import Modal from "@Src/components/Modal";
 
 function Manufacture() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -10,6 +12,14 @@ function Manufacture() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showCommentInput, setShowCommentInput] = useState<boolean>(false);
   const [comment, setComment] = useState<string>("");
+
+  const openModal = (order: any) => {
+    handleViewOrder(order);
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+  };
 
   useEffect(() => {
     if (session) {
@@ -121,7 +131,7 @@ function Manufacture() {
               <div className="flex flex-row gap-4">
                 <button
                   className="bg-green-500 text-white px-4 py-2 rounded-md mt-2"
-                  onClick={() => handleViewOrder(order)}
+                  onClick={() => openModal(order)}
                 >
                   Ver Orden
                 </button>
@@ -131,11 +141,11 @@ function Manufacture() {
         </div>
       </div>
 
-      {showModal && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+      {selectedOrder && (
+        <Modal onClose={closeModal}>
           <div className="bg-white p-6 rounded-lg w-3/4">
             <h2 className="text-xl font-semibold mb-4">
-              Orden: {selectedOrder.productName}
+              Orden: {selectedOrder.productDetails.name}
             </h2>
             <p>Status: {selectedOrder.status}</p>
             <p>Customer: {selectedOrder.vendedorName}</p>
@@ -144,9 +154,27 @@ function Manufacture() {
             <h3 className="text-lg font-semibold mt-4">
               Detalles del Producto
             </h3>
+            <img
+              src={selectedOrder.productDetails.imageUrl}
+              alt={selectedOrder.productDetails.name}
+              className="w-[320px] h-auto mb-4"
+            />
             <p>Nombre: {selectedOrder.productDetails.name}</p>
-            <p>Descripción: {selectedOrder.productDetails.description}</p>
-            <p>Precio: {selectedOrder.productDetails.price}</p>
+            <p>
+              Descripción:{" "}
+              {selectedOrder.productDetails.description ||
+                "No hay descripción disponible"}
+            </p>
+            <p>
+              Dimensiones externas:
+              {selectedOrder.productDetails.externalDimensions ||
+                "No hay dimensiones externas disponible"}
+            </p>
+            <p>
+              Dimensiones internas:
+              {selectedOrder.productDetails.internalDimensions ||
+                "No hay dimensiones internas disponible"}
+            </p>
             <div className="flex gap-4 mt-4">
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded-md"
@@ -178,7 +206,7 @@ function Manufacture() {
               </div>
             )}
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

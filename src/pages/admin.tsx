@@ -330,6 +330,11 @@ const Admin = ({ initialProducts, orders }: any) => {
     setModalOpen(true);
   };
 
+  const editClient = (client: any) => {
+    setCurrentClient(client);
+    setIsClientFormModalOpen(true);
+  };
+
   const handleCreateClient = async (client: any) => {
     try {
       const response = await fetch("/api/client", {
@@ -646,15 +651,14 @@ const Admin = ({ initialProducts, orders }: any) => {
                   <p>Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}</p>
                 </div>
                 <div className="flex space-x-4">
-                  {/* <button
+                  <button
                     onClick={() => {
-                      setCurrentClient(client);
-                      setIsClientFormModalOpen(true);
+                      editClient(client);
                     }}
                     className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                   >
                     Editar
-                  </button> */}
+                  </button>
                   <button
                     onClick={() => handleDeleteClient(client._id)}
                     className="bg-red-500 text-white px-4 py-2 rounded-md"

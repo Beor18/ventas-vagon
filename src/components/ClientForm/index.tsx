@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function ClientForm({ onSubmit }: any) {
+function ClientForm({ onSubmit, initialClientData }: any) {
   const [newClient, setNewClient] = useState({
     nombre: "",
     direccion_residencial: "",
@@ -26,6 +26,12 @@ function ClientForm({ onSubmit }: any) {
     email: "",
     identificacion: "",
   });
+
+  useEffect(() => {
+    if (initialClientData) {
+      setNewClient(initialClientData);
+    }
+  }, [initialClientData]);
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -62,33 +68,36 @@ function ClientForm({ onSubmit }: any) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    // Validación de identificación única
-    const idCheckResponse = await fetch(
-      `/api/client/check?identificacion=${newClient.identificacion}`
-    );
-    const idCheckResult = await idCheckResponse.json();
-    if (idCheckResult.exists) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        identificacion: "La identificación ya está registrada",
-      }));
-      return;
+    if (!initialClientData) {
+      // Validación de identificación única
+      const idCheckResponse = await fetch(
+        `/api/client/check?identificacion=${newClient.identificacion}`
+      );
+      const idCheckResult = await idCheckResponse.json();
+      if (idCheckResult.exists) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          identificacion: "La identificación ya está registrada",
+        }));
+        return;
+      }
+
+      // Validación de correo único
+      const emailCheckResponse = await fetch(
+        `/api/client/check?email=${newClient.email}`
+      );
+      const emailCheckResult = await emailCheckResponse.json();
+      if (emailCheckResult.exists) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          email: "El correo ya está registrado",
+        }));
+        return;
+      }
+
+      setErrors({ email: "", identificacion: "" });
     }
 
-    // Validación de correo único
-    const emailCheckResponse = await fetch(
-      `/api/client/check?email=${newClient.email}`
-    );
-    const emailCheckResult = await emailCheckResponse.json();
-    if (emailCheckResult.exists) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        email: "El correo ya está registrado",
-      }));
-      return;
-    }
-
-    setErrors({ email: "", identificacion: "" });
     onSubmit(newClient);
   };
 
@@ -97,7 +106,9 @@ function ClientForm({ onSubmit }: any) {
       onSubmit={handleSubmit}
       className="bg-white p-4 rounded-lg shadow-md mb-4"
     >
-      <h2 className="text-xl font-semibold mb-4">Crear Nuevo Cliente</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        {initialClientData ? "Actualizar Cliente" : "Crear Nuevo Cliente"}
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
           type="text"
@@ -256,7 +267,7 @@ function ClientForm({ onSubmit }: any) {
         type="submit"
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
       >
-        Crear Cliente
+        {initialClientData ? "Actualizar Cliente" : "Crear Cliente"}
       </button>
     </form>
   );

@@ -254,8 +254,12 @@ const Admin = ({ initialProducts, orders }: any) => {
     const productToSave = { ...product, options: product.options };
     if (!productToSave._id) {
       await createProduct(productToSave);
+      setModalOpen(false);
+      fetchProducts();
     } else {
       await updateProduct(productToSave);
+      setModalOpen(false);
+      fetchProducts();
     }
   };
 

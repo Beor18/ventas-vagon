@@ -144,37 +144,96 @@ function Manufacture() {
       {selectedOrder && (
         <Modal onClose={closeModal}>
           <div className="bg-white p-6 rounded-lg w-3/4">
-            <h2 className="text-xl font-semibold mb-4">
-              Orden: {selectedOrder.productDetails.name}
-            </h2>
-            <p>Status: {selectedOrder.status}</p>
-            <p>Customer: {selectedOrder.vendedorName}</p>
-            <p>Email: {selectedOrder.vendedorEmail}</p>
-            <p>Comentarios: {selectedOrder.comentaries}</p>
-            <h3 className="text-lg font-semibold mt-4">
-              Detalles del Producto
-            </h3>
-            <img
-              src={selectedOrder.productDetails.imageUrl}
-              alt={selectedOrder.productDetails.name}
-              className="w-[320px] h-auto mb-4"
-            />
-            <p>Nombre: {selectedOrder.productDetails.name}</p>
-            <p>
-              Descripción:{" "}
-              {selectedOrder.productDetails.description ||
-                "No hay descripción disponible"}
-            </p>
-            <p>
-              Dimensiones externas:
-              {selectedOrder.productDetails.externalDimensions ||
-                "No hay dimensiones externas disponible"}
-            </p>
-            <p>
-              Dimensiones internas:
-              {selectedOrder.productDetails.internalDimensions ||
-                "No hay dimensiones internas disponible"}
-            </p>
+            <div>
+              <h2 className="text-xl font-semibold mb-4">
+                Orden: {selectedOrder.productDetails.name}
+              </h2>
+              <table className="min-w-full bg-white overflow-y-auto overflow-x-hidden h-[500px]">
+                <tbody>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Status
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.status}
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Customer
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.vendedorName}
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Email
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.vendedorEmail}
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Comentarios
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.comentaries ||
+                        "No hay comentarios disponibles"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Producto
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img
+                        src={selectedOrder.productDetails.imageUrl}
+                        alt={selectedOrder.productDetails.name}
+                        className="w-[320px] h-auto mb-4"
+                      />
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Nombre
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.productDetails.name}
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Descripción
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.productDetails.description ||
+                        "No hay descripción disponible"}
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Dimensiones externas
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.productDetails.externalDimensions ||
+                        "No hay dimensiones externas disponibles"}
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                      Dimensiones internas
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {selectedOrder.productDetails.internalDimensions ||
+                        "No hay dimensiones internas disponibles"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
             <div className="flex gap-4 mt-4">
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded-md"

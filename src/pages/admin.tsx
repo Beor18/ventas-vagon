@@ -554,7 +554,7 @@ const Admin = ({ initialProducts, orders }: any) => {
                   }}
                   className="bg-blue-500 text-white px-4 py-2 rounded-md"
                 >
-                  Add New Product
+                  Agregar nuevo producto
                 </button>
               </div>
             </div>

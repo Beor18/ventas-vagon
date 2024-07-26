@@ -19,6 +19,9 @@ function Manufacture() {
 
   const closeModal = () => {
     setSelectedOrder(null);
+    setShowModal(false);
+    setShowCommentInput(false);
+    setComment("");
   };
 
   useEffect(() => {
@@ -85,7 +88,7 @@ function Manufacture() {
               order._id === orderId ? updatedOrder : order
             )
           );
-          setShowModal(false);
+          closeModal(); // Cerrar modal al aprobar
         });
     }
   };
@@ -107,7 +110,7 @@ function Manufacture() {
               order._id === orderId ? updatedOrder : order
             )
           );
-          setShowModal(false);
+          closeModal(); // Cerrar modal al rechazar
         });
     }
   };
@@ -143,13 +146,14 @@ function Manufacture() {
 
       {selectedOrder && (
         <Modal onClose={closeModal}>
-          <div className="bg-white p-6 rounded-lg w-3/4">
+          <div className="bg-white p-6 rounded-lg w-full overflow-y-auto overflow-hidden h-[700px]">
             <div>
               <h2 className="text-xl font-semibold mb-4">
                 Orden: {selectedOrder.productDetails.name}
               </h2>
-              <table className="min-w-full bg-white overflow-y-auto overflow-x-hidden h-[500px]">
+              <table className="min-w-full bg-white">
                 <tbody>
+                  {" "}
                   <tr className="border-b">
                     <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
                       Status
@@ -243,7 +247,7 @@ function Manufacture() {
               </button>
               <button
                 className="bg-red-500 text-white px-4 py-2 rounded-md"
-                onClick={() => setShowCommentInput(true)}
+                onClick={() => setShowCommentInput((prev) => !prev)}
               >
                 Cancelar orden
               </button>

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { connectToDatabase } from "@Src/lib/mongodb";
-import Client from "@Src/models/Client";
+import { connectToDatabase } from "@/lib/mongodb";
+import Client from "@/models/Client";
 
 export default async function handler(
   req: NextApiRequest,

@@ -1,6 +1,23 @@
 /* eslint-disable @next/next/no-img-element */
-import React from "react";
-import { useRef, useState } from "react";
+"use client";
+
+import React, { useRef, useState } from "react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Upload,
+  Plus,
+  Minus,
+} from "lucide-react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
 
 interface ProductType {
   _id?: string;
@@ -96,492 +113,484 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    {
-      title: "Product Information",
-      content: (
-        <>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Product Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={product.name}
-              onChange={handleProductChange}
-              placeholder="Product Name"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={product.description}
-              onChange={handleProductChange}
-              placeholder="Product Description"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Image
-            </label>
-            <input
-              type="file"
-              name="image"
-              ref={inputFileRef}
-              onChange={(e) =>
-                handleImagePreview(
-                  e,
-                  (url: string) => setProduct({ ...product, imageUrl: url }),
-                  setImagePreview
-                )
-              }
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Image Preview"
-                className="mt-2 h-32 w-32 object-cover"
-              />
-            )}
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Quantity
-            </label>
-            <input
-              type="number"
-              name="quantity"
-              value={product.quantity}
-              onChange={handleProductChange}
-              placeholder="Quantity"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Material
-            </label>
-            <input
-              type="text"
-              name="material"
-              value={product.material}
-              onChange={handleProductChange}
-              placeholder="Material"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              External Dimensions
-            </label>
-            <input
-              type="text"
-              name="externalDimensions"
-              value={product.externalDimensions}
-              onChange={handleProductChange}
-              placeholder="External Dimensions"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Internal Dimensions
-            </label>
-            <input
-              type="text"
-              name="internalDimensions"
-              value={product.internalDimensions}
-              onChange={handleProductChange}
-              placeholder="Internal Dimensions"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Folding State
-            </label>
-            <input
-              type="text"
-              name="foldingState"
-              value={product.foldingState}
-              onChange={handleProductChange}
-              placeholder="Folding State"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Total Weight
-            </label>
-            <input
-              type="number"
-              name="totalWeight"
-              value={product.totalWeight}
-              onChange={handleProductChange}
-              placeholder="Total Weight"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Base Price
-            </label>
-            <input
-              type="number"
-              name="basePrice"
-              value={product.basePrice}
-              onChange={handleProductChange}
-              placeholder="Base Price"
-              className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            />
-          </div>
-        </>
-      ),
-    },
-    {
-      title: "Options",
-      content: (
-        <>
-          <h4 className="text-lg font-medium text-gray-900 mt-4">Options</h4>
-          {product.options.map((option, optionIndex) => (
-            <div key={optionIndex} className="mb-2 border-b pb-2">
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Option Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={option.name}
-                  onChange={(e) => handleOptionChange(e, optionIndex)}
-                  placeholder="Option Name"
-                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                />
-              </div>
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Option Price
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={option.price}
-                  onChange={(e) => handleOptionChange(e, optionIndex)}
-                  placeholder="Option Price"
-                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                />
-              </div>
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Option Image
-                </label>
-                <input
-                  type="file"
-                  name="image"
-                  ref={inputFileRefOption}
-                  onChange={(e) =>
-                    handleImagePreview(
-                      e,
-                      (url: string) => {
-                        const updatedOptions = [...product.options];
-                        updatedOptions[optionIndex] = {
-                          ...updatedOptions[optionIndex],
-                          imageUrl: url,
-                        };
-                        setProduct({
-                          ...product,
-                          options: updatedOptions,
-                        });
-                      },
-                      (url: string) => {
-                        const updatedOptions = [...product.options];
-                        updatedOptions[optionIndex].imageUrl = url;
-                        setProduct({
-                          ...product,
-                          options: updatedOptions,
-                        });
-                      }
-                    )
-                  }
-                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                />
-                {option.imageUrl && (
-                  <img
-                    src={option.imageUrl}
-                    alt="Option Image"
-                    className="mt-2 h-20 w-20 object-cover"
-                  />
-                )}
-              </div>
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Option Type
-                </label>
-                <input
-                  type="text"
-                  name="type"
-                  value={option.type}
-                  onChange={(e) => handleOptionChange(e, optionIndex)}
-                  placeholder="Option Type"
-                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                />
-              </div>
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Specification
-                </label>
-                <input
-                  type="text"
-                  name="specification"
-                  value={option.specification}
-                  onChange={(e) => handleOptionChange(e, optionIndex)}
-                  placeholder="Specification"
-                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                />
-              </div>
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  PCS
-                </label>
-                <input
-                  type="number"
-                  name="pcs"
-                  value={option.pcs}
-                  onChange={(e) => handleOptionChange(e, optionIndex)}
-                  placeholder="PCS"
-                  className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                />
-              </div>
-              <h5 className="text-md font-medium text-gray-700 mt-2">
-                Suboptions
-              </h5>
-              {option.suboptions.map((suboption, subOptionIndex) => (
-                <div key={subOptionIndex} className="mb-2 border-b pb-2 ml-4">
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Suboption Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={suboption.name}
-                      onChange={(e) =>
-                        handleSubOptionChange(e, optionIndex, subOptionIndex)
-                      }
-                      placeholder="Suboption Name"
-                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Suboption Price
-                    </label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={suboption.price}
-                      onChange={(e) =>
-                        handleSubOptionChange(e, optionIndex, subOptionIndex)
-                      }
-                      placeholder="Suboption Price"
-                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Suboption Image
-                    </label>
-                    <input
-                      type="file"
-                      name="image"
-                      ref={inputFileRefSubOption}
-                      onChange={(e) =>
-                        handleImagePreview(
-                          e,
-                          (url: string) => {
-                            const updatedOptions = [...product.options];
-                            updatedOptions[optionIndex].suboptions[
-                              subOptionIndex
-                            ] = {
-                              ...updatedOptions[optionIndex].suboptions[
-                                subOptionIndex
-                              ],
-                              imageUrl: url,
-                            };
-                            setProduct({
-                              ...product,
-                              options: updatedOptions,
-                            });
-                          },
-                          (url: string) => {
-                            const updatedOptions = [...product.options];
-                            updatedOptions[optionIndex].suboptions[
-                              subOptionIndex
-                            ].imageUrl = url;
-                            setProduct({
-                              ...product,
-                              options: updatedOptions,
-                            });
-                          }
-                        )
-                      }
-                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    />
-                    {suboption.imageUrl && (
-                      <img
-                        src={suboption.imageUrl}
-                        alt="Suboption Image"
-                        className="mt-2 h-16 w-16 object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Suboption Code
-                    </label>
-                    <input
-                      type="text"
-                      name="code"
-                      value={suboption.code}
-                      onChange={(e) =>
-                        handleSubOptionChange(e, optionIndex, subOptionIndex)
-                      }
-                      placeholder="Suboption Code"
-                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Details
-                    </label>
-                    <input
-                      type="text"
-                      name="details"
-                      value={suboption.details}
-                      onChange={(e) =>
-                        handleSubOptionChange(e, optionIndex, subOptionIndex)
-                      }
-                      placeholder="Details"
-                      className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    />
-                  </div>
-                  <button
-                    onClick={() => removeSubOption(optionIndex, subOptionIndex)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-md"
-                  >
-                    Remove Suboption
-                  </button>
-                </div>
-              ))}
-              <div className="border-t pt-2 mt-2 ml-4">
-                <h6 className="text-md font-medium text-gray-900 mt-4">
-                  Add New Suboption
-                </h6>
-                <button
-                  onClick={() => addSubOption(optionIndex)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                >
-                  Add Suboption
-                </button>
-              </div>
-              <button
-                onClick={() => removeOption(optionIndex)}
-                className="bg-red-500 text-white px-4 py-2 rounded-md mt-2"
-              >
-                Remove Option
-              </button>
-            </div>
-          ))}
-          <div className="border-t pt-2 mt-2">
-            <h4 className="text-lg font-medium text-gray-900 mt-4">
-              Add New Option
-            </h4>
-            <button
-              onClick={addOption}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-              Add Option
-            </button>
-          </div>
-        </>
-      ),
-    },
+    { title: "Product Information", value: "product-info" },
+    { title: "Options", value: "options" },
   ];
 
   return (
-    <div className="fixed z-10 inset-0 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
-        >
-          &#8203;
-        </span>
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="sm:flex sm:items-start">
-              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3
-                  className="text-lg leading-6 font-medium text-gray-900"
-                  id="modal-title"
-                >
-                  {product._id ? "Edit Product" : "New Product"}
-                </h3>
-                <div className="mt-2">{steps[currentStep].content}</div>
-              </div>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center overflow-y-auto">
+      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle>{product._id ? "Edit Product" : "New Product"}</CardTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setModalOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={steps[currentStep].value} className="w-full">
+            <div className="flex items-center justify-between mb-4">
+              <TabsList>
+                {steps.map((step, index) => (
+                  <TabsTrigger
+                    key={step.value}
+                    value={step.value}
+                    disabled={index > currentStep}
+                    onClick={() => setCurrentStep(index)}
+                  >
+                    {step.title}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <span className="text-sm text-muted-foreground">
+                Step {currentStep + 1} of {steps.length}
+              </span>
             </div>
-          </div>
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            {currentStep < steps.length - 1 ? (
-              <button
-                onClick={() => setCurrentStep(currentStep + 1)}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                onClick={saveProduct}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Save
-              </button>
-            )}
-            {currentStep > 0 && (
-              <button
-                onClick={() => setCurrentStep(currentStep - 1)}
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Previous
-              </button>
-            )}
-            <button
-              onClick={() => setModalOpen(false)}
-              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            <div className="h-2 w-full bg-secondary mb-8">
+              <div
+                className="h-2 bg-primary transition-all duration-300 ease-in-out"
+                style={{
+                  width: `${((currentStep + 1) / steps.length) * 100}%`,
+                }}
+              />
+            </div>
+            <ScrollArea className="h-[calc(90vh-16rem)]">
+              <TabsContent value="product-info" className="space-y-4">
+                <InputField
+                  label="Product Name"
+                  name="name"
+                  value={product.name}
+                  onChange={handleProductChange}
+                  placeholder="Enter product name"
+                />
+                <TextAreaField
+                  label="Description"
+                  name="description"
+                  value={product.description}
+                  onChange={handleProductChange}
+                  placeholder="Enter product description"
+                />
+                <ImageUploadField
+                  label="Product Image"
+                  inputRef={inputFileRef}
+                  onChange={(e: any) =>
+                    handleImagePreview(
+                      e,
+                      (url: string) =>
+                        setProduct({ ...product, imageUrl: url }),
+                      setImagePreview
+                    )
+                  }
+                  preview={imagePreview}
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InputField
+                    label="Quantity"
+                    name="quantity"
+                    type="number"
+                    value={product.quantity}
+                    onChange={handleProductChange}
+                    placeholder="Enter quantity"
+                  />
+                  <InputField
+                    label="Material"
+                    name="material"
+                    value={product.material}
+                    onChange={handleProductChange}
+                    placeholder="Enter material"
+                  />
+                  <InputField
+                    label="External Dimensions"
+                    name="externalDimensions"
+                    value={product.externalDimensions}
+                    onChange={handleProductChange}
+                    placeholder="Enter external dimensions"
+                  />
+                  <InputField
+                    label="Internal Dimensions"
+                    name="internalDimensions"
+                    value={product.internalDimensions}
+                    onChange={handleProductChange}
+                    placeholder="Enter internal dimensions"
+                  />
+                  <InputField
+                    label="Folding State"
+                    name="foldingState"
+                    value={product.foldingState}
+                    onChange={handleProductChange}
+                    placeholder="Enter folding state"
+                  />
+                  <InputField
+                    label="Total Weight"
+                    name="totalWeight"
+                    type="number"
+                    value={product.totalWeight}
+                    onChange={handleProductChange}
+                    placeholder="Enter total weight"
+                  />
+                  <InputField
+                    label="Base Price"
+                    name="basePrice"
+                    type="number"
+                    value={product.basePrice}
+                    onChange={handleProductChange}
+                    placeholder="Enter base price"
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="options" className="space-y-6">
+                {product.options.map((option, optionIndex) => (
+                  <OptionCard
+                    key={optionIndex}
+                    option={option}
+                    optionIndex={optionIndex}
+                    handleOptionChange={handleOptionChange}
+                    inputFileRefOption={inputFileRefOption}
+                    handleImagePreview={handleImagePreview}
+                    setProduct={setProduct}
+                    product={product}
+                    addSubOption={addSubOption}
+                    removeOption={removeOption}
+                    handleSubOptionChange={handleSubOptionChange}
+                    removeSubOption={removeSubOption}
+                    inputFileRefSubOption={inputFileRefSubOption}
+                  />
+                ))}
+                <Button onClick={addOption} className="w-full">
+                  <Plus className="mr-2 h-4 w-4" /> Add Option
+                </Button>
+              </TabsContent>
+            </ScrollArea>
+          </Tabs>
+        </CardContent>
+        <div className="flex justify-between items-center p-6 bg-muted/40 rounded-b-lg">
+          {currentStep > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => setCurrentStep(currentStep - 1)}
             >
-              Cancel
-            </button>
-          </div>
+              <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+            </Button>
+          )}
+          {currentStep < steps.length - 1 ? (
+            <Button
+              onClick={() => setCurrentStep(currentStep + 1)}
+              className="ml-auto"
+            >
+              Next <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          ) : (
+            <Button onClick={saveProduct} className="ml-auto">
+              Save Product
+            </Button>
+          )}
         </div>
-      </div>
+      </Card>
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-4 rounded-md">
-            <h2 className="text-lg font-semibold">Uploading...</h2>
-          </div>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+          <Card>
+            <CardContent className="flex items-center space-x-4 p-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+              <CardTitle>Uploading...</CardTitle>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
   );
 };
+
+const InputField = ({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}: any) => (
+  <div className="space-y-2">
+    <Label htmlFor={name}>{label}</Label>
+    <Input
+      type={type}
+      id={name}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+    />
+  </div>
+);
+
+const TextAreaField = ({ label, name, value, onChange, placeholder }: any) => (
+  <div className="space-y-2">
+    <Label htmlFor={name}>{label}</Label>
+    <Textarea
+      id={name}
+      name={name}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      rows={3}
+    />
+  </div>
+);
+
+const ImageUploadField = ({ label, inputRef, onChange, preview }: any) => (
+  <div className="space-y-2">
+    <Label>{label}</Label>
+    <div className="flex items-center">
+      <Input
+        type="file"
+        ref={inputRef}
+        onChange={onChange}
+        className="hidden"
+        accept="image/*"
+      />
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => inputRef.current?.click()}
+      >
+        <Upload className="mr-2 h-4 w-4" /> Choose Image
+      </Button>
+      {preview && (
+        <div className="relative h-20 w-20">
+          <img
+            src={preview}
+            alt="Preview"
+            //fill
+            className="object-cover rounded-md"
+          />
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const OptionCard = ({
+  option,
+  optionIndex,
+  handleOptionChange,
+  inputFileRefOption,
+  handleImagePreview,
+  setProduct,
+  product,
+  addSubOption,
+  removeOption,
+  handleSubOptionChange,
+  removeSubOption,
+  inputFileRefSubOption,
+}: any) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex justify-between items-center">
+        <span>Option {optionIndex + 1}</span>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => removeOption(optionIndex)}
+        >
+          <Minus className="mr-2 h-4 w-4" /> Remove Option
+        </Button>
+      </CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField
+          label="Option Name"
+          name="name"
+          value={option.name}
+          onChange={(e: any) => handleOptionChange(e, optionIndex)}
+          placeholder="Enter option name"
+        />
+        <InputField
+          label="Option Price"
+          name="price"
+          type="number"
+          value={option.price}
+          onChange={(e: any) => handleOptionChange(e, optionIndex)}
+          placeholder="Enter option price"
+        />
+        <ImageUploadField
+          label="Option Image"
+          inputRef={inputFileRefOption}
+          onChange={(e: any) =>
+            handleImagePreview(
+              e,
+              (url: string) => {
+                const updatedOptions = [...product.options];
+                updatedOptions[optionIndex] = {
+                  ...updatedOptions[optionIndex],
+                  imageUrl: url,
+                };
+                setProduct({
+                  ...product,
+                  options: updatedOptions,
+                });
+              },
+              (url: string) => {
+                const updatedOptions = [...product.options];
+                updatedOptions[optionIndex].imageUrl = url;
+                setProduct({
+                  ...product,
+                  options: updatedOptions,
+                });
+              }
+            )
+          }
+          preview={option.imageUrl}
+        />
+        <InputField
+          label="Option Type"
+          name="type"
+          value={option.type}
+          onChange={(e: any) => handleOptionChange(e, optionIndex)}
+          placeholder="Enter option type"
+        />
+        <InputField
+          label="Specification"
+          name="specification"
+          value={option.specification}
+          onChange={(e: any) => handleOptionChange(e, optionIndex)}
+          placeholder="Enter specification"
+        />
+        <InputField
+          label="PCS"
+          name="pcs"
+          type="number"
+          value={option.pcs}
+          onChange={(e: any) => handleOptionChange(e, optionIndex)}
+          placeholder="Enter PCS"
+        />
+      </div>
+      <div className="space-y-4">
+        <h6 className="text-lg font-semibold">Suboptions</h6>
+        {option.suboptions.map((suboption: any, subOptionIndex: any) => (
+          <SuboptionCard
+            key={subOptionIndex}
+            suboption={suboption}
+            optionIndex={optionIndex}
+            subOptionIndex={subOptionIndex}
+            handleSubOptionChange={handleSubOptionChange}
+            removeSubOption={removeSubOption}
+            inputFileRefSubOption={inputFileRefSubOption}
+            handleImagePreview={handleImagePreview}
+            setProduct={setProduct}
+            product={product}
+          />
+        ))}
+        <Button
+          onClick={() => addSubOption(optionIndex)}
+          variant="outline"
+          className="w-full"
+        >
+          <Plus className="mr-2 h-4 w-4" /> Add Suboption
+        </Button>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const SuboptionCard = ({
+  suboption,
+  optionIndex,
+  subOptionIndex,
+  handleSubOptionChange,
+  removeSubOption,
+  inputFileRefSubOption,
+  handleImagePreview,
+  setProduct,
+  product,
+}: any) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="flex justify-between items-center text-base">
+        <span>Suboption {subOptionIndex + 1}</span>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => removeSubOption(optionIndex, subOptionIndex)}
+        >
+          <Minus className="mr-2 h-4 w-4" /> Remove
+        </Button>
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField
+          label="Suboption Name"
+          name="name"
+          value={suboption.name}
+          onChange={(e: any) =>
+            handleSubOptionChange(e, optionIndex, subOptionIndex)
+          }
+          placeholder="Enter suboption name"
+        />
+        <InputField
+          label="Suboption Price"
+          name="price"
+          type="number"
+          value={suboption.price}
+          onChange={(e: any) =>
+            handleSubOptionChange(e, optionIndex, subOptionIndex)
+          }
+          placeholder="Enter suboption price"
+        />
+        <ImageUploadField
+          label="Suboption Image"
+          inputRef={inputFileRefSubOption}
+          onChange={(e: any) =>
+            handleImagePreview(
+              e,
+              (url: string) => {
+                const updatedOptions = [...product.options];
+                updatedOptions[optionIndex].suboptions[subOptionIndex] = {
+                  ...updatedOptions[optionIndex].suboptions[subOptionIndex],
+                  imageUrl: url,
+                };
+                setProduct({
+                  ...product,
+                  options: updatedOptions,
+                });
+              },
+              (url: string) => {
+                const updatedOptions = [...product.options];
+                updatedOptions[optionIndex].suboptions[
+                  subOptionIndex
+                ].imageUrl = url;
+                setProduct({
+                  ...product,
+                  options: updatedOptions,
+                });
+              }
+            )
+          }
+          preview={suboption.imageUrl}
+        />
+        <InputField
+          label="Suboption Code"
+          name="code"
+          value={suboption.code}
+          onChange={(e: any) =>
+            handleSubOptionChange(e, optionIndex, subOptionIndex)
+          }
+          placeholder="Enter suboption code"
+        />
+        <InputField
+          label="Details"
+          name="details"
+          value={suboption.details}
+          onChange={(e: any) =>
+            handleSubOptionChange(e, optionIndex, subOptionIndex)
+          }
+          placeholder="Enter details"
+        />
+      </div>
+    </CardContent>
+  </Card>
+);
 
 export default ProductForm;

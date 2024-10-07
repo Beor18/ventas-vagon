@@ -3,14 +3,14 @@ import { type PutBlobResult } from "@vercel/blob";
 import { upload } from "@vercel/blob/client";
 import { useState, useRef, useEffect } from "react";
 import { connectToDatabase } from "../lib/mongodb";
-import Product from "@Src/models/Product";
-import Order from "@Src/models/Order";
-import Client from "@Src/models/Client";
+import Product from "@/models/Product";
+import Order from "@/models/Order";
+import Client from "@/models/Client";
 import withAuth from "../lib/withAuth";
-import ProductForm from "@Src/components/ProductForm";
+import ProductForm from "@/components/ProductForm";
 import { useSession } from "next-auth/react";
-import Modal from "@Src/components/Modal";
-import ClientForm from "@Src/components/ClientForm";
+import Modal from "@/components/Modal";
+import ClientForm from "@/components/ClientForm";
 import React from "react";
 
 interface ProductType {

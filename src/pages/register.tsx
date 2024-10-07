@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import withAuth from "@Src/lib/withAuth";
+import withAuth from "@/lib/withAuth";
 
 const Register = () => {
   const [email, setEmail] = useState("");

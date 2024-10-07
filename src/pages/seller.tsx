@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "../models/Product";
-import Modal from "@Src/components/Modal";
-import Select from "@Src/components/Select";
+import Modal from "@/components/Modal";
+import Select from "@/components/Select";
 import withAuth from "../lib/withAuth";
 import { useSession } from "next-auth/react";
-import ClientForm from "@Src/components/ClientForm";
+import ClientForm from "@/components/ClientForm";
 
 function Seller({ products }: any) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);

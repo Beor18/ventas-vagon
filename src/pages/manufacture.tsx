@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import withAuth from "@Src/lib/withAuth";
-import Modal from "@Src/components/Modal";
+import withAuth from "@/lib/withAuth";
+import Modal from "@/components/Modal";
 
 function Manufacture() {
   const [orders, setOrders] = useState<any[]>([]);

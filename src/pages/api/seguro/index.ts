@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import { connectToDatabase } from "@Src/lib/mongodb";
-import Seguro from "@Src/models/Seguro";
+import { connectToDatabase } from "@/lib/mongodb";
+import Seguro from "@/models/Seguro";
 
 const secret = process.env.JWT_SECRET;
 

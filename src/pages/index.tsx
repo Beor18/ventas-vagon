@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "../models/Product";
-import Modal from "@Src/components/Modal";
-import Select from "@Src/components/Select";
+import Modal from "@/components/Modal";
+import Select from "@/components/Select";
 
 export default function Home({ products }: any) {
   return (

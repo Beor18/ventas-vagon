@@ -1,17 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
-import { type PutBlobResult } from "@vercel/blob";
-import { upload } from "@vercel/blob/client";
-import { useState, useRef, useEffect } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PlusCircle, Edit, Trash2, Eye } from "lucide-react";
+import ProductForm from "@/components/ProductForm";
+import ClientForm from "@/components/ClientForm";
+import Modal from "@/components/Modal";
+import withAuth from "../lib/withAuth";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "@/models/Product";
 import Order from "@/models/Order";
 import Client from "@/models/Client";
-import withAuth from "../lib/withAuth";
-import ProductForm from "@/components/ProductForm";
-import { useSession } from "next-auth/react";
-import Modal from "@/components/Modal";
-import ClientForm from "@/components/ClientForm";
-import React from "react";
 
 interface ProductType {
   _id?: string;
@@ -81,9 +86,7 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
   const [activeTab, setActiveTab] = useState("products");
-
   const { data: session } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [clients, setClients] = useState<any[]>([]);
@@ -92,13 +95,15 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [ordersList, setOrdersList] = useState([]);
 
-  const openModal = (product: any) => {
-    setSelectedProduct(product);
-  };
-
-  const closeModal = () => {
-    setSelectedProduct(null);
-  };
+  useEffect(() => {
+    if (session) {
+      fetchAccessToken().then((token) => {
+        setAccessToken(token);
+      });
+      fetchClients();
+      fetchOrders();
+    }
+  }, [session]);
 
   const fetchAccessToken = async () => {
     const response = await fetch("/api/jwt");
@@ -132,23 +137,15 @@ const Admin = ({ initialProducts, orders }: any) => {
     setProducts(data);
   };
 
-  useEffect(() => {
-    if (session) {
-      fetchAccessToken().then((token) => {
-        setAccessToken(token);
-      });
-
-      fetchClients();
-      fetchOrders();
-    }
-  }, [session]);
-
-  const handleProductChange = (e: any) => {
+  const handleProductChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProduct({ ...product, [name]: value });
   };
 
-  const handleOptionChange = (e: any, optionIndex: number) => {
+  const handleOptionChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    optionIndex: number
+  ) => {
     const { name, value } = e.target;
     const updatedOptions = [...product.options];
     updatedOptions[optionIndex] = {
@@ -159,7 +156,7 @@ const Admin = ({ initialProducts, orders }: any) => {
   };
 
   const handleSubOptionChange = (
-    e: any,
+    e: React.ChangeEvent<HTMLInputElement>,
     optionIndex: number,
     subOptionIndex: number
   ) => {
@@ -172,12 +169,12 @@ const Admin = ({ initialProducts, orders }: any) => {
     setProduct({ ...product, options: updatedOptions });
   };
 
-  const handleNewOptionChange = (e: any) => {
+  const handleNewOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewOption({ ...newOption, [name]: value });
   };
 
-  const handleNewSubOptionChange = (e: any) => {
+  const handleNewSubOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewSubOption({ ...newSubOption, [name]: value });
   };
@@ -212,9 +209,7 @@ const Admin = ({ initialProducts, orders }: any) => {
   };
 
   const removeOption = (optionIndex: number) => {
-    const updatedOptions = product.options.filter(
-      (_: any, i: number) => i !== optionIndex
-    );
+    const updatedOptions = product.options.filter((_, i) => i !== optionIndex);
     setProduct({ ...product, options: updatedOptions });
   };
 
@@ -222,18 +217,24 @@ const Admin = ({ initialProducts, orders }: any) => {
     const updatedOptions = [...product.options];
     updatedOptions[optionIndex].suboptions = updatedOptions[
       optionIndex
-    ].suboptions.filter((_: any, i: number) => i !== subOptionIndex);
+    ].suboptions.filter((_, i) => i !== subOptionIndex);
     setProduct({ ...product, options: updatedOptions });
   };
 
-  const handleImageUpload = async (file: File, callback: any) => {
+  const handleImageUpload = async (
+    file: File,
+    callback: (url: string) => void
+  ) => {
     setLoading(true);
     try {
-      const newBlob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
       });
-      callback(newBlob.url);
+      const data = await response.json();
+      callback(data.url);
     } catch (error) {
       setMessage("Error uploading image");
     } finally {
@@ -242,26 +243,26 @@ const Admin = ({ initialProducts, orders }: any) => {
   };
 
   const handleImagePreview = async (
-    e: any,
-    setImageUrlCallback: any,
-    setPreviewCallback: any
+    e: React.ChangeEvent<HTMLInputElement>,
+    setImageUrlCallback: (url: string) => void,
+    setPreviewCallback: (url: string) => void
   ) => {
-    const file = e.target.files[0];
-    setPreviewCallback(URL.createObjectURL(file));
-    await handleImageUpload(file, setImageUrlCallback);
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreviewCallback(URL.createObjectURL(file));
+      await handleImageUpload(file, setImageUrlCallback);
+    }
   };
 
   const saveProduct = async () => {
     const productToSave = { ...product, options: product.options };
     if (!productToSave._id) {
       await createProduct(productToSave);
-      setModalOpen(false);
-      fetchProducts();
     } else {
       await updateProduct(productToSave);
-      setModalOpen(false);
-      fetchProducts();
     }
+    setModalOpen(false);
+    fetchProducts();
   };
 
   const createProduct = async (productData: ProductType) => {
@@ -275,29 +276,7 @@ const Admin = ({ initialProducts, orders }: any) => {
         body: JSON.stringify(productData),
       });
       await fetchProducts();
-      setProduct({
-        name: "",
-        description: "",
-        imageUrl: "",
-        quantity: 1,
-        material: "",
-        externalDimensions: "",
-        internalDimensions: "",
-        foldingState: "",
-        totalWeight: 0,
-        basePrice: 0,
-        options: [],
-      });
-      setNewOption({
-        name: "",
-        price: 0,
-        imageUrl: "",
-        type: "",
-        specification: "",
-        pcs: 0,
-        suboptions: [],
-      });
-      setImagePreview("");
+      resetProductForm();
       setMessage("Product saved successfully");
     } catch (error) {
       setMessage("Error saving product");
@@ -318,7 +297,6 @@ const Admin = ({ initialProducts, orders }: any) => {
       });
       await fetchProducts();
       setMessage("Product updated successfully");
-      setModalOpen(false);
     } catch (error) {
       setMessage("Error updating product");
     } finally {
@@ -352,19 +330,16 @@ const Admin = ({ initialProducts, orders }: any) => {
     setIsClientFormModalOpen(true);
   };
 
-  const deleteOrder = async (orderId: any) => {
+  const deleteOrder = async (orderId: string) => {
     try {
       await fetch(`/api/orders?id=${orderId}`, {
         method: "DELETE",
       });
-
-      alert("Orden eliminada exitosamente.");
+      setMessage("Order deleted successfully");
       fetchOrders();
     } catch (error) {
-      console.error("Error al eliminar la orden:", error);
-      alert(
-        "Hubo un error al intentar eliminar la orden. Por favor, intenta de nuevo."
-      );
+      console.error("Error deleting order:", error);
+      setMessage("Error deleting order");
     }
   };
 
@@ -378,15 +353,16 @@ const Admin = ({ initialProducts, orders }: any) => {
         },
         body: JSON.stringify({ ...client, vendedor: session?.user?.email }),
       });
-
       if (response.ok) {
         fetchClients();
         setIsClientFormModalOpen(false);
+        setMessage("Client created successfully");
       } else {
-        console.error("Failed to create client");
+        setMessage("Failed to create client");
       }
     } catch (error) {
       console.error(error);
+      setMessage("Error creating client");
     }
   };
 
@@ -400,16 +376,17 @@ const Admin = ({ initialProducts, orders }: any) => {
         },
         body: JSON.stringify(client),
       });
-
       if (response.ok) {
         fetchClients();
         setIsClientFormModalOpen(false);
         setCurrentClient(null);
+        setMessage("Client updated successfully");
       } else {
-        console.error("Failed to update client");
+        setMessage("Failed to update client");
       }
     } catch (error) {
       console.error(error);
+      setMessage("Error updating client");
     }
   };
 
@@ -421,291 +398,114 @@ const Admin = ({ initialProducts, orders }: any) => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
       if (response.ok) {
         fetchClients();
+        setMessage("Client deleted successfully");
       } else {
-        console.error("Failed to delete client");
+        setMessage("Failed to delete client");
       }
     } catch (error) {
       console.error(error);
+      setMessage("Error deleting client");
     }
   };
 
+  const resetProductForm = () => {
+    setProduct({
+      name: "",
+      description: "",
+      imageUrl: "",
+      quantity: 1,
+      material: "",
+      externalDimensions: "",
+      internalDimensions: "",
+      foldingState: "",
+      totalWeight: 0,
+      basePrice: 0,
+      options: [],
+    });
+    setImagePreview("");
+    setNewOption({
+      name: "",
+      price: 0,
+      imageUrl: "",
+      type: "",
+      specification: "",
+      pcs: 0,
+      suboptions: [],
+    });
+  };
+
   return (
-    <div className="min-h-screen flex flex-col container mx-auto p-4">
-      <div className="flex flex-row gap-4 items-center mb-8 mt-8">
-        <div>
-          {" "}
-          <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-        </div>
-      </div>
+    <div className="container mx-auto p-8 space-y-12">
+      <h1 className="text-4xl font-bold mb-8">Admin Panel</h1>
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-8"
+      >
+        <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+          <TabsTrigger value="clients">Clients</TabsTrigger>
+          <TabsTrigger value="seguros">Insurance</TabsTrigger>
+        </TabsList>
+        <TabsContent value="products">
+          <ProductsTab
+            products={products}
+            openModal={() => {
+              resetProductForm();
+              setModalOpen(true);
+            }}
+            editProduct={editProduct}
+            deleteProduct={deleteProduct}
+            setSelectedProduct={setSelectedProduct}
+          />
+        </TabsContent>
+        <TabsContent value="orders">
+          <OrdersTab orders={ordersList} deleteOrder={deleteOrder} />
+        </TabsContent>
+        <TabsContent value="clients">
+          <ClientsTab
+            clients={clients}
+            openClientForm={() => {
+              setCurrentClient(null);
+              setIsClientFormModalOpen(true);
+            }}
+            editClient={editClient}
+            deleteClient={handleDeleteClient}
+          />
+        </TabsContent>
+        <TabsContent value="seguros">
+          <h2 className="text-3xl font-bold  mb-6">Insurance Management</h2>
+          {/* Add insurance management content here */}
+        </TabsContent>
+      </Tabs>
 
-      <div className="flex text-2xl border-b-4 border-red-700 mb-4">
-        <button
-          className={`px-4 py-2 ${
-            activeTab === "products" ? "text-blue-500" : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("products")}
-        >
-          Lista de Productos
-        </button>
-        <button
-          className={`px-4 py-2 ${
-            activeTab === "orders" ? "text-blue-500" : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("orders")}
-        >
-          Todas las Ordenes
-        </button>
-        <button
-          className={`px-4 py-2 ${
-            activeTab === "clients" ? "text-blue-500" : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("clients")}
-        >
-          Todos los Clientes
-        </button>
-        <button
-          className={`px-4 py-2 ${
-            activeTab === "seguros" ? "text-blue-500" : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("seguros")}
-        >
-          Todos los Seguros
-        </button>
-      </div>
-
-      {activeTab === "orders" && (
-        <section>
-          <h1 className="text-2xl font-bold pt-4 pb-4">
-            Todas las ordenes - <span>({ordersList.length})</span>
-          </h1>
-          <div className="grid grid-cols-1 gap-4">
-            {ordersList.map((order: any) => (
-              <div
-                key={order._id}
-                className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
-              >
-                <div>
-                  <h2 className="text-xl font-semibold uppercase">
-                    {order.productName}
-                  </h2>
-                  <p className="text-gray-800 font-normal">
-                    Total precio: ${order.total}
-                  </p>
-                  <p className="text-gray-800 font-normal">
-                    Descuento: {order.discount}%
-                  </p>
-                  <p className="text-gray-800 font-normal">Tax: {order.tax}%</p>
-                  <p className="text-gray-700 pb-4">Status: {order.status}</p>
-                  <p className="text-gray-700 pb-4 border-t-2 border-red-400 pt-2">
-                    Vendedor: {order.vendedorName}
-                  </p>
-                  <p className="text-gray-700 pb-4">
-                    Cliente: {order.cliente?.nombre || "N/A"}
-                  </p>
-                  <p className="text-gray-700 pb-4">
-                    Comentarios:{" "}
-                    {order.comentaries === "" ? (
-                      <span className="font-bold">
-                        Todavía sin comentarios!
-                      </span>
-                    ) : (
-                      order.comentaries
-                    )}
-                  </p>
-                </div>
-                <button
-                  onClick={() => deleteOrder(order._id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-md"
-                >
-                  Eliminar
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {activeTab === "products" && (
-        <>
-          <section>
-            <div className="flex flex-row gap-4 items-center pt-4 pb-4">
-              <div>
-                {" "}
-                <h1 className="text-2xl font-bold pt-4 pb-4">
-                  Gestión de Productos - <span>({products.length})</span>
-                </h1>
-              </div>
-              <div>
-                <button
-                  onClick={() => {
-                    setProduct({
-                      name: "",
-                      description: "",
-                      imageUrl: "",
-                      quantity: 1,
-                      material: "",
-                      externalDimensions: "",
-                      internalDimensions: "",
-                      foldingState: "",
-                      totalWeight: 0,
-                      basePrice: 0,
-                      options: [],
-                    });
-                    setImagePreview("");
-                    setModalOpen(true);
-                  }}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                >
-                  Agregar nuevo producto
-                </button>
-              </div>
-            </div>
-            {modalOpen && (
-              <ProductForm
-                product={product}
-                setProduct={setProduct}
-                imagePreview={imagePreview}
-                setImagePreview={setImagePreview}
-                newOption={newOption}
-                setNewOption={setNewOption}
-                newSubOption={newSubOption}
-                setNewSubOption={setNewSubOption}
-                handleProductChange={handleProductChange}
-                handleOptionChange={handleOptionChange}
-                handleSubOptionChange={handleSubOptionChange}
-                handleNewOptionChange={handleNewOptionChange}
-                handleNewSubOptionChange={handleNewSubOptionChange}
-                addOption={addOption}
-                addSubOption={addSubOption}
-                removeOption={removeOption}
-                removeSubOption={removeSubOption}
-                handleImagePreview={handleImagePreview}
-                saveProduct={saveProduct}
-                setModalOpen={setModalOpen}
-                loading={loading}
-              />
-            )}
-
-            {message && <div className="mt-4 text-red-500">{message}</div>}
-          </section>
-
-          <section>
-            <ul className="divide-y divide-gray-200">
-              {products.map((product: ProductType) => (
-                <li
-                  key={product._id}
-                  className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow mb-4"
-                >
-                  <div className="flex flex-row gap-4">
-                    <div>
-                      <img
-                        src={product.imageUrl}
-                        alt=""
-                        width={100}
-                        height={100}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-500">{product.description}</p>
-                      <p className="text-gray-500">USD {product.basePrice}</p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => openModal(product)}
-                      className="bg-green-500 text-white px-4 py-2 rounded-md"
-                    >
-                      Ver
-                    </button>
-                    <button
-                      onClick={() => editProduct(product)}
-                      className="bg-yellow-500 text-white px-4 py-2 rounded-md"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(product._id!)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-md"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </>
-      )}
-
-      {activeTab === "clients" && (
-        <div>
-          <div className="flex flex-row gap-4 items-center pt-4 pb-4">
-            <div>
-              <h1 className="text-2xl font-bold pt-4 pb-4">
-                Todos los Clientes
-              </h1>
-            </div>
-            <div>
-              <button
-                onClick={() => {
-                  setCurrentClient(null);
-                  setIsClientFormModalOpen(true);
-                }}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-              >
-                Crear Nuevo Cliente
-              </button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            {clients.map((client) => (
-              <div
-                key={client._id}
-                className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
-              >
-                <div>
-                  <h3 className="text-lg font-semibold">{client.nombre}</h3>
-                  <p>Dirección Residencial: {client.direccion_residencial}</p>
-                  <p>Dirección de la Unidad: {client.direccion_unidad}</p>
-                  <p>Propietario del Terreno: {client.propietario_terreno}</p>
-                  <p>Propósito de la Unidad: {client.proposito_unidad}</p>
-                  <p>Estado Civil: {client.estado_civil}</p>
-                  <p>Lugar de Empleo: {client.lugar_empleo}</p>
-                  <p>Email: {client.email}</p>
-                  <p>Identificación: {client.identificacion}</p>
-                  <p>Teléfono: {client.telefono}</p>
-                  <p>Teléfono Alterno: {client.telefono_alterno}</p>
-                  <p>Forma de Pago: {client.forma_pago}</p>
-                  <p>Contacto de Referencia: {client.contacto_referencia}</p>
-                  <p>Asegurador: {client.asegurador}</p>
-                  <p>Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}</p>
-                </div>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => {
-                      editClient(client);
-                    }}
-                    className="bg-yellow-500 text-white px-4 py-2 rounded-md"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDeleteClient(client._id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-md"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {modalOpen && (
+        <ProductForm
+          product={product}
+          setProduct={setProduct}
+          imagePreview={imagePreview}
+          setImagePreview={setImagePreview}
+          newOption={newOption}
+          setNewOption={setNewOption}
+          newSubOption={newSubOption}
+          setNewSubOption={setNewSubOption}
+          handleProductChange={handleProductChange}
+          handleOptionChange={handleOptionChange}
+          handleSubOptionChange={handleSubOptionChange}
+          handleNewOptionChange={handleNewOptionChange}
+          handleNewSubOptionChange={handleNewSubOptionChange}
+          addOption={addOption}
+          addSubOption={addSubOption}
+          removeOption={removeOption}
+          removeSubOption={removeSubOption}
+          handleImagePreview={handleImagePreview}
+          saveProduct={saveProduct}
+          setModalOpen={setModalOpen}
+          loading={loading}
+        />
       )}
 
       {isClientFormModalOpen && (
@@ -718,45 +518,227 @@ const Admin = ({ initialProducts, orders }: any) => {
       )}
 
       {selectedProduct && (
-        <Modal onClose={closeModal}>
-          <div className="flex gap-4">
-            <div>
-              <div>
-                <img
-                  src={selectedProduct.imageUrl}
-                  alt=""
-                  width={200}
-                  height={100}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <h1>{selectedProduct?.name}</h1>
-              <p className="text-gray-500">{selectedProduct.description}</p>
-              <p className="text-gray-500">USD {selectedProduct.basePrice}</p>
-              <p className="text-gray-500">
-                <span className="font-bold">Dimensiones externas: </span>
-                {selectedProduct.externalDimensions}
-              </p>
-              <p className="text-gray-500">
-                <span className="font-bold">Dimensiones internas: </span>
-                {selectedProduct.internalDimensions}
-              </p>
-            </div>
-          </div>
+        <Modal onClose={() => setSelectedProduct(null)}>
+          <ProductDetails product={selectedProduct} />
         </Modal>
       )}
 
-      {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-4 rounded-md">
-            <h2 className="text-lg font-semibold">Uploading...</h2>
-          </div>
+      {loading && <LoadingOverlay />}
+
+      {message && (
+        <div className="fixed bottom-8 right-8 bg-blue-500 text-white p-6 rounded-md shadow-lg text-lg">
+          {message}
         </div>
       )}
     </div>
   );
 };
+
+const ProductsTab = ({
+  products,
+  openModal,
+  editProduct,
+  deleteProduct,
+  setSelectedProduct,
+}) => (
+  <div className="space-y-8">
+    <div className="flex justify-between items-center">
+      <h2 className="text-3xl font-bold">
+        Product Management ({products.length})
+      </h2>
+      <Button onClick={openModal} size="lg">
+        <PlusCircle className="mr-2 h-5 w-5" /> Add New Product
+      </Button>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {products.map((product: ProductType) => (
+        <Card key={product._id} className="overflow-hidden">
+          <CardContent className="p-4">
+            <img
+              src={product.imageUrl}
+              alt=""
+              className="w-full h-full object-cover rounded-md mb-4"
+            />
+            <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
+            <p className="text-gray-600 mb-4 line-clamp-2">
+              {product.description}
+            </p>
+            <p className="text-lg font-bold mb-4">USD {product.basePrice}</p>
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedProduct(product)}
+              >
+                <Eye className="h-4 w-4 mr-2" /> View
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => editProduct(product)}
+              >
+                <Edit className="h-4 w-4 mr-2" /> Edit
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => deleteProduct(product._id!)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
+);
+
+const OrdersTab = ({ orders, deleteOrder }) => (
+  <div className="space-y-8">
+    <h2 className="text-3xl font-bold">All Orders ({orders.length})</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {orders.map((order: any) => (
+        <Card key={order._id}>
+          <CardHeader>
+            <CardTitle>{order.productName}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-lg font-semibold">Total price: ${order.total}</p>
+            <p>Discount: {order.discount}%</p>
+            <p>Tax: {order.tax}%</p>
+            <p>Status: {order.status}</p>
+            <p className="border-t pt-4 mt-4">Seller: {order.vendedorName}</p>
+            <p>Client: {order.cliente?.nombre || "N/A"}</p>
+            <p>
+              Comments:{" "}
+              {order.comentaries === "" ? (
+                <span className="font-bold">No comments yet!</span>
+              ) : (
+                order.comentaries
+              )}
+            </p>
+            <Button
+              variant="destructive"
+              onClick={() => deleteOrder(order._id)}
+            >
+              Delete Order
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
+);
+
+const ClientsTab = ({ clients, openClientForm, editClient, deleteClient }) => (
+  <div className="space-y-8">
+    <div className="flex justify-between items-center">
+      <h2 className="text-3xl font-bold">All Clients</h2>
+      <Button onClick={openClientForm} size="lg">
+        <PlusCircle className="mr-2 h-5 w-5" /> Create New Client
+      </Button>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {clients.map((client: any) => (
+        <Card key={client._id}>
+          <CardContent className="p-6 space-y-4">
+            <h3 className="text-xl font-semibold">{client.nombre}</h3>
+            <p>
+              <strong>Residential Address:</strong>{" "}
+              {client.direccion_residencial}
+            </p>
+            <p>
+              <strong>Unit Address:</strong> {client.direccion_unidad}
+            </p>
+            <p>
+              <strong>Land Owner:</strong> {client.propietario_terreno}
+            </p>
+            <p>
+              <strong>Unit Purpose:</strong> {client.proposito_unidad}
+            </p>
+            <p>
+              <strong>Marital Status:</strong> {client.estado_civil}
+            </p>
+            <p>
+              <strong>Workplace:</strong> {client.lugar_empleo}
+            </p>
+            <p>
+              <strong>Email:</strong> {client.email}
+            </p>
+            <p>
+              <strong>ID:</strong> {client.identificacion}
+            </p>
+            <p>
+              <strong>Phone:</strong> {client.telefono}
+            </p>
+            <p>
+              <strong>Alternate Phone:</strong> {client.telefono_alterno}
+            </p>
+            <p>
+              <strong>Payment Method:</strong> {client.forma_pago}
+            </p>
+            <p>
+              <strong>Reference Contact:</strong> {client.contacto_referencia}
+            </p>
+            <p>
+              <strong>Insurer:</strong> {client.asegurador}
+            </p>
+            <p>
+              <strong>Insurance Purchased:</strong>{" "}
+              {client.seguro_comprado ? "Yes" : "No"}
+            </p>
+            <div className="flex justify-between pt-4">
+              <Button variant="outline" onClick={() => editClient(client)}>
+                Edit Client
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteClient(client._id)}
+              >
+                Delete Client
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  </div>
+);
+
+const ProductDetails = ({ product }) => (
+  <div className="space-y-6">
+    <img
+      src={product.imageUrl}
+      alt=""
+      className="w-full h-full object-cover rounded-lg"
+    />
+    <div>
+      <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
+      <p className="text-gray-600 mb-4">{product.description}</p>
+      <p className="text-2xl font-bold mb-4">USD {product.basePrice}</p>
+      <p className="mb-2">
+        <span className="font-bold">External Dimensions: </span>
+        {product.externalDimensions}
+      </p>
+      <p>
+        <span className="font-bold">Internal Dimensions: </span>
+        {product.internalDimensions}
+      </p>
+    </div>
+  </div>
+);
+
+const LoadingOverlay = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <Card>
+      <CardContent className="flex items-center space-x-4 p-8">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500" />
+        <CardTitle className="text-2xl">Uploading...</CardTitle>
+      </CardContent>
+    </Card>
+  </div>
+);
 
 export async function getServerSideProps() {
   await connectToDatabase();

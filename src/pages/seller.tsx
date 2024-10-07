@@ -1,16 +1,77 @@
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable @next/next/no-img-element */
+"use client";
+
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "../models/Product";
 import Modal from "@/components/Modal";
 import Select from "@/components/Select";
 import withAuth from "../lib/withAuth";
-import { useSession } from "next-auth/react";
 import ClientForm from "@/components/ClientForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Package,
+  Users,
+  ClipboardList,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  X,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-function Seller({ products }: any) {
+interface FullScreenImageProps {
+  src: string;
+  alt: string;
+  onClose: () => void;
+}
+
+const FullScreenImage: React.FC<FullScreenImageProps> = ({
+  src,
+  alt,
+  onClose,
+}) => {
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-[50vw] max-h-[90vh] p-0 overflow-hidden bg-opacity-90">
+        <div className="relative w-full h-full flex items-center justify-center">
+          <DialogClose className="absolute top-2 right-2 z-10">
+            <Button variant="ghost" size="icon">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </Button>
+          </DialogClose>
+          <img
+            src={src}
+            alt={alt}
+            className="max-h-[90vh] max-w-[90vw] object-contain"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+function Seller({ products }: { products: any[] }) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -18,6 +79,7 @@ function Seller({ products }: any) {
   const [activeTab, setActiveTab] = useState("orders");
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
   const [currentClient, setCurrentClient] = useState<any>(null);
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (session) {
@@ -132,206 +194,410 @@ function Seller({ products }: any) {
     }
   };
 
+  const openOrderDetail = (order: any) => {
+    const product = products.find((p) => p._id === order.productId);
+    setSelectedOrder({ ...order, product });
+  };
+
+  const closeOrderDetail = () => {
+    setSelectedOrder(null);
+  };
+
+  const openFullScreenImage = (src: string) => {
+    setFullScreenImage(src);
+  };
+
+  const closeFullScreenImage = () => {
+    setFullScreenImage(null);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <div className="container mx-auto py-4 flex-grow">
-        <div className="flex text-2xl border-b-4 border-red-700 mb-4">
-          <button
-            className={`px-4 py-2 ${
-              activeTab === "orders" ? "text-blue-500" : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("orders")}
-          >
-            Mis Ordenes
-          </button>
-          <button
-            className={`px-4 py-2 ${
-              activeTab === "products" ? "text-blue-500" : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("products")}
-          >
+    <div className="container mx-auto py-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="orders">
+            <ClipboardList className="mr-2 h-4 w-4" />
+            Mis Órdenes
+          </TabsTrigger>
+          <TabsTrigger value="products">
+            <Package className="mr-2 h-4 w-4" />
             Lista de Productos
-          </button>
-          <button
-            className={`px-4 py-2 ${
-              activeTab === "clients" ? "text-blue-500" : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("clients")}
-          >
+          </TabsTrigger>
+          <TabsTrigger value="clients">
+            <Users className="mr-2 h-4 w-4" />
             Mis Clientes
-          </button>
-        </div>
-
-        {activeTab === "orders" && (
-          <div>
-            <h1 className="text-2xl font-bold mb-4 pt-4">Mis Ordenes</h1>
-            <div className="grid grid-cols-1 gap-4">
-              {orders
-                .filter(
-                  (order: any) => order.vendedorEmail === session?.user?.email
-                )
-                .map((order: any) => (
-                  <div
-                    key={order._id}
-                    className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
-                  >
-                    <div>
-                      <h2 className="text-xl font-semibold uppercase">
-                        {order.productName}
-                      </h2>
-                      <p className="text-gray-800 font-normal">
-                        Total precio: ${order.total}
-                      </p>
-                      <p className="text-gray-800 font-normal">
-                        Descuento: {order.discount}%
-                      </p>
-                      <p className="text-gray-800 font-normal">
-                        Tax: {order.tax}%
-                      </p>
-                      <p className="text-gray-700 pb-4">
-                        Status: {order.status}
-                      </p>
-
-                      <p className="text-gray-700 pb-4 border-t-2 border-red-400 pt-2">
-                        Vendedor: {order.vendedorName}
-                      </p>
-                      <p className="text-gray-700 pb-4">
-                        Cliente: {order.cliente?.nombre || "N/A"}
-                      </p>
-                      <p className="text-gray-700 pb-4">
-                        Comentarios:{" "}
-                        {order.comentaries === "" ? (
-                          <span className="font-bold">
-                            Todavía sin comentarios!
-                          </span>
-                        ) : (
-                          order.comentaries
-                        )}
-                      </p>
-                    </div>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                      Próximamente ver detalle de la orden...
-                    </button>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "products" && (
-          <div>
-            <h1 className="text-2xl font-bold mb-4 pt-4">Lista de Productos</h1>
-            <div className="grid grid-cols-1 gap-4">
-              {products.map((product: any) => (
-                <div
-                  key={product._id}
-                  className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => openModal(product)}
-                >
-                  <div className="flex flex-row gap-4">
-                    <div>
-                      <img
-                        src={product.imageUrl}
-                        alt=""
-                        width={100}
-                        height={100}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="orders">
+          <Card>
+            <CardHeader>
+              <CardTitle>Mis Órdenes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {orders
+                  .filter(
+                    (order: any) => order.vendedorEmail === session?.user?.email
+                  )
+                  .map((order: any) => (
+                    <Card key={order._id}>
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-semibold uppercase mb-2">
+                          {order.productName}
+                        </h3>
+                        <p>Total precio: ${order.total}</p>
+                        <p>Descuento: {order.discount}%</p>
+                        <p>Tax: {order.tax}%</p>
+                        <p>Status: {order.status}</p>
+                        <p className="mt-2 pt-2 border-t">
+                          Vendedor: {order.vendedorName}
+                        </p>
+                        <p>Cliente: {order.cliente?.nombre || "N/A"}</p>
+                        <p>
+                          Comentarios:{" "}
+                          {order.comentaries === "" ? (
+                            <span className="font-bold">
+                              Todavía sin comentarios!
+                            </span>
+                          ) : (
+                            order.comentaries
+                          )}
+                        </p>
+                        <Button
+                          className="mt-4"
+                          onClick={() => openOrderDetail(order)}
+                        >
+                          Ver detalle de la orden
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="products">
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista de Productos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {products.map((product: any) => (
+                  <Card key={product._id}>
+                    <CardContent className="p-6">
+                      <div className="aspect-w-16 aspect-h-9 mb-4">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="rounded-md object-cover w-full h-full"
+                        />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">
                         {product.name}
                       </h3>
-                      <p className="text-gray-500">{product.description}</p>
-                      <p className="text-gray-500">USD {product.basePrice}</p>
+                      <p className="text-sm text-gray-500 mb-2">
+                        {product.description}
+                      </p>
+                      <p className="text-sm font-semibold mb-4">
+                        USD {product.basePrice}
+                      </p>
+                      <Button
+                        onClick={() => openModal(product)}
+                        className="w-full"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver Producto
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="clients">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Mis Clientes</CardTitle>
+              <Button onClick={() => setIsClientFormModalOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Crear Nuevo Cliente
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {clients.map((client: any) => (
+                  <Card key={client._id}>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            {client.nombre}
+                          </h3>
+                          <p>Email: {client.email}</p>
+                          <p>Teléfono: {client.telefono}</p>
+                          <p>Dirección: {client.direccion_residencial}</p>
+                        </div>
+                        <div className="space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => editClient(client)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteClient(client._id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {selectedProduct && (
+        <Modal onClose={closeModal}>
+          <Select product={selectedProduct} onClose={closeModal} />
+        </Modal>
+      )}
+
+      {isClientFormModalOpen && (
+        <Modal onClose={() => setIsClientFormModalOpen(false)}>
+          <ClientForm
+            onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
+            initialClientData={currentClient}
+          />
+        </Modal>
+      )}
+
+      <Dialog open={!!selectedOrder} onOpenChange={closeOrderDetail}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Detalle de la Orden</DialogTitle>
+            <DialogDescription>
+              Información detallada de la orden seleccionada.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <ScrollArea className="flex-grow">
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="aspect-w-16 aspect-h-9">
+                    <img
+                      src={
+                        selectedOrder.product?.imageUrl || "/placeholder.png"
+                      }
+                      alt={selectedOrder.productName}
+                      className="rounded-md object-cover w-full h-full cursor-pointer"
+                      onClick={() =>
+                        openFullScreenImage(
+                          selectedOrder.product?.imageUrl || "/placeholder.png"
+                        )
+                      }
+                    />
+                  </div>
+                  <h3 className="text-xl font-semibold uppercase">
+                    {selectedOrder.productName}
+                  </h3>
+                  <p className="text-gray-600">
+                    {selectedOrder.product?.description}
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="font-semibold">Total precio:</p>
+                      <p>${selectedOrder.total}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Descuento:</p>
+                      <p>{selectedOrder.discount}%</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Tax:</p>
+                      <p>{selectedOrder.tax}%</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Status:</p>
+                      <p>{selectedOrder.status}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Vendedor:</p>
+                      <p>{selectedOrder.vendedorName}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold">Cliente:</p>
+                      <p>{selectedOrder.cliente?.nombre || "N/A"}</p>
                     </div>
                   </div>
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                    Ver Producto
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "clients" && (
-          <div>
-            <div className="flex flex-row gap-4 items-center mb-8 mt-8">
-              <div>
-                {" "}
-                <h1 className="text-2xl font-bold mb-4 pt-4">Mis Clientes</h1>
-              </div>
-              <div>
-                <button
-                  onClick={() => setIsClientFormModalOpen(true)}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-                >
-                  Crear Nuevo Cliente
-                </button>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
-              {clients.map((client: any) => (
-                <div
-                  key={client._id}
-                  className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
-                >
                   <div>
-                    <h3 className="text-lg font-semibold">{client.nombre}</h3>
-                    <p>Dirección Residencial: {client.direccion_residencial}</p>
-                    <p>Dirección de la Unidad: {client.direccion_unidad}</p>
-                    <p>Propietario del Terreno: {client.propietario_terreno}</p>
-                    <p>Propósito de la Unidad: {client.proposito_unidad}</p>
-                    <p>Estado Civil: {client.estado_civil}</p>
-                    <p>Lugar de Empleo: {client.lugar_empleo}</p>
-                    <p>Email: {client.email}</p>
-                    <p>Identificación: {client.identificacion}</p>
-                    <p>Teléfono: {client.telefono}</p>
-                    <p>Teléfono Alterno: {client.telefono_alterno}</p>
-                    <p>Forma de Pago: {client.forma_pago}</p>
-                    <p>Contacto de Referencia: {client.contacto_referencia}</p>
-                    <p>Asegurador: {client.asegurador}</p>
+                    <p className="font-semibold">Comentarios:</p>
                     <p>
-                      Seguro Comprado: {client.seguro_comprado ? "Sí" : "No"}
+                      {selectedOrder.comentaries === "" ? (
+                        <span className="italic">Todavía sin comentarios</span>
+                      ) : (
+                        selectedOrder.comentaries
+                      )}
                     </p>
                   </div>
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => {
-                        editClient(client);
-                      }}
-                      className="bg-yellow-500 text-white px-4 py-2 rounded-md"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClient(client._id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-md"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+                <div className="md:col-span-2">
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="options">
+                      <AccordionTrigger>
+                        Opciones seleccionadas
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <ScrollArea className="h-[400px] w-full rounded-md border p-4">
+                          {selectedOrder.options &&
+                          selectedOrder.options.length > 0 ? (
+                            selectedOrder.options.map(
+                              (option: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="mb-4 p-4 border rounded-md"
+                                >
+                                  <h4 className="font-semibold text-lg mb-2">
+                                    {option.name}
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <p>
+                                      <span className="font-medium">
+                                        Precio:
+                                      </span>{" "}
+                                      ${option.price}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium">Tipo:</span>{" "}
+                                      {option.type || "N/A"}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium">
+                                        Especificación:
+                                      </span>
+                                      {option.specification || "N/A"}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium">
+                                        Piezas:
+                                      </span>{" "}
+                                      {option.pcs || "N/A"}
+                                    </p>
+                                  </div>
+                                  {option.imageUrl && (
+                                    <div className="mt-2">
+                                      <img
+                                        src={option.imageUrl}
+                                        alt={option.name}
+                                        className="rounded-md w-24 h-24 object-cover cursor-pointer"
+                                        onClick={() =>
+                                          openFullScreenImage(option.imageUrl)
+                                        }
+                                      />
+                                    </div>
+                                  )}
+                                  {option.suboptions &&
+                                    option.suboptions.length > 0 && (
+                                      <div className="mt-4">
+                                        <h5 className="font-semibold mb-2">
+                                          Subopciones:
+                                        </h5>
+                                        {option.suboptions.map(
+                                          (
+                                            suboption: any,
+                                            subIndex: number
+                                          ) => (
+                                            <div
+                                              key={subIndex}
+                                              className="ml-4 mb-2 p-2 border-l"
+                                            >
+                                              <p>
+                                                <span className="font-medium">
+                                                  Nombre:
+                                                </span>{" "}
+                                                {suboption.name}
+                                              </p>
+                                              <p>
+                                                <span className="font-medium">
+                                                  Código:
+                                                </span>{" "}
+                                                {suboption.code}
+                                              </p>
+                                              <p>
+                                                <span className="font-medium">
+                                                  Precio:
+                                                </span>{" "}
+                                                ${suboption.price}
+                                              </p>
+                                              <p>
+                                                <span className="font-medium">
+                                                  Detalles:
+                                                </span>{" "}
+                                                {suboption.details || "N/A"}
+                                              </p>
+                                              {suboption.imageUrl && (
+                                                <div className="mt-2">
+                                                  <img
+                                                    src={suboption.imageUrl}
+                                                    alt={suboption.name}
+                                                    className="rounded-md w-20 h-20 object-cover cursor-pointer"
+                                                    onClick={() =>
+                                                      openFullScreenImage(
+                                                        suboption.imageUrl
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              )}
+                                            </div>
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                </div>
+                              )
+                            )
+                          ) : (
+                            <p>
+                              No hay opciones seleccionadas para esta orden.
+                            </p>
+                          )}
+                        </ScrollArea>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+          <DialogClose asChild>
+            <Button className="mt-4">
+              <X className="mr-2 h-4 w-4" />
+              Cerrar
+            </Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
 
-        {selectedProduct && (
-          <Modal onClose={closeModal}>
-            <Select product={selectedProduct} onClose={closeModal} />
-          </Modal>
-        )}
-
-        {isClientFormModalOpen && (
-          <Modal onClose={() => setIsClientFormModalOpen(false)}>
-            <ClientForm
-              onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
-              initialClientData={currentClient}
-            />
-          </Modal>
-        )}
-      </div>
+      {fullScreenImage && (
+        <FullScreenImage
+          src={fullScreenImage}
+          alt="Full screen image"
+          onClose={closeFullScreenImage}
+        />
+      )}
     </div>
   );
 }

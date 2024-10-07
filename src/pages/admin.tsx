@@ -8,10 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Edit, Trash2, Eye } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Eye, X } from "lucide-react";
 import ProductForm from "@/components/ProductForm";
 import ClientForm from "@/components/ClientForm";
-import Modal from "@/components/Modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import withAuth from "../lib/withAuth";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "@/models/Product";
@@ -477,7 +484,7 @@ const Admin = ({ initialProducts, orders }: any) => {
           />
         </TabsContent>
         <TabsContent value="seguros">
-          <h2 className="text-3xl font-bold  mb-6">Insurance Management</h2>
+          <h2 className="text-3xl font-bold mb-6">Insurance Management</h2>
           {/* Add insurance management content here */}
         </TabsContent>
       </Tabs>
@@ -508,20 +515,42 @@ const Admin = ({ initialProducts, orders }: any) => {
         />
       )}
 
-      {isClientFormModalOpen && (
-        <Modal onClose={() => setIsClientFormModalOpen(false)}>
+      <Dialog
+        open={isClientFormModalOpen}
+        onOpenChange={setIsClientFormModalOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {currentClient ? "Edit Client" : "Create New Client"}
+            </DialogTitle>
+          </DialogHeader>
           <ClientForm
             onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
             initialClientData={currentClient}
           />
-        </Modal>
-      )}
+          <DialogClose asChild>
+            <Button onClick={() => setIsClientFormModalOpen(false)}>
+              Close
+            </Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
 
-      {selectedProduct && (
-        <Modal onClose={() => setSelectedProduct(null)}>
-          <ProductDetails product={selectedProduct} />
-        </Modal>
-      )}
+      <Dialog
+        open={!!selectedProduct}
+        onOpenChange={() => setSelectedProduct(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Product Details</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && <ProductDetails product={selectedProduct} />}
+          <DialogClose asChild>
+            <Button onClick={() => setSelectedProduct(null)}>Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
 
       {loading && <LoadingOverlay />}
 
@@ -556,7 +585,7 @@ const ProductsTab = ({
           <CardContent className="p-4">
             <img
               src={product.imageUrl}
-              alt=""
+              alt={product.name}
               className="w-full h-full object-cover rounded-md mb-4"
             />
             <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
@@ -710,8 +739,8 @@ const ProductDetails = ({ product }) => (
   <div className="space-y-6">
     <img
       src={product.imageUrl}
-      alt=""
-      className="w-full h-full object-cover rounded-lg"
+      alt={product.name}
+      className="w-full object-cover rounded-lg"
     />
     <div>
       <h2 className="text-3xl font-bold mb-4">{product.name}</h2>

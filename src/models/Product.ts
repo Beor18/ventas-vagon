@@ -18,6 +18,13 @@ const optionSchema = new mongoose.Schema({
   suboptions: [subOptionSchema],
 });
 
+const colorOptionSchema = new mongoose.Schema({
+  colorName: { type: String, required: true },
+  colorCode: { type: String, required: true },
+  additionalPrice: { type: Number, default: 0 },
+  imageUrl: { type: String },
+});
+
 const productSchema = new mongoose.Schema({
   name: { type: String },
   description: { type: String },
@@ -30,6 +37,7 @@ const productSchema = new mongoose.Schema({
   totalWeight: { type: Number },
   basePrice: { type: Number },
   options: [optionSchema],
+  colorOptions: [colorOptionSchema],
 });
 
 const Product =

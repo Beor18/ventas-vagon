@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Package, Ruler, House } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
 export function ProductDetails({ product }) {
   const [selectedColor, setSelectedColor] = useState(null);
@@ -141,26 +147,15 @@ export function ProductDetails({ product }) {
       </div>
 
       {product.options && product.options.length > 0 && (
-        <div className="mt-6 sm:mt-8">
-          <Tabs defaultValue={product.options[0]?.name}>
-            <TabsList className="max-w-[350px] overflow-x-auto items-center justify-start">
-              {product.options.map((option) => (
-                <TabsTrigger
-                  key={option.name}
-                  value={option.name}
-                  className="px-3 py-1 text-sm whitespace-nowrap"
-                >
-                  {option.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {product.options.map((option) => (
-              <TabsContent key={option.name} value={option.name}>
+        <Accordion type="single" collapsible className="w-full">
+          {product.options.map((option, index) => (
+            <AccordionItem key={option.name} value={option.name}>
+              <AccordionTrigger className="text-sm sm:text-base font-semibold px-4 py-3">
+                {option.name}
+              </AccordionTrigger>
+              <AccordionContent>
                 <Card>
                   <CardContent className="space-y-4 pt-4">
-                    <h3 className="font-semibold text-sm sm:text-base">
-                      {option.name}
-                    </h3>
                     <p className="text-xs sm:text-sm">{option.specification}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
                       {option.suboptions.map((suboption) => (
@@ -175,21 +170,25 @@ export function ProductDetails({ product }) {
                           onClick={() =>
                             handleOptionSelect(option.name, suboption)
                           }
-                          className="w-full text-xs sm:text-sm py-1 sm:py-2"
+                          className="w-full text-xs sm:text-sm py-1 sm:py-2 px-2 sm:px-3 h-auto"
                         >
-                          {suboption.name}
-                          {suboption.price > 0 && (
-                            <span className="ml-1">+${suboption.price}</span>
-                          )}
+                          <span className="text-left">
+                            {suboption.name}
+                            {suboption.price > 0 && (
+                              <span className="block text-xs text-gray-500">
+                                +${suboption.price}
+                              </span>
+                            )}
+                          </span>
                         </Button>
                       ))}
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       )}
     </div>
   );

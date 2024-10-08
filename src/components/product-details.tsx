@@ -148,7 +148,7 @@ export function ProductDetails({ product }) {
 
       {product.options && product.options.length > 0 && (
         <Accordion type="single" collapsible className="w-full">
-          {product.options.map((option, index) => (
+          {product.options.map((option) => (
             <AccordionItem key={option.name} value={option.name}>
               <AccordionTrigger className="text-sm sm:text-base font-semibold px-4 py-3">
                 {option.name}
@@ -157,30 +157,51 @@ export function ProductDetails({ product }) {
                 <Card>
                   <CardContent className="space-y-4 pt-4">
                     <p className="text-xs sm:text-sm">{option.specification}</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                       {option.suboptions.map((suboption) => (
-                        <Button
-                          key={suboption.code}
-                          variant={
-                            selectedOptions[option.name]?.code ===
-                            suboption.code
-                              ? "default"
-                              : "outline"
-                          }
-                          onClick={() =>
-                            handleOptionSelect(option.name, suboption)
-                          }
-                          className="w-full text-xs sm:text-sm py-1 sm:py-2 px-2 sm:px-3 h-auto"
-                        >
-                          <span className="text-left">
-                            {suboption.name}
-                            {suboption.price > 0 && (
-                              <span className="block text-xs text-gray-500">
-                                +${suboption.price}
+                        <div key={suboption.name}>
+                          <Card
+                            className={`cursor-pointer transition-all duration-200 ${
+                              selectedOptions[option.name]?.code ===
+                              suboption.code
+                                ? "ring-2 ring-primary"
+                                : "hover:shadow-md"
+                            }`}
+                            // onClick={() =>
+                            //   handleOptionSelect(option.name, suboption)
+                            // }
+                            role="radio"
+                            aria-checked={
+                              selectedOptions[option.name]?.code ===
+                              suboption.code
+                            }
+                            tabIndex={0}
+                          >
+                            <CardContent className="p-4 flex flex-col items-center">
+                              {suboption.imageUrl && (
+                                <img
+                                  src={suboption.imageUrl}
+                                  alt={suboption.name}
+                                  className="mb-2 w-20 h-20 object-cover rounded"
+                                />
+                              )}
+                              <span className="text-sm font-medium text-center">
+                                {suboption.name}
                               </span>
-                            )}
-                          </span>
-                        </Button>
+                              <span className="text-sm font-medium text-center">
+                                Code: {suboption.code || "N/A"}
+                              </span>
+                              {suboption.price > 0 && (
+                                <span className="mt-1 text-xs text-muted-foreground">
+                                  Price: +${suboption.price.toFixed(2) || "N/A"}
+                                </span>
+                              )}
+                              <span className="text-sm font-medium text-center">
+                                Details: {suboption.details || "N/A"}
+                              </span>
+                            </CardContent>
+                          </Card>
+                        </div>
                       ))}
                     </div>
                   </CardContent>

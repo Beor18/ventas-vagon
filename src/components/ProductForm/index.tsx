@@ -137,7 +137,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <TabsTrigger
                     key={step.value}
                     value={step.value}
-                    disabled={index > currentStep}
+                    //disabled={index > currentStep}
                     onClick={() => setCurrentStep(index)}
                   >
                     {step.title}

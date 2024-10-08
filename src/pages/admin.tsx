@@ -26,6 +26,7 @@ import Order from "@/models/Order";
 import Client from "@/models/Client";
 
 import { upload } from "@vercel/blob/client";
+import { ProductDetails } from "@/components/product-details";
 
 interface ProductType {
   _id?: string;
@@ -555,13 +556,15 @@ const Admin = ({ initialProducts, orders }: any) => {
         open={!!selectedProduct}
         onOpenChange={() => setSelectedProduct(null)}
       >
-        <DialogContent>
+        <DialogContent className="max-w-6xl h-[90vh] sm:h-[90vh] max-h-[90vh] overflow-y-scroll overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Product Details</DialogTitle>
           </DialogHeader>
           {selectedProduct && <ProductDetails product={selectedProduct} />}
           <DialogClose asChild>
-            <Button onClick={() => setSelectedProduct(null)}>Close</Button>
+            <Button onClick={() => setSelectedProduct(null)} className="mt-4">
+              Close
+            </Button>
           </DialogClose>
         </DialogContent>
       </Dialog>
@@ -749,28 +752,28 @@ const ClientsTab = ({ clients, openClientForm, editClient, deleteClient }) => (
   </div>
 );
 
-const ProductDetails = ({ product }) => (
-  <div className="space-y-6">
-    <img
-      src={product.imageUrl}
-      alt={product.name}
-      className="w-full object-cover rounded-lg"
-    />
-    <div>
-      <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
-      <p className="text-gray-600 mb-4">{product.description}</p>
-      <p className="text-2xl font-bold mb-4">USD {product.basePrice}</p>
-      <p className="mb-2">
-        <span className="font-bold">External Dimensions: </span>
-        {product.externalDimensions}
-      </p>
-      <p>
-        <span className="font-bold">Internal Dimensions: </span>
-        {product.internalDimensions}
-      </p>
-    </div>
-  </div>
-);
+// const ProductDetails = ({ product }) => (
+//   <div className="space-y-6">
+//     <img
+//       src={product.imageUrl}
+//       alt={product.name}
+//       className="w-full object-cover rounded-lg"
+//     />
+//     <div>
+//       <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
+//       <p className="text-gray-600 mb-4">{product.description}</p>
+//       <p className="text-2xl font-bold mb-4">USD {product.basePrice}</p>
+//       <p className="mb-2">
+//         <span className="font-bold">External Dimensions: </span>
+//         {product.externalDimensions}
+//       </p>
+//       <p>
+//         <span className="font-bold">Internal Dimensions: </span>
+//         {product.internalDimensions}
+//       </p>
+//     </div>
+//   </div>
+// );
 
 const LoadingOverlay = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

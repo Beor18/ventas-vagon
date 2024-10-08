@@ -25,6 +25,8 @@ import Product from "@/models/Product";
 import Order from "@/models/Order";
 import Client from "@/models/Client";
 
+import { upload } from "@vercel/blob/client";
+
 interface ProductType {
   _id?: string;
   name: string;
@@ -111,6 +113,15 @@ const Admin = ({ initialProducts, orders }: any) => {
       fetchOrders();
     }
   }, [session]);
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const fetchAccessToken = async () => {
     const response = await fetch("/api/jwt");
@@ -234,15 +245,18 @@ const Admin = ({ initialProducts, orders }: any) => {
   ) => {
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+      const newBlob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload",
       });
-      const data = await response.json();
-      callback(data.url);
+
+      if (newBlob.url) {
+        callback(newBlob.url);
+      } else {
+        throw new Error("Image upload failed");
+      }
     } catch (error) {
+      console.error("Error uploading image:", error);
       setMessage("Error uploading image");
     } finally {
       setLoading(false);

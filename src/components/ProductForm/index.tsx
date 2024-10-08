@@ -10,7 +10,6 @@ import {
   Plus,
   Minus,
 } from "lucide-react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -106,7 +105,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   saveProduct,
   setModalOpen,
   loading,
-}) => {
+}: any) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const inputFileRefOption = useRef<HTMLInputElement>(null);
   const inputFileRefSubOption = useRef<HTMLInputElement>(null);
@@ -259,9 +258,27 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     inputFileRefSubOption={inputFileRefSubOption}
                   />
                 ))}
-                <Button onClick={addOption} className="w-full">
-                  <Plus className="mr-2 h-4 w-4" /> Add Option
-                </Button>
+                <div className="space-y-4">
+                  <h6 className="text-lg font-semibold">New Option</h6>
+                  <InputField
+                    label="Option Name"
+                    name="name"
+                    value={newOption.name}
+                    onChange={handleNewOptionChange}
+                    placeholder="Enter new option name"
+                  />
+                  <InputField
+                    label="Option Price"
+                    name="price"
+                    type="number"
+                    value={newOption.price}
+                    onChange={handleNewOptionChange}
+                    placeholder="Enter new option price"
+                  />
+                  <Button onClick={addOption} className="w-full">
+                    <Plus className="mr-2 h-4 w-4" /> Add Option
+                  </Button>
+                </div>
               </TabsContent>
             </ScrollArea>
           </Tabs>

@@ -19,10 +19,17 @@ const optionSchema = new mongoose.Schema({
 });
 
 const colorOptionSchema = new mongoose.Schema({
-  colorName: { type: String, required: true },
-  colorCode: { type: String, required: true },
+  colorName: { type: String },
+  colorCode: { type: String },
   additionalPrice: { type: Number, default: 0 },
   imageUrl: { type: String },
+});
+
+// Nuevo esquema para diseños de casa
+const houseDesignSchema = new mongoose.Schema({
+  designType: { type: String },
+  imageUrl: { type: String },
+  cost: { type: Number },
 });
 
 const productSchema = new mongoose.Schema({
@@ -38,6 +45,7 @@ const productSchema = new mongoose.Schema({
   basePrice: { type: Number },
   options: [optionSchema],
   colorOptions: [colorOptionSchema],
+  houseDesigns: [houseDesignSchema], // Agregar el nuevo esquema aquí
 });
 
 const Product =

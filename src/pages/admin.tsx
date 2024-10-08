@@ -27,6 +27,7 @@ import Client from "@/models/Client";
 
 import { upload } from "@vercel/blob/client";
 import { ProductDetails } from "@/components/product-details";
+import { DesignType } from "@/types/types";
 
 interface ProductType {
   _id?: string;
@@ -41,6 +42,7 @@ interface ProductType {
   totalWeight: number;
   basePrice: number;
   options: OptionType[];
+  designs: any;
 }
 
 interface OptionType {
@@ -75,6 +77,7 @@ const Admin = ({ initialProducts, orders }: any) => {
     totalWeight: 0,
     basePrice: 0,
     options: [],
+    designs: [],
   });
   const [imagePreview, setImagePreview] = useState("");
   const [newOption, setNewOption] = useState<OptionType>({
@@ -104,6 +107,32 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [ordersList, setOrdersList] = useState([]);
+
+  const [newDesign, setNewDesign] = useState<DesignType>({
+    name: "",
+    price: 0,
+    imageUrl: "",
+  });
+
+  const handleNewDesignChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewDesign((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const addDesign = () => {
+    setProduct((prev) => ({
+      ...prev,
+      designs: [...prev.designs, newDesign],
+    }));
+    setNewDesign({ name: "", price: 0, imageUrl: "" });
+  };
+
+  const removeDesign = (designIndex: number) => {
+    setProduct((prev) => ({
+      ...prev,
+      designs: prev.designs.filter((_, index) => index !== designIndex),
+    }));
+  };
 
   useEffect(() => {
     if (session) {
@@ -445,6 +474,7 @@ const Admin = ({ initialProducts, orders }: any) => {
       totalWeight: 0,
       basePrice: 0,
       options: [],
+      designs: [],
     });
     setImagePreview("");
     setNewOption({
@@ -508,21 +538,24 @@ const Admin = ({ initialProducts, orders }: any) => {
         <ProductForm
           product={product}
           setProduct={setProduct}
-          imagePreview={imagePreview}
-          setImagePreview={setImagePreview}
           newOption={newOption}
           setNewOption={setNewOption}
           newSubOption={newSubOption}
           setNewSubOption={setNewSubOption}
+          newDesign={newDesign}
+          setNewDesign={setNewDesign}
           handleProductChange={handleProductChange}
           handleOptionChange={handleOptionChange}
           handleSubOptionChange={handleSubOptionChange}
           handleNewOptionChange={handleNewOptionChange}
           handleNewSubOptionChange={handleNewSubOptionChange}
+          handleNewDesignChange={handleNewDesignChange}
           addOption={addOption}
           addSubOption={addSubOption}
+          addDesign={addDesign}
           removeOption={removeOption}
           removeSubOption={removeSubOption}
+          removeDesign={removeDesign}
           handleImagePreview={handleImagePreview}
           saveProduct={saveProduct}
           setModalOpen={setModalOpen}

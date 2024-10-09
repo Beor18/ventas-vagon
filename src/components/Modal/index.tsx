@@ -1,23 +1,37 @@
 import { ReactNode } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default function Modal({
-  children,
-  onClose,
-}: {
+interface DialogModalProps {
   children: ReactNode;
+  isOpen: boolean;
   onClose: () => void;
-}) {
+  title?: string;
+}
+
+export default function DialogModal({
+  children,
+  isOpen,
+  onClose,
+  title = "Modal Title",
+}: DialogModalProps) {
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full relative">
-        <button
-          className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
-          onClick={onClose}
-        >
-          &times;
-        </button>
-        {children}
-      </div>
-    </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[900px]">
+        {/* <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader> */}
+        <ScrollArea className="max-h-[calc(100vh-10rem)] overflow-y-auto">
+          <div className="p-6">{children}</div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -1,6 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Minus, X } from "lucide-react";
 
 interface ProductOption {
   _id: string;
@@ -28,7 +42,7 @@ interface SelectedSubOptions {
   };
 }
 
-export default function Select({ product, onClose }: any) {
+export default function SelectComponent({ product, onClose }: any) {
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
   const [selectedSubOptions, setSelectedSubOptions] =
     useState<SelectedSubOptions>({});
@@ -119,7 +133,7 @@ export default function Select({ product, onClose }: any) {
     );
     const subtotal = basePrice + optionsPrice + subOptionsPrice;
     const total = subtotal + subtotal * (tax / 100) - discount;
-    return total;
+    return total.toFixed(2);
   };
 
   const exportOrder = async () => {
@@ -171,141 +185,146 @@ export default function Select({ product, onClose }: any) {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg">
-      <h2 className="text-2xl font-semibold mb-4">{product?.name}</h2>
-      <p className="text-gray-700 mb-4">Base Price: ${product?.basePrice}</p>
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 mb-4">
-        <div className="flex flex-col gap-4">
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">{product?.name}</CardTitle>
+        <p className="text-muted-foreground">
+          Precio Base: ${product?.basePrice}
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium mb-2">Opciones: </h3>
-          </div>
-          <div className="overflow-auto max-h-96 border p-2 rounded-lg">
-            {product?.options.map((option: ProductOption) => (
-              <div key={option._id} className="mb-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-800">
-                    {option.name}
-                  </span>
-                  <span className="text-gray-600">${option.price}</span>
-                  {selectedOptions[option._id] ? (
-                    <button
-                      onClick={() => handleOptionDeselect(option._id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors"
+            <h3 className="text-lg font-semibold mb-2">Opciones:</h3>
+            <ScrollArea className="h-[400px] border rounded-md p-4">
+              {product?.options.map((option: ProductOption) => (
+                <div key={option._id} className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{option.name}</span>
+                    <span className="text-muted-foreground">
+                      ${option.price}
+                    </span>
+                    <Button
+                      variant={
+                        selectedOptions[option._id]
+                          ? "destructive"
+                          : "secondary"
+                      }
+                      size="sm"
+                      onClick={() =>
+                        selectedOptions[option._id]
+                          ? handleOptionDeselect(option._id)
+                          : handleOptionSelect(option)
+                      }
                     >
-                      Remove
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleOptionSelect(option)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 transition-colors"
-                    >
-                      Select
-                    </button>
+                      {selectedOptions[option._id] ? (
+                        <Minus className="h-4 w-4" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {selectedOptions[option._id] && option.suboptions && (
+                    <div className="ml-4 mt-2 space-y-2">
+                      {option.suboptions.map((subOption: ProductSubOption) => (
+                        <div
+                          key={subOption._id}
+                          className="flex items-center justify-between p-2 bg-muted rounded-md"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <img
+                              src={subOption.imageUrl}
+                              alt={subOption.name}
+                              className="w-10 h-10 rounded-md object-cover"
+                            />
+                            <span className="font-medium">
+                              {subOption.name}
+                            </span>
+                          </div>
+                          <span className="text-muted-foreground">
+                            ${subOption.price}
+                          </span>
+                          <Button
+                            variant={
+                              selectedSubOptions[option._id]?.[subOption._id]
+                                ? "destructive"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() =>
+                              selectedSubOptions[option._id]?.[subOption._id]
+                                ? handleSubOptionDeselect(
+                                    option._id,
+                                    subOption._id
+                                  )
+                                : handleSubOptionSelect(option._id, subOption)
+                            }
+                          >
+                            {selectedSubOptions[option._id]?.[subOption._id] ? (
+                              <X className="h-4 w-4" />
+                            ) : (
+                              <Plus className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-                {selectedOptions[option._id] && option.suboptions && (
-                  <div className="ml-4 mt-2 overflow-auto max-h-48 border-l-2 border-gray-200 pl-2">
-                    {option.suboptions.map((subOption: ProductSubOption) => (
-                      <div
-                        key={subOption._id}
-                        className="flex items-center justify-between mb-2"
-                      >
-                        <img
-                          src={subOption.imageUrl}
-                          alt={subOption.name}
-                          className="w-10 h-10 mr-2"
-                        />
-                        <span className="font-medium text-gray-800">
-                          {subOption.name}
-                        </span>
-                        <span className="text-gray-600">
-                          ${subOption.price}
-                        </span>
-                        {selectedSubOptions[option._id] &&
-                        selectedSubOptions[option._id][subOption._id] ? (
-                          <button
-                            onClick={() =>
-                              handleSubOptionDeselect(option._id, subOption._id)
-                            }
-                            className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 transition-colors"
-                          >
-                            Remove
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() =>
-                              handleSubOptionSelect(option._id, subOption)
-                            }
-                            className="bg-gray-500 text-white px-2 py-1 rounded-md hover:bg-gray-600 transition-colors"
-                          >
-                            Select
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </ScrollArea>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tax">Impuesto (%)</Label>
+              <Input
+                id="tax"
+                type="number"
+                value={tax}
+                onChange={(e) => setTax(Number(e.target.value))}
+                placeholder="Impuesto (%)"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="discount">Descuento</Label>
+              <Input
+                id="discount"
+                type="number"
+                value={discount}
+                onChange={(e) => setDiscount(Number(e.target.value))}
+                placeholder="Descuento"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="client">Cliente</Label>
+              <Select value={selectedClient} onValueChange={setSelectedClient}>
+                <SelectTrigger id="client">
+                  <SelectValue placeholder="Seleccione un cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client: any) => (
+                    <SelectItem key={client._id} value={client._id}>
+                      {client.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Separator />
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-semibold">Total:</span>
+            <span className="text-2xl font-bold">${calculateTotal()}</span>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button onClick={exportOrder}>Crear Orden</Button>
           </div>
         </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Tax (%)
-          </label>
-          <input
-            type="number"
-            value={tax}
-            onChange={(e) => setTax(Number(e.target.value))}
-            placeholder="Tax (%)"
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Discount
-          </label>
-          <input
-            type="number"
-            value={discount}
-            onChange={(e) => setDiscount(Number(e.target.value))}
-            placeholder="Discount"
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Cliente
-          </label>
-          <select
-            value={selectedClient}
-            onChange={(e) => setSelectedClient(e.target.value)}
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          >
-            <option value="" disabled>
-              Seleccione un cliente
-            </option>
-            {clients.map((client: any) => (
-              <option key={client._id} value={client._id}>
-                {client.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div className="text-right">
-        <h3 className="text-lg font-semibold mb-4">
-          Total: ${calculateTotal()}
-        </h3>
-        <button
-          onClick={exportOrder}
-          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-        >
-          Crear Orden
-        </button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

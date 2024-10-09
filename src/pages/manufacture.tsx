@@ -145,7 +145,7 @@ function Manufacture() {
       </div>
 
       {selectedOrder && (
-        <Modal onClose={closeModal}>
+        <Modal isOpen={false} onClose={closeModal}>
           <div className="bg-white p-6 rounded-lg w-full overflow-y-auto overflow-hidden h-[700px]">
             <div>
               <h2 className="text-xl font-semibold mb-4">

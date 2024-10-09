@@ -102,10 +102,7 @@ function ClientForm({ onSubmit, initialClientData }: any) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-4 rounded-lg shadow-md mb-4"
-    >
+    <form onSubmit={handleSubmit} className="bg-white p-4 mb-4">
       <h2 className="text-xl font-semibold mb-4">
         {initialClientData ? "Actualizar Cliente" : "Crear Nuevo Cliente"}
       </h2>

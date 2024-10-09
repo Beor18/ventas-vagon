@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { connectToDatabase } from "../lib/mongodb";
 import Product from "../models/Product";
 import Modal from "@/components/Modal";
-import Select from "@/components/Select";
+import SelectComponent from "@/components/Select";
 import withAuth from "../lib/withAuth";
 import ClientForm from "@/components/ClientForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -81,6 +81,7 @@ function Seller({ products }: { products: any[] }) {
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
   const [currentClient, setCurrentClient] = useState<any>(null);
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -161,10 +162,22 @@ function Seller({ products }: { products: any[] }) {
 
   const openModal = (product: any) => {
     setSelectedProduct(product);
+    setIsModalOpen(true);
   };
 
   const closeModal = () => {
+    setIsModalOpen(false);
     setSelectedProduct(null);
+  };
+
+  const openClientFormModal = (client = null) => {
+    setCurrentClient(client);
+    setIsClientFormModalOpen(true);
+  };
+
+  const closeClientFormModal = () => {
+    setIsClientFormModalOpen(false);
+    setCurrentClient(null);
   };
 
   const editClient = (client: any) => {
@@ -321,7 +334,7 @@ function Seller({ products }: { products: any[] }) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Mis Clientes</CardTitle>
-              <Button onClick={() => setIsClientFormModalOpen(true)}>
+              <Button onClick={() => openClientFormModal()}>
                 <Plus className="mr-2 h-4 w-4" />
                 Crear Nuevo Cliente
               </Button>
@@ -344,7 +357,7 @@ function Seller({ products }: { products: any[] }) {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => editClient(client)}
+                            onClick={() => openClientFormModal(client)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
@@ -369,13 +382,13 @@ function Seller({ products }: { products: any[] }) {
       </Tabs>
 
       {selectedProduct && (
-        <Modal onClose={closeModal}>
-          <Select product={selectedProduct} onClose={closeModal} />
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+          <SelectComponent product={selectedProduct} onClose={closeModal} />
         </Modal>
       )}
 
       {isClientFormModalOpen && (
-        <Modal onClose={() => setIsClientFormModalOpen(false)}>
+        <Modal isOpen={isClientFormModalOpen} onClose={closeClientFormModal}>
           <ClientForm
             onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
             initialClientData={currentClient}

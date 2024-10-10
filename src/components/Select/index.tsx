@@ -32,6 +32,21 @@ interface ProductSubOption {
   imageUrl?: string;
 }
 
+interface ColorOption {
+  _id: string;
+  colorName: string;
+  colorCode: string;
+  additionalPrice: number;
+  imageUrl?: string;
+}
+
+interface HouseDesign {
+  _id: string;
+  designType: string;
+  imageUrl: string;
+  cost: number;
+}
+
 interface SelectedOptions {
   [key: string]: ProductOption;
 }
@@ -46,6 +61,11 @@ export default function SelectComponent({ product, onClose }: any) {
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
   const [selectedSubOptions, setSelectedSubOptions] =
     useState<SelectedSubOptions>({});
+  const [selectedColorOption, setSelectedColorOption] =
+    useState<ColorOption | null>(null);
+  const [selectedDesign, setSelectedDesign] = useState<HouseDesign | null>(
+    null
+  );
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [clients, setClients] = useState<any[]>([]);
@@ -116,6 +136,14 @@ export default function SelectComponent({ product, onClose }: any) {
     setSelectedSubOptions(newSelectedSubOptions);
   };
 
+  const handleColorOptionSelect = (colorOption: ColorOption) => {
+    setSelectedColorOption(colorOption);
+  };
+
+  const handleDesignSelect = (design: HouseDesign) => {
+    setSelectedDesign(design);
+  };
+
   const calculateTotal = () => {
     const basePrice = product?.basePrice || 0;
     const optionsPrice = Object.values(selectedOptions).reduce(
@@ -131,7 +159,12 @@ export default function SelectComponent({ product, onClose }: any) {
         ),
       0
     );
-    const subtotal = basePrice + optionsPrice + subOptionsPrice;
+    const colorPrice = selectedColorOption
+      ? selectedColorOption.additionalPrice
+      : 0;
+    const designPrice = selectedDesign ? selectedDesign.cost : 0;
+    const subtotal =
+      basePrice + optionsPrice + subOptionsPrice + colorPrice + designPrice;
     const total = subtotal + subtotal * (tax / 100) - discount;
     return total.toFixed(2);
   };
@@ -153,6 +186,8 @@ export default function SelectComponent({ product, onClose }: any) {
       productId: product?._id,
       productName: product?.name,
       options: preparedOptions,
+      colorOptions: selectedColorOption ? [selectedColorOption] : [],
+      designs: selectedDesign ? [selectedDesign] : [],
       total: calculateTotal(),
       discount,
       tax,
@@ -270,6 +305,78 @@ export default function SelectComponent({ product, onClose }: any) {
                       ))}
                     </div>
                   )}
+                </div>
+              ))}
+            </ScrollArea>
+          </div>
+          <Separator />
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Color Options:</h3>
+            <ScrollArea className="h-[200px] border rounded-md p-4">
+              {product?.colorOptions?.map((colorOption: ColorOption) => (
+                <div
+                  key={colorOption._id}
+                  className="mb-2 flex items-center justify-between"
+                >
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className="w-14 h-14 rounded-full border"
+                      style={{
+                        backgroundImage: `url(${colorOption.imageUrl})`,
+                        backgroundSize: "cover",
+                      }}
+                    />
+                    <span>{colorOption.colorName}</span>
+                  </div>
+                  <span className="text-muted-foreground">
+                    +${colorOption.additionalPrice}
+                  </span>
+                  <Button
+                    variant={
+                      selectedColorOption?._id === colorOption._id
+                        ? "destructive"
+                        : "outline"
+                    }
+                    size="sm"
+                    onClick={() => handleColorOptionSelect(colorOption)}
+                  >
+                    {selectedColorOption?._id === colorOption._id
+                      ? "Selected"
+                      : "Select"}
+                  </Button>
+                </div>
+              ))}
+            </ScrollArea>
+          </div>
+          <Separator />
+          <div>
+            <h3 className="text-lg font-semibold mb-2">House Designs:</h3>
+            <ScrollArea className="h-[200px] border rounded-md p-4">
+              {product?.designs?.map((design: HouseDesign) => (
+                <div
+                  key={design._id}
+                  className="mb-2 flex items-center justify-between"
+                >
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src={design.imageUrl}
+                      alt={design.designType}
+                      className="w-10 h-10 rounded-md object-cover"
+                    />
+                    <span>{design.designType}</span>
+                  </div>
+                  <span className="text-muted-foreground">+${design.cost}</span>
+                  <Button
+                    variant={
+                      selectedDesign?._id === design._id
+                        ? "destructive"
+                        : "outline"
+                    }
+                    size="sm"
+                    onClick={() => handleDesignSelect(design)}
+                  >
+                    {selectedDesign?._id === design._id ? "Selected" : "Select"}
+                  </Button>
                 </div>
               ))}
             </ScrollArea>

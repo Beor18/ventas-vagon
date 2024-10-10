@@ -101,7 +101,7 @@ export function OrderDetail({
               </div>
             </div>
             <div className="md:col-span-2">
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="multiple" className="w-full">
                 <AccordionItem value="options">
                   <AccordionTrigger>Opciones seleccionadas</AccordionTrigger>
                   <AccordionContent>
@@ -206,6 +206,98 @@ export function OrderDetail({
                         ))
                       ) : (
                         <p>No hay opciones seleccionadas para esta orden.</p>
+                      )}
+                    </ScrollArea>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="colorOptions">
+                  <AccordionTrigger>Opción de Color</AccordionTrigger>
+                  <AccordionContent>
+                    <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                      {order.colorOptions && order.colorOptions.length > 0 ? (
+                        order.colorOptions.map(
+                          (colorOption: any, index: number) => (
+                            <div
+                              key={index}
+                              className="mb-4 p-4 border rounded-md"
+                            >
+                              <h4 className="font-semibold text-lg mb-2">
+                                {colorOption.colorName}
+                              </h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                <p>
+                                  <span className="font-medium">
+                                    Código de Color:
+                                  </span>{" "}
+                                  {colorOption.colorCode}
+                                </p>
+                                <p>
+                                  <span className="font-medium">
+                                    Precio Adicional:
+                                  </span>{" "}
+                                  ${colorOption.additionalPrice}
+                                </p>
+                              </div>
+                              {colorOption.imageUrl && (
+                                <div className="mt-2">
+                                  <img
+                                    src={colorOption.imageUrl}
+                                    alt={colorOption.colorName}
+                                    className="rounded-md w-24 h-24 object-cover cursor-pointer"
+                                    onClick={() =>
+                                      openFullScreenImage(colorOption.imageUrl)
+                                    }
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )
+                        )
+                      ) : (
+                        <p>
+                          No hay opción de color seleccionada para esta orden.
+                        </p>
+                      )}
+                    </ScrollArea>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="designs">
+                  <AccordionTrigger>Diseño de Casa</AccordionTrigger>
+                  <AccordionContent>
+                    <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                      {order.designs && order.designs.length > 0 ? (
+                        order.designs.map((design: any, index: number) => (
+                          <div
+                            key={index}
+                            className="mb-4 p-4 border rounded-md"
+                          >
+                            <h4 className="font-semibold text-lg mb-2">
+                              {design.designType}
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                              <p>
+                                <span className="font-medium">Costo:</span> $
+                                {design.cost}
+                              </p>
+                            </div>
+                            {design.imageUrl && (
+                              <div className="mt-2">
+                                <img
+                                  src={design.imageUrl}
+                                  alt={design.designType}
+                                  className="rounded-md w-24 h-24 object-cover cursor-pointer"
+                                  onClick={() =>
+                                    openFullScreenImage(design.imageUrl)
+                                  }
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <p>
+                          No hay diseño de casa seleccionado para esta orden.
+                        </p>
                       )}
                     </ScrollArea>
                   </AccordionContent>

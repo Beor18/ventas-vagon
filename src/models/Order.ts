@@ -19,10 +19,25 @@ const optionSchema = new Schema({
   suboptions: [subOptionSchema],
 });
 
+const colorOptionSchema = new mongoose.Schema({
+  colorName: { type: String },
+  colorCode: { type: String },
+  additionalPrice: { type: Number, default: 0 },
+  imageUrl: { type: String },
+});
+
+const houseDesignSchema = new mongoose.Schema({
+  designType: { type: String },
+  imageUrl: { type: String },
+  cost: { type: Number },
+});
+
 const orderSchema = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: "Product" },
   productName: { type: String },
   options: [optionSchema],
+  colorOptions: [colorOptionSchema],
+  designs: [houseDesignSchema],
   total: { type: Number },
   discount: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },

@@ -33,7 +33,7 @@ export interface SubOptionType {
 }
 
 export interface DesignType {
-  name: string;
-  price: number;
+  designType: string;
+  cost: number;
   imageUrl: string;
 }

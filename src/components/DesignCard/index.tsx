@@ -47,7 +47,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
           <InputField
             label="Design Name"
             name="name"
-            value={design.name}
+            value={design.designType}
             onChange={(e) => handleDesignChange(e)}
             placeholder="Enter design name"
           />
@@ -55,7 +55,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
             label="Design Price"
             name="price"
             type="number"
-            value={design.price}
+            value={design.cost}
             onChange={(e) => handleDesignChange(e)}
             placeholder="Enter design price"
           />

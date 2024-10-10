@@ -109,8 +109,8 @@ const Admin = ({ initialProducts, orders }: any) => {
   const [ordersList, setOrdersList] = useState([]);
 
   const [newDesign, setNewDesign] = useState<DesignType>({
-    name: "",
-    price: 0,
+    designType: "",
+    cost: 0,
     imageUrl: "",
   });
 
@@ -124,7 +124,7 @@ const Admin = ({ initialProducts, orders }: any) => {
       ...prev,
       designs: [...prev.designs, newDesign],
     }));
-    setNewDesign({ name: "", price: 0, imageUrl: "" });
+    setNewDesign({ designType: "", cost: 0, imageUrl: "" });
   };
 
   const removeDesign = (designIndex: number) => {

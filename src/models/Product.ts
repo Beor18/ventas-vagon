@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema({
   basePrice: { type: Number },
   options: [optionSchema],
   colorOptions: [colorOptionSchema],
-  houseDesigns: [houseDesignSchema], // Agregar el nuevo esquema aquí
+  designs: [houseDesignSchema],
 });
 
 const Product =

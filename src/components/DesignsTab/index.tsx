@@ -59,16 +59,16 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
         <h6 className="text-lg font-semibold">New Design</h6>
         <InputField
           label="Design Name"
-          name="name"
-          value={newDesign.name}
+          name="designType"
+          value={newDesign.designType}
           onChange={handleNewDesignChange}
           placeholder="Enter new design name"
         />
         <InputField
           label="Design Price"
-          name="price"
+          name="cost"
           type="number"
-          value={newDesign.price}
+          value={newDesign.cost}
           onChange={handleNewDesignChange}
           placeholder="Enter new design price"
         />

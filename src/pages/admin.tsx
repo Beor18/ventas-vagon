@@ -29,6 +29,7 @@ import {
   ProductType,
   OptionType,
   SubOptionType,
+  ColorOptionType,
 } from "@/types/types";
 
 const Admin = ({ initialProducts, orders }: any) => {
@@ -45,6 +46,7 @@ const Admin = ({ initialProducts, orders }: any) => {
     totalWeight: 0,
     basePrice: 0,
     options: [],
+    colorOptions: [],
     designs: [],
   });
   const [imagePreview, setImagePreview] = useState("");
@@ -81,6 +83,40 @@ const Admin = ({ initialProducts, orders }: any) => {
     cost: 0,
     imageUrl: "",
   });
+
+  const [newColorOption, setNewColorOption] = useState<ColorOptionType>({
+    colorName: "",
+    colorCode: "",
+    additionalPrice: 0,
+    imageUrl: "",
+  });
+
+  const handleNewColorOptionChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewColorOption((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const addColorOption = () => {
+    setProduct((prev) => ({
+      ...prev,
+      colorOptions: [...(prev.colorOptions || []), newColorOption],
+    }));
+    setNewColorOption({
+      colorName: "",
+      colorCode: "",
+      additionalPrice: 0,
+      imageUrl: "",
+    });
+  };
+
+  const removeColorOption = (index: number) => {
+    setProduct((prev) => ({
+      ...prev,
+      colorOptions: prev.colorOptions.filter((_, i) => i !== index),
+    }));
+  };
 
   const handleNewDesignChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -446,6 +482,7 @@ const Admin = ({ initialProducts, orders }: any) => {
       totalWeight: 0,
       basePrice: 0,
       options: [],
+      colorOptions: [],
       designs: [],
     });
     setImagePreview("");
@@ -521,18 +558,23 @@ const Admin = ({ initialProducts, orders }: any) => {
           setNewSubOption={setNewSubOption}
           newDesign={newDesign}
           setNewDesign={setNewDesign}
+          newColorOption={newColorOption}
+          setNewColorOption={setNewColorOption}
           handleProductChange={handleProductChange}
           handleOptionChange={handleOptionChange}
           handleSubOptionChange={handleSubOptionChange}
           handleNewOptionChange={handleNewOptionChange}
           handleNewSubOptionChange={handleNewSubOptionChange}
           handleNewDesignChange={handleNewDesignChange}
+          handleNewColorOptionChange={handleNewColorOptionChange}
           addOption={addOption}
           addSubOption={addSubOption}
           addDesign={addDesign}
+          addColorOption={addColorOption}
           removeOption={removeOption}
           removeSubOption={removeSubOption}
           removeDesign={removeDesign}
+          removeColorOption={removeColorOption}
           handleImagePreview={handleImagePreview}
           saveProduct={saveProduct}
           setModalOpen={setModalOpen}

@@ -11,6 +11,7 @@ export interface ProductType {
   totalWeight: number;
   basePrice: number;
   options: OptionType[];
+  colorOptions: ColorOptionType[];
   designs: DesignType[];
 }
 
@@ -54,4 +55,11 @@ export interface SubOptionType {
   imageUrl: string;
   details: string;
   name: string;
+}
+
+export interface ColorOptionType {
+  colorName: string;
+  colorCode: string;
+  additionalPrice: number;
+  imageUrl: string;
 }

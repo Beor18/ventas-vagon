@@ -9,11 +9,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ProductInfo from "@/components/ProductInfo";
 import DesignsTab from "@/components/DesignsTab";
 import OptionsTab from "@/components/OptionsTab";
+import ColorOptionsTab from "@/components/ColorOptionsTab";
 import {
   ProductType,
   OptionType,
   SubOptionType,
   DesignType,
+  ColorOptionType,
 } from "@/types/types";
 
 interface ProductFormProps {
@@ -25,6 +27,8 @@ interface ProductFormProps {
   setNewSubOption: (subOption: SubOptionType) => void;
   newDesign: DesignType;
   setNewDesign: (design: DesignType) => void;
+  newColorOption: ColorOptionType;
+  setNewColorOption: (colorOption: ColorOptionType) => void;
   handleProductChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -40,12 +44,15 @@ interface ProductFormProps {
   handleNewOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewSubOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewDesignChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleNewColorOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   addOption: () => void;
   addSubOption: (optionIndex: number) => void;
   addDesign: () => void;
+  addColorOption: () => void;
   removeOption: (optionIndex: number) => void;
   removeSubOption: (optionIndex: number, subOptionIndex: number) => void;
   removeDesign: (designIndex: number) => void;
+  removeColorOption: (colorOptionIndex: number) => void;
   handleImagePreview: (
     e: React.ChangeEvent<HTMLInputElement>,
     setImageUrlCallback: (url: string) => void,
@@ -65,18 +72,23 @@ const ProductForm: React.FC<ProductFormProps> = ({
   setNewSubOption,
   newDesign,
   setNewDesign,
+  newColorOption,
+  setNewColorOption,
   handleProductChange,
   handleOptionChange,
   handleSubOptionChange,
   handleNewOptionChange,
   handleNewSubOptionChange,
   handleNewDesignChange,
+  handleNewColorOptionChange,
   addOption,
   addSubOption,
   addDesign,
+  addColorOption,
   removeOption,
   removeSubOption,
   removeDesign,
+  removeColorOption,
   handleImagePreview,
   saveProduct,
   setModalOpen,
@@ -87,6 +99,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const steps = [
     { title: "Información de producto", value: "product-info" },
     { title: "Agregar tipo de estructura", value: "designs" },
+    { title: "Opciones de color", value: "color-options" },
     { title: "Opciones", value: "options" },
   ];
 
@@ -163,6 +176,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   addSubOption={addSubOption}
                   removeOption={removeOption}
                   removeSubOption={removeSubOption}
+                  handleImagePreview={handleImagePreview}
+                />
+              </TabsContent>
+              <TabsContent value="color-options">
+                <ColorOptionsTab
+                  product={product}
+                  setProduct={setProduct}
+                  newColorOption={newColorOption}
+                  setNewColorOption={setNewColorOption}
+                  handleNewColorOptionChange={handleNewColorOptionChange}
+                  addColorOption={addColorOption}
+                  removeColorOption={removeColorOption}
                   handleImagePreview={handleImagePreview}
                 />
               </TabsContent>

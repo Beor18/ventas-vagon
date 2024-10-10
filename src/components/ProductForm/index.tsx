@@ -85,9 +85,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    { title: "Product Information", value: "product-info" },
-    { title: "Agregar diseños", value: "designs" },
-    { title: "Options", value: "options" },
+    { title: "Información de producto", value: "product-info" },
+    { title: "Agregar tipo de estructura", value: "designs" },
+    { title: "Opciones", value: "options" },
   ];
 
   return (

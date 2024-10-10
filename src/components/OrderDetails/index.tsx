@@ -71,7 +71,7 @@ export function OrderDetail({
                   </div>
                   <div>
                     <p className="font-semibold">Descuento:</p>
-                    <p>{order.discount}%</p>
+                    <p>{order.discount} USD</p>
                   </div>
                   <div>
                     <p className="font-semibold">Tax:</p>

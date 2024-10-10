@@ -1,8 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,12 +17,6 @@ import {
 export function ProductDetails({ product }) {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
-
-  useEffect(() => {
-    if (product.colorOptions && product.colorOptions.length > 0) {
-      setSelectedColor(product.colorOptions[0]);
-    }
-  }, [product.colorOptions]);
 
   const handleColorSelect = (color) => {
     setSelectedColor(color);
@@ -53,27 +46,34 @@ export function ProductDetails({ product }) {
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-lg">
             <img
-              src={selectedColor?.imageUrl || product.imageUrl}
+              src={product.imageUrl}
               alt={product.name}
               className="object-cover w-full h-full"
             />
           </div>
           {product.colorOptions && product.colorOptions.length > 0 && (
-            <div className="flex space-x-2 overflow-x-auto py-2 scrollbar-hide">
-              {product.colorOptions.map((color) => (
-                <button
-                  key={color.colorCode}
-                  onClick={() => handleColorSelect(color)}
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 flex-shrink-0 ${
-                    selectedColor?.colorCode === color.colorCode
-                      ? "border-primary"
-                      : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: color.colorCode }}
-                >
-                  <span className="sr-only">{color.colorName}</span>
-                </button>
-              ))}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-sm">Color Options:</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.colorOptions.map((color) => (
+                  <button
+                    key={color.colorCode}
+                    onClick={() => handleColorSelect(color)}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 flex-shrink-0 ${
+                      selectedColor?.colorCode === color.colorCode
+                        ? "border-primary"
+                        : "border-transparent"
+                    }`}
+                    style={{
+                      backgroundImage: `url(${color.imageUrl})`,
+                      backgroundSize: "cover",
+                    }}
+                    title={color.colorName}
+                  >
+                    <span className="sr-only">{color.colorName}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -128,16 +128,19 @@ export function ProductDetails({ product }) {
           {selectedColor && (
             <div className="text-sm sm:text-base">
               <h3 className="font-semibold mb-2">
-                Color: {selectedColor.colorName}
+                Selected Color: {selectedColor.colorName}
               </h3>
               <div className="flex items-center space-x-2">
                 <div
-                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border"
-                  style={{ backgroundColor: selectedColor.colorCode }}
+                  className="w-5 h-5 sm:w-20 sm:h-20 rounded-full border"
+                  style={{
+                    backgroundImage: `url(${selectedColor.imageUrl})`,
+                    backgroundSize: "cover",
+                  }}
                 />
                 <span>
                   {selectedColor.additionalPrice > 0
-                    ? `+$${selectedColor.additionalPrice}`
+                    ? `+$${selectedColor.additionalPrice.toFixed(2)}`
                     : "No additional cost"}
                 </span>
               </div>
@@ -167,9 +170,9 @@ export function ProductDetails({ product }) {
                                 ? "ring-2 ring-primary"
                                 : "hover:shadow-md"
                             }`}
-                            // onClick={() =>
-                            //   handleOptionSelect(option.name, suboption)
-                            // }
+                            onClick={() =>
+                              handleOptionSelect(option.name, suboption)
+                            }
                             role="radio"
                             aria-checked={
                               selectedOptions[option.name]?.code ===

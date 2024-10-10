@@ -1,22 +1,14 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PlusCircle, Edit, Trash2, Eye, X } from "lucide-react";
-import ProductForm from "@/components/ProductForm";
-import ClientForm from "@/components/ClientForm";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
 import withAuth from "../lib/withAuth";
@@ -24,44 +16,20 @@ import { connectToDatabase } from "../lib/mongodb";
 import Product from "@/models/Product";
 import Order from "@/models/Order";
 import Client from "@/models/Client";
-
 import { upload } from "@vercel/blob/client";
 import { ProductDetails } from "@/components/product-details";
-import { DesignType } from "@/types/types";
-
-interface ProductType {
-  _id?: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  quantity: number;
-  material: string;
-  externalDimensions: string;
-  internalDimensions: string;
-  foldingState: string;
-  totalWeight: number;
-  basePrice: number;
-  options: OptionType[];
-  designs: any;
-}
-
-interface OptionType {
-  name: string;
-  price: number;
-  imageUrl: string;
-  type: string;
-  specification: string;
-  pcs: number;
-  suboptions: SubOptionType[];
-}
-
-interface SubOptionType {
-  code: string;
-  price: number;
-  imageUrl: string;
-  details: string;
-  name: string;
-}
+import { ProductsTab } from "@/components/Admin/ProductsTab";
+import { OrdersTab } from "@/components/Admin/OrdersTab";
+import { ClientsTab } from "@/components/Admin/ClientsTab";
+import ProductForm from "@/components/ProductForm";
+import ClientForm from "@/components/ClientForm";
+import { LoadingOverlay } from "@/components/Admin/LoadingOverlay";
+import {
+  DesignType,
+  ProductType,
+  OptionType,
+  SubOptionType,
+} from "@/types/types";
 
 const Admin = ({ initialProducts, orders }: any) => {
   const [products, setProducts] = useState(initialProducts);
@@ -122,7 +90,9 @@ const Admin = ({ initialProducts, orders }: any) => {
   const addDesign = () => {
     setProduct((prev) => ({
       ...prev,
-      designs: [...prev.designs, newDesign],
+      designs: Array.isArray(prev.designs)
+        ? [...prev.designs, newDesign]
+        : [newDesign],
     }));
     setNewDesign({ designType: "", cost: 0, imageUrl: "" });
   };
@@ -130,7 +100,9 @@ const Admin = ({ initialProducts, orders }: any) => {
   const removeDesign = (designIndex: number) => {
     setProduct((prev) => ({
       ...prev,
-      designs: prev.designs.filter((_, index) => index !== designIndex),
+      designs: Array.isArray(prev.designs)
+        ? prev.designs.filter((_, index) => index !== designIndex)
+        : [],
     }));
   };
 
@@ -486,6 +458,11 @@ const Admin = ({ initialProducts, orders }: any) => {
       pcs: 0,
       suboptions: [],
     });
+    setNewDesign({
+      designType: "",
+      cost: 0,
+      imageUrl: "",
+    });
   };
 
   return (
@@ -577,11 +554,11 @@ const Admin = ({ initialProducts, orders }: any) => {
             onSubmit={currentClient ? handleUpdateClient : handleCreateClient}
             initialClientData={currentClient}
           />
-          <DialogClose asChild>
+          {/* <DialogClose asChild>
             <Button onClick={() => setIsClientFormModalOpen(false)}>
               Close
             </Button>
-          </DialogClose>
+          </DialogClose> */}
         </DialogContent>
       </Dialog>
 
@@ -612,212 +589,6 @@ const Admin = ({ initialProducts, orders }: any) => {
     </div>
   );
 };
-
-const ProductsTab = ({
-  products,
-  openModal,
-  editProduct,
-  deleteProduct,
-  setSelectedProduct,
-}) => (
-  <div className="space-y-8">
-    <div className="flex justify-between items-center">
-      <h2 className="text-3xl font-bold">
-        Product Management ({products.length})
-      </h2>
-      <Button onClick={openModal} size="lg">
-        <PlusCircle className="mr-2 h-5 w-5" /> Add New Product
-      </Button>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {products.map((product: ProductType) => (
-        <Card key={product._id} className="overflow-hidden">
-          <CardContent className="p-4">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover rounded-md mb-4"
-            />
-            <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-            <p className="text-gray-600 mb-4 line-clamp-2">
-              {product.description}
-            </p>
-            <p className="text-lg font-bold mb-4">USD {product.basePrice}</p>
-            <div className="flex justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedProduct(product)}
-              >
-                <Eye className="h-4 w-4 mr-2" /> View
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => editProduct(product)}
-              >
-                <Edit className="h-4 w-4 mr-2" /> Edit
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => deleteProduct(product._id!)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" /> Delete
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </div>
-);
-
-const OrdersTab = ({ orders, deleteOrder }) => (
-  <div className="space-y-8">
-    <h2 className="text-3xl font-bold">All Orders ({orders.length})</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {orders.map((order: any) => (
-        <Card key={order._id}>
-          <CardHeader>
-            <CardTitle>{order.productName}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-lg font-semibold">Total price: ${order.total}</p>
-            <p>Discount: {order.discount}%</p>
-            <p>Tax: {order.tax}%</p>
-            <p>Status: {order.status}</p>
-            <p className="border-t pt-4 mt-4">Seller: {order.vendedorName}</p>
-            <p>Client: {order.cliente?.nombre || "N/A"}</p>
-            <p>
-              Comments:{" "}
-              {order.comentaries === "" ? (
-                <span className="font-bold">No comments yet!</span>
-              ) : (
-                order.comentaries
-              )}
-            </p>
-            <Button
-              variant="destructive"
-              onClick={() => deleteOrder(order._id)}
-            >
-              Delete Order
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </div>
-);
-
-const ClientsTab = ({ clients, openClientForm, editClient, deleteClient }) => (
-  <div className="space-y-8">
-    <div className="flex justify-between items-center">
-      <h2 className="text-3xl font-bold">All Clients</h2>
-      <Button onClick={openClientForm} size="lg">
-        <PlusCircle className="mr-2 h-5 w-5" /> Create New Client
-      </Button>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {clients.map((client: any) => (
-        <Card key={client._id}>
-          <CardContent className="p-6 space-y-4">
-            <h3 className="text-xl font-semibold">{client.nombre}</h3>
-            <p>
-              <strong>Residential Address:</strong>{" "}
-              {client.direccion_residencial}
-            </p>
-            <p>
-              <strong>Unit Address:</strong> {client.direccion_unidad}
-            </p>
-            <p>
-              <strong>Land Owner:</strong> {client.propietario_terreno}
-            </p>
-            <p>
-              <strong>Unit Purpose:</strong> {client.proposito_unidad}
-            </p>
-            <p>
-              <strong>Marital Status:</strong> {client.estado_civil}
-            </p>
-            <p>
-              <strong>Workplace:</strong> {client.lugar_empleo}
-            </p>
-            <p>
-              <strong>Email:</strong> {client.email}
-            </p>
-            <p>
-              <strong>ID:</strong> {client.identificacion}
-            </p>
-            <p>
-              <strong>Phone:</strong> {client.telefono}
-            </p>
-            <p>
-              <strong>Alternate Phone:</strong> {client.telefono_alterno}
-            </p>
-            <p>
-              <strong>Payment Method:</strong> {client.forma_pago}
-            </p>
-            <p>
-              <strong>Reference Contact:</strong> {client.contacto_referencia}
-            </p>
-            <p>
-              <strong>Insurer:</strong> {client.asegurador}
-            </p>
-            <p>
-              <strong>Insurance Purchased:</strong>{" "}
-              {client.seguro_comprado ? "Yes" : "No"}
-            </p>
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={() => editClient(client)}>
-                Edit Client
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => deleteClient(client._id)}
-              >
-                Delete Client
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </div>
-);
-
-// const ProductDetails = ({ product }) => (
-//   <div className="space-y-6">
-//     <img
-//       src={product.imageUrl}
-//       alt={product.name}
-//       className="w-full object-cover rounded-lg"
-//     />
-//     <div>
-//       <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
-//       <p className="text-gray-600 mb-4">{product.description}</p>
-//       <p className="text-2xl font-bold mb-4">USD {product.basePrice}</p>
-//       <p className="mb-2">
-//         <span className="font-bold">External Dimensions: </span>
-//         {product.externalDimensions}
-//       </p>
-//       <p>
-//         <span className="font-bold">Internal Dimensions: </span>
-//         {product.internalDimensions}
-//       </p>
-//     </div>
-//   </div>
-// );
-
-const LoadingOverlay = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <Card>
-      <CardContent className="flex items-center space-x-4 p-8">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500" />
-        <CardTitle className="text-2xl">Uploading...</CardTitle>
-      </CardContent>
-    </Card>
-  </div>
-);
 
 export async function getServerSideProps() {
   await connectToDatabase();

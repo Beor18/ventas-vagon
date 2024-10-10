@@ -1,4 +1,8 @@
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 function ClientForm({ onSubmit, initialClientData }: any) {
   const [newClient, setNewClient] = useState({
@@ -33,12 +37,14 @@ function ClientForm({ onSubmit, initialClientData }: any) {
     }
   }, [initialClientData]);
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setNewClient({ ...newClient, [name]: value });
   };
 
-  const handleLatChange = (e: any) => {
+  const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewClient({
       ...newClient,
       pin_localidad: {
@@ -48,7 +54,7 @@ function ClientForm({ onSubmit, initialClientData }: any) {
     });
   };
 
-  const handleLongChange = (e: any) => {
+  const handleLongChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewClient({
       ...newClient,
       pin_localidad: {
@@ -58,14 +64,14 @@ function ClientForm({ onSubmit, initialClientData }: any) {
     });
   };
 
-  const handleCheckboxChange = (e: any) => {
+  const handleCheckboxChange = (checked: boolean) => {
     setNewClient({
       ...newClient,
-      seguro_comprado: e.target.checked,
+      seguro_comprado: checked,
     });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!initialClientData) {
@@ -102,170 +108,197 @@ function ClientForm({ onSubmit, initialClientData }: any) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 mb-4">
-      <h2 className="text-xl font-semibold mb-4">
+    <form onSubmit={handleSubmit} className="space-y-6 p-4 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6">
         {initialClientData ? "Actualizar Cliente" : "Crear Nuevo Cliente"}
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          type="text"
-          name="nombre"
-          placeholder="Nombre"
-          value={newClient.nombre}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="direccion_residencial"
-          placeholder="Dirección Residencial"
-          value={newClient.direccion_residencial}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="direccion_unidad"
-          placeholder="Dirección de la Unidad"
-          value={newClient.direccion_unidad}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <div className="flex flex-col">
-          <label>Latitud</label>
-          <input
-            type="number"
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="nombre">Nombre</Label>
+          <Input
+            id="nombre"
+            name="nombre"
+            value={newClient.nombre}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="direccion_residencial">Dirección Residencial</Label>
+          <Input
+            id="direccion_residencial"
+            name="direccion_residencial"
+            value={newClient.direccion_residencial}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="direccion_unidad">Dirección de la Unidad</Label>
+          <Input
+            id="direccion_unidad"
+            name="direccion_unidad"
+            value={newClient.direccion_unidad}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="pin_localidad_lat">Latitud</Label>
+          <Input
+            id="pin_localidad_lat"
             name="pin_localidad_lat"
-            placeholder="Latitud"
+            type="number"
             value={newClient.pin_localidad.lat}
             onChange={handleLatChange}
-            className="border p-2 rounded"
+            required
           />
         </div>
-        <div className="flex flex-col">
-          <label>Longitud</label>
-          <input
-            type="number"
+        <div className="space-y-2">
+          <Label htmlFor="pin_localidad_long">Longitud</Label>
+          <Input
+            id="pin_localidad_long"
             name="pin_localidad_long"
-            placeholder="Longitud"
+            type="number"
             value={newClient.pin_localidad.long}
             onChange={handleLongChange}
-            className="border p-2 rounded"
+            required
           />
         </div>
-        <input
-          type="text"
-          name="propietario_terreno"
-          placeholder="Propietario del Terreno"
-          value={newClient.propietario_terreno}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="proposito_unidad"
-          placeholder="Propósito de la Unidad"
-          value={newClient.proposito_unidad}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <div className="flex flex-col">
-          <label>Estado Civil</label>
+        <div className="space-y-2">
+          <Label htmlFor="propietario_terreno">Propietario del Terreno</Label>
+          <Input
+            id="propietario_terreno"
+            name="propietario_terreno"
+            value={newClient.propietario_terreno}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="proposito_unidad">Propósito de la Unidad</Label>
+          <Input
+            id="proposito_unidad"
+            name="proposito_unidad"
+            value={newClient.proposito_unidad}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="estado_civil">Estado Civil</Label>
           <select
+            id="estado_civil"
             name="estado_civil"
             value={newClient.estado_civil}
             onChange={handleInputChange}
-            className="border p-2 rounded"
+            required
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Seleccione</option>
             <option value="Casado">Casado</option>
             <option value="Soltero">Soltero</option>
           </select>
         </div>
-        <input
-          type="text"
-          name="lugar_empleo"
-          placeholder="Lugar de Empleo"
-          value={newClient.lugar_empleo}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={newClient.email}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        {errors.email && <p className="text-red-500">{errors.email}</p>}
-        <input
-          type="text"
-          name="identificacion"
-          placeholder="Identificación (único)"
-          value={newClient.identificacion}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        {errors.identificacion && (
-          <p className="text-red-500">{errors.identificacion}</p>
-        )}
-        <input
-          type="tel"
-          name="telefono"
-          placeholder="Teléfono"
-          value={newClient.telefono}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="tel"
-          name="telefono_alterno"
-          placeholder="Teléfono Alterno"
-          value={newClient.telefono_alterno}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="forma_pago"
-          placeholder="Forma de Pago"
-          value={newClient.forma_pago}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="contacto_referencia"
-          placeholder="Contacto de Referencia"
-          value={newClient.contacto_referencia}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <input
-          type="text"
-          name="asegurador"
-          placeholder="Asegurador"
-          value={newClient.asegurador}
-          onChange={handleInputChange}
-          className="border p-2 rounded"
-        />
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name="seguro_comprado"
-            checked={newClient.seguro_comprado}
-            onChange={handleCheckboxChange}
+        <div className="space-y-2">
+          <Label htmlFor="lugar_empleo">Lugar de Empleo</Label>
+          <Input
+            id="lugar_empleo"
+            name="lugar_empleo"
+            value={newClient.lugar_empleo}
+            onChange={handleInputChange}
+            required
           />
-          <span>Seguro Comprado</span>
-        </label>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={newClient.email}
+            onChange={handleInputChange}
+            required
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="identificacion">Identificación (único)</Label>
+          <Input
+            id="identificacion"
+            name="identificacion"
+            value={newClient.identificacion}
+            onChange={handleInputChange}
+            required
+          />
+          {errors.identificacion && (
+            <p className="text-red-500 text-sm">{errors.identificacion}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="telefono">Teléfono</Label>
+          <Input
+            id="telefono"
+            name="telefono"
+            type="tel"
+            value={newClient.telefono}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="telefono_alterno">Teléfono Alterno</Label>
+          <Input
+            id="telefono_alterno"
+            name="telefono_alterno"
+            type="tel"
+            value={newClient.telefono_alterno}
+            onChange={handleInputChange}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="forma_pago">Forma de Pago</Label>
+          <Input
+            id="forma_pago"
+            name="forma_pago"
+            value={newClient.forma_pago}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="contacto_referencia">Contacto de Referencia</Label>
+          <Input
+            id="contacto_referencia"
+            name="contacto_referencia"
+            value={newClient.contacto_referencia}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="asegurador">Asegurador</Label>
+          <Input
+            id="asegurador"
+            name="asegurador"
+            value={newClient.asegurador}
+            onChange={handleInputChange}
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="seguro_comprado"
+            checked={newClient.seguro_comprado}
+            onCheckedChange={handleCheckboxChange}
+          />
+          <Label htmlFor="seguro_comprado">Seguro Comprado</Label>
+        </div>
       </div>
-      <button
-        type="submit"
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-      >
+      <Button type="submit" className="w-full">
         {initialClientData ? "Actualizar Cliente" : "Crear Cliente"}
-      </button>
+      </Button>
     </form>
   );
 }

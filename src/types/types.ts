@@ -37,3 +37,21 @@ export interface DesignType {
   cost: number;
   imageUrl: string;
 }
+
+export interface OptionType {
+  name: string;
+  price: number;
+  imageUrl: string;
+  type: string;
+  specification: string;
+  pcs: number;
+  suboptions: SubOptionType[];
+}
+
+export interface SubOptionType {
+  code: string;
+  price: number;
+  imageUrl: string;
+  details: string;
+  name: string;
+}

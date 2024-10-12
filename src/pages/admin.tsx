@@ -31,6 +31,7 @@ import {
   SubOptionType,
   ColorOptionType,
 } from "@/types/types";
+import InsurancePolicies from "@/components/Insurance";
 
 const Admin = ({ initialProducts, orders }: any) => {
   const [products, setProducts] = useState(initialProducts);
@@ -544,7 +545,7 @@ const Admin = ({ initialProducts, orders }: any) => {
         </TabsContent>
         <TabsContent value="seguros">
           <h2 className="text-3xl font-bold mb-6">Insurance Management</h2>
-          {/* Add insurance management content here */}
+          <InsurancePolicies />
         </TabsContent>
       </Tabs>
 

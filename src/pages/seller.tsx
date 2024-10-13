@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OrderDetail } from "@/components/OrderDetails";
+import InsurancePolicies from "@/components/Insurance";
 
 interface FullScreenImageProps {
   src: string;
@@ -241,7 +242,7 @@ function Seller({ products }: { products: any[] }) {
   return (
     <div className="container mx-auto py-8">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4 mb-12">
           <TabsTrigger value="orders">
             <ClipboardList className="mr-2 h-4 w-4" />
             Mis Órdenes
@@ -254,6 +255,7 @@ function Seller({ products }: { products: any[] }) {
             <Users className="mr-2 h-4 w-4" />
             Mis Clientes
           </TabsTrigger>
+          <TabsTrigger value="insurance">Seguros</TabsTrigger>
         </TabsList>
         <TabsContent value="orders">
           <Card>
@@ -391,6 +393,9 @@ function Seller({ products }: { products: any[] }) {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="insurance">
+          <InsurancePolicies />
         </TabsContent>
       </Tabs>
 

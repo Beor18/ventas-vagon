@@ -32,7 +32,6 @@ declare module "jspdf" {
 }
 
 const handleExportToPDF = async (order: any) => {
-  console.log("Order PDF: ", order);
   const doc = new jsPDF();
   let yOffset = 10;
 

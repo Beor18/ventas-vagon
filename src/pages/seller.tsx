@@ -21,6 +21,9 @@ import {
   Trash2,
   Eye,
   X,
+  Download,
+  FileText,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   Dialog,
@@ -39,6 +42,14 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OrderDetail } from "@/components/OrderDetails";
 import InsurancePolicies from "@/components/Insurance";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: typeof autoTable;
+  }
+}
 
 interface FullScreenImageProps {
   src: string;
@@ -96,6 +107,253 @@ function Seller({ products }: { products: any[] }) {
       fetchClients();
     }
   }, [session]);
+
+  // const handleDownloadOrder = (order: any) => {
+  //   const orderString = JSON.stringify(order, null, 2);
+  //   const blob = new Blob([orderString], { type: "application/json" });
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement("a");
+  //   link.href = url;
+  //   link.download = `order_${order._id}.json`;
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
+
+  const handleExportToPDF = async (order: any) => {
+    const doc = new jsPDF();
+    let yOffset = 10;
+
+    // Helper function to add text
+    const addText = (text: string, y: number, fontSize = 12) => {
+      doc.setFontSize(fontSize);
+      doc.text(text, 10, y);
+      return doc.getTextDimensions(text).h + 2;
+    };
+
+    // Helper function to add image
+    const addImage = async (
+      url: string,
+      y: number,
+      maxWidth = 180,
+      maxHeight = 100
+    ) => {
+      try {
+        const img = await loadImage(url);
+        const imgProps = doc.getImageProperties(img);
+        const width = Math.min(maxWidth, imgProps.width);
+        const height = (imgProps.height * width) / imgProps.width;
+        doc.addImage(img, "JPEG", 10, y, width, Math.min(height, maxHeight));
+        return Math.min(height, maxHeight) + 5;
+      } catch (error) {
+        console.error("Error loading image:", error);
+        return 0;
+      }
+    };
+
+    // Helper function to load image
+    const loadImage = (url: string): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL("image/jpeg"));
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
+    };
+
+    // Title
+    yOffset += addText(`Order Details: ${order.productName}`, yOffset, 18);
+    yOffset += 10;
+
+    // Order Information
+    const orderInfo = [
+      { label: "Total", value: `$${order.total}` },
+      { label: "Discount", value: `$${order.discount}` },
+      { label: "Tax", value: `${order.tax}%` },
+      { label: "Status", value: order.status },
+      { label: "Vendor", value: order.vendedorName },
+      { label: "Vendor Email", value: order.vendedorEmail },
+    ];
+
+    autoTable(doc, {
+      startY: yOffset,
+      head: [["Field", "Value"]],
+      body: orderInfo.map((info) => [info.label, info.value]),
+      theme: "striped",
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      styles: { fontSize: 10, cellPadding: 5 },
+    });
+
+    yOffset = (doc as any).lastAutoTable.finalY + 10;
+
+    // Client Information
+    if (order.cliente) {
+      yOffset += addText("Client Information", yOffset, 14);
+      const clientInfo = [
+        { label: "Name", value: order.cliente.nombre },
+        { label: "Email", value: order.cliente.email },
+        { label: "Phone", value: order.cliente.telefono },
+        { label: "Address", value: order.cliente.direccion_residencial },
+        { label: "Unit Address", value: order.cliente.direccion_unidad },
+        { label: "Land Owner", value: order.cliente.propietario_terreno },
+        { label: "Unit Purpose", value: order.cliente.proposito_unidad },
+        { label: "Marital Status", value: order.cliente.estado_civil },
+        { label: "Workplace", value: order.cliente.lugar_empleo },
+        { label: "ID", value: order.cliente.identificacion },
+        { label: "Payment Method", value: order.cliente.forma_pago },
+        {
+          label: "Reference Contact",
+          value: order.cliente.contacto_referencia,
+        },
+        {
+          label: "Insurance Purchased",
+          value: order.cliente.seguro_comprado ? "Yes" : "No",
+        },
+      ];
+
+      autoTable(doc, {
+        startY: yOffset + 5,
+        head: [["Field", "Value"]],
+        body: clientInfo.map((info) => [info.label, info.value]),
+        theme: "striped",
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        styles: { fontSize: 10, cellPadding: 5 },
+      });
+
+      yOffset = (doc as any).lastAutoTable.finalY + 10;
+    }
+
+    // Options
+    if (order.options && order.options.length > 0) {
+      yOffset += addText("Options", yOffset, 14);
+      for (const option of order.options) {
+        autoTable(doc, {
+          startY: yOffset + 5,
+          head: [[option.name]],
+          body: [
+            ["Price", `$${option.price}`],
+            ["Type", option.type],
+            ["Specification", option.specification],
+            ["Pieces", option.pcs.toString()],
+          ],
+          theme: "striped",
+          headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+          styles: { fontSize: 10, cellPadding: 5 },
+        });
+
+        yOffset = (doc as any).lastAutoTable.finalY + 5;
+
+        if (option.imageUrl) {
+          yOffset += await addImage(option.imageUrl, yOffset);
+        }
+
+        if (option.suboptions && option.suboptions.length > 0) {
+          autoTable(doc, {
+            startY: yOffset + 5,
+            head: [["Suboption", "Code", "Price", "Details"]],
+            body: option.suboptions.map((suboption: any) => [
+              suboption.name,
+              suboption.code,
+              `$${suboption.price}`,
+              suboption.details,
+            ]),
+            theme: "striped",
+            headStyles: { fillColor: [52, 152, 219], textColor: 255 },
+            styles: { fontSize: 9, cellPadding: 3 },
+          });
+
+          yOffset = (doc as any).lastAutoTable.finalY + 5;
+
+          for (const suboption of option.suboptions) {
+            if (suboption.imageUrl) {
+              yOffset += await addImage(suboption.imageUrl, yOffset, 90, 50);
+            }
+          }
+        }
+
+        if (yOffset > 270) {
+          doc.addPage();
+          yOffset = 10;
+        }
+      }
+    }
+
+    // Designs
+    if (order.designs && order.designs.length > 0) {
+      yOffset += addText("Designs", yOffset, 14);
+      autoTable(doc, {
+        startY: yOffset + 5,
+        head: [["Design Type", "Cost"]],
+        body: order.designs.map((design: any) => [
+          design.designType,
+          `$${design.cost}`,
+        ]),
+        theme: "striped",
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        styles: { fontSize: 10, cellPadding: 5 },
+      });
+
+      yOffset = (doc as any).lastAutoTable.finalY + 5;
+
+      for (const design of order.designs) {
+        if (design.imageUrl) {
+          yOffset += await addImage(design.imageUrl, yOffset);
+        }
+        if (yOffset > 270) {
+          doc.addPage();
+          yOffset = 10;
+        }
+      }
+    }
+
+    // Comments
+    if (order.comentaries) {
+      yOffset += addText("Comments", yOffset, 14);
+      autoTable(doc, {
+        startY: yOffset + 5,
+        body: [[order.comentaries]],
+        theme: "plain",
+        styles: { fontSize: 10, cellPadding: 5 },
+      });
+    }
+
+    doc.save(`order_${order._id}.pdf`);
+  };
+
+  const handleExportToCSV = (order: any) => {
+    const replacer = (key: string, value: any) => (value === null ? "" : value);
+    const header = Object.keys(order);
+    const csv = [
+      header.join(","),
+      Object.values(order)
+        .map((v) =>
+          typeof v === "object"
+            ? JSON.stringify(v, replacer)
+            : v !== null
+            ? v
+            : ""
+        )
+        .join(","),
+    ].join("\r\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `order_${order._id}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const fetchAccessToken = async () => {
     const response = await fetch("/api/jwt");
@@ -292,12 +550,24 @@ function Seller({ products }: { products: any[] }) {
                             order.comentaries
                           )}
                         </p>
-                        <Button
-                          className="mt-4"
-                          onClick={() => handleOpenOrderDetail(order)}
-                        >
-                          Ver detalle de la orden
-                        </Button>
+                        <div className="flex space-x-2 mt-4">
+                          <Button onClick={() => handleOpenOrderDetail(order)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver detalle
+                          </Button>
+                          {/* <Button onClick={() => handleDownloadOrder(order)}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Descargar
+                          </Button> */}
+                          <Button onClick={() => handleExportToPDF(order)}>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Exportar a PDF
+                          </Button>
+                          {/* <Button onClick={() => handleExportToCSV(order)}>
+                            <FileSpreadsheet className="mr-2 h-4 w-4" />
+                            Exportar a CSV
+                          </Button> */}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

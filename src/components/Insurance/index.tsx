@@ -429,23 +429,39 @@ export default function InsurancePolicies() {
                                 {selectedPolicy.comentarios}
                               </p>
                             </div>
-                            <div className="col-span-2">
-                              <p>
-                                <strong>Documentos:</strong>
-                              </p>
-                              <ul className="list-disc list-inside">
+                            <div className="mt-4">
+                              <h4 className="text-sm font-semibold mb-2">
+                                Documentos:
+                              </h4>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 {selectedPolicy.documentos.map((doc, index) => (
-                                  <li key={index}>
-                                    <a
-                                      href={doc}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
+                                  <a
+                                    key={index}
+                                    href={doc}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                                  >
+                                    <svg
+                                      className="w-5 h-5 mr-2 text-gray-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      xmlns="http://www.w3.org/2000/svg"
                                     >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                      />
+                                    </svg>
+                                    <span className="text-sm text-gray-800">
                                       Documento {index + 1}
-                                    </a>
-                                  </li>
+                                    </span>
+                                  </a>
                                 ))}
-                              </ul>
+                              </div>
                             </div>
                           </div>
                         )}

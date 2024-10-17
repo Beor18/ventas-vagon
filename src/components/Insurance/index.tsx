@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { upload } from "@vercel/blob/client";
 import { format } from "date-fns";
 import { Eye, Pencil, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,8 @@ export default function InsurancePolicies() {
     documentos: [],
   });
 
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
   useEffect(() => {
     fetchPolicies();
   }, []);
@@ -101,12 +104,27 @@ export default function InsurancePolicies() {
   const handleCreatePolicy = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const uploadedUrls = await Promise.all(
+        uploadedFiles.map(async (file) => {
+          const blob = await upload(file.name, file, {
+            access: "public",
+            handleUploadUrl: "/api/upload",
+          });
+          return blob.url;
+        })
+      );
+
+      const policyWithDocuments = {
+        ...newPolicy,
+        documentos: uploadedUrls,
+      };
+
       const response = await fetch("/api/seguro", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newPolicy),
+        body: JSON.stringify(policyWithDocuments),
       });
       if (!response.ok) {
         throw new Error("Failed to create insurance policy");
@@ -126,6 +144,7 @@ export default function InsurancePolicies() {
         comentarios: "",
         documentos: [],
       });
+      setUploadedFiles([]);
     } catch (error) {
       console.error("Error creating insurance policy:", error);
     }
@@ -136,12 +155,27 @@ export default function InsurancePolicies() {
     if (!selectedPolicy) return;
 
     try {
+      const uploadedUrls = await Promise.all(
+        uploadedFiles.map(async (file) => {
+          const blob = await upload(file.name, file, {
+            access: "public",
+            handleUploadUrl: "/api/upload",
+          });
+          return blob.url;
+        })
+      );
+
+      const updatedPolicy = {
+        ...selectedPolicy,
+        documentos: [...selectedPolicy.documentos, ...uploadedUrls],
+      };
+
       const response = await fetch(`/api/seguro?id=${selectedPolicy._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(selectedPolicy),
+        body: JSON.stringify(updatedPolicy),
       });
       if (!response.ok) {
         throw new Error("Failed to update insurance policy");
@@ -149,6 +183,7 @@ export default function InsurancePolicies() {
       fetchPolicies();
       setIsEditModalOpen(false);
       setSelectedPolicy(null);
+      setUploadedFiles([]);
     } catch (error) {
       console.error("Error updating insurance policy:", error);
     }
@@ -166,6 +201,12 @@ export default function InsurancePolicies() {
   ) => {
     const { name, value } = e.target;
     setSelectedPolicy((prev) => (prev ? { ...prev, [name]: value } : null));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setUploadedFiles(Array.from(e.target.files));
+    }
   };
 
   return (
@@ -279,6 +320,16 @@ export default function InsurancePolicies() {
                     required
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="documentos">Documentos</Label>
+                  <Input
+                    id="documentos"
+                    name="documentos"
+                    type="file"
+                    onChange={handleFileChange}
+                    multiple
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="comentarios">Comentarios</Label>
@@ -384,7 +435,15 @@ export default function InsurancePolicies() {
                               </p>
                               <ul className="list-disc list-inside">
                                 {selectedPolicy.documentos.map((doc, index) => (
-                                  <li key={index}>{doc}</li>
+                                  <li key={index}>
+                                    <a
+                                      href={doc}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      Documento {index + 1}
+                                    </a>
+                                  </li>
                                 ))}
                               </ul>
                             </div>
@@ -535,6 +594,19 @@ export default function InsurancePolicies() {
                                 name="comentarios"
                                 value={selectedPolicy.comentarios}
                                 onChange={handleEditInputChange}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-documentos">
+                                Documentos Adicionales
+                              </Label>
+                              <Input
+                                id="edit-documentos"
+                                name="documentos"
+                                type="file"
+                                onChange={handleFileChange}
+                                multiple
                               />
                             </div>
                             <Button type="submit">Actualizar Póliza</Button>

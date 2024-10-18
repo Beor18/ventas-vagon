@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Toaster } from "@/components/ui/toaster";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -187,6 +188,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
           <div className="container mx-auto px-2 sm:px-2 lg:px-2 py-2">
             {children}
+            <Toaster />
           </div>
         </main>
       </div>

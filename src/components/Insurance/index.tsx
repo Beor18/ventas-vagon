@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 interface InsurancePolicy {
   _id: string;
@@ -62,6 +63,8 @@ export default function InsurancePolicies() {
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchPolicies();
@@ -129,6 +132,7 @@ export default function InsurancePolicies() {
       if (!response.ok) {
         throw new Error("Failed to create insurance policy");
       }
+      const createdPolicy = await response.json();
       fetchPolicies();
       setIsCreateModalOpen(false);
       setNewPolicy({
@@ -145,8 +149,18 @@ export default function InsurancePolicies() {
         documentos: [],
       });
       setUploadedFiles([]);
+      toast({
+        title: "Éxito",
+        description: "La póliza de seguro se creó correctamente.",
+      });
+      await sendPolicyEmail(createdPolicy, true);
     } catch (error) {
       console.error("Error creating insurance policy:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la póliza de seguro.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -184,8 +198,63 @@ export default function InsurancePolicies() {
       setIsEditModalOpen(false);
       setSelectedPolicy(null);
       setUploadedFiles([]);
+      toast({
+        title: "Éxito",
+        description: "La póliza de seguro se actualizó correctamente.",
+      });
+      await sendPolicyEmail(updatedPolicy, false);
     } catch (error) {
       console.error("Error updating insurance policy:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la póliza de seguro.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const sendPolicyEmail = async (policy: InsurancePolicy, isNew: boolean) => {
+    try {
+      const response = await fetch("/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: "ventas@vagonpuertorico.com",
+          subject: isNew
+            ? "Nueva Póliza de Seguro Creada"
+            : "Póliza de Seguro Actualizada",
+          text: `
+            Detalles de la póliza:
+            Nombre: ${policy.nombre}
+            Dirección Postal: ${policy.direccion_postal}
+            Dirección Física: ${policy.direccion_fisica}
+            Fecha de Nacimiento: ${policy.fecha_nacimiento}
+            Teléfono de Contacto: ${policy.telefono_contacto}
+            Costo de Propiedad: ${policy.costo_propiedad}
+            Modelo de Propiedad: ${policy.modelo_propiedad}
+            Uso de Propiedad: ${policy.uso_propiedad}
+            Vendedor: ${policy.vendedor}
+            Comentarios: ${policy.comentarios}
+            Documentos: ${policy.documentos.join(", ")}
+          `,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+
+      console.log("Email sent successfully");
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast({
+        title: "Advertencia",
+        description:
+          "La póliza se guardó, pero hubo un problema al enviar el correo electrónico.",
+        //variant: "warning",
+      });
     }
   };
 

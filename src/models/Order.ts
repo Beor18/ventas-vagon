@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Client from "./Client";
 const { Schema } = mongoose;
 
 const subOptionSchema = new Schema({

@@ -99,6 +99,17 @@ const OptionCard: React.FC<OptionCardProps> = ({
               )
             }
             preview={option.imageUrl}
+            handleGallerySelect={(url: string) => {
+              const updatedOptions = [...product.options];
+              updatedOptions[optionIndex] = {
+                ...updatedOptions[optionIndex],
+                imageUrl: url,
+              };
+              setProduct({
+                ...product,
+                options: updatedOptions,
+              });
+            }}
           />
           <InputField
             label="Option Type"
@@ -243,6 +254,17 @@ const SuboptionCard: React.FC<{
             )
           }
           preview={suboption.imageUrl}
+          handleGallerySelect={(url: string) => {
+            const updatedOptions = [...product.options];
+            updatedOptions[optionIndex].suboptions[subOptionIndex] = {
+              ...updatedOptions[optionIndex].suboptions[subOptionIndex],
+              imageUrl: url,
+            };
+            setProduct({
+              ...product,
+              options: updatedOptions,
+            });
+          }}
         />
         <InputField
           label="Suboption Code"

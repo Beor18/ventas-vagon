@@ -81,6 +81,9 @@ const Navbar = () => {
                     {session?.user.role === "Administrador" && (
                       <>
                         <NavLink href="/admin">Administrador</NavLink>
+                        <NavLink href="/gallery">
+                          Subir Imagenes / Galeria
+                        </NavLink>
                         <NavLink href="/register">Registrar Usuarios</NavLink>
                       </>
                     )}
@@ -148,6 +151,7 @@ const Navbar = () => {
                 {session?.user.role === "Administrador" && (
                   <>
                     <NavLink href="/admin">Administrador</NavLink>
+                    <NavLink href="/gallery">Subir Imagenes / Galeria</NavLink>
                     <NavLink href="/register">Registrar Usuarios</NavLink>
                   </>
                 )}

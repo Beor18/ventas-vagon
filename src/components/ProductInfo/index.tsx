@@ -51,6 +51,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           )
         }
         preview={product.imageUrl}
+        handleGallerySelect={(url: any) => {
+          setProduct({ ...product, imageUrl: url?.downloadUrl });
+        }}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField

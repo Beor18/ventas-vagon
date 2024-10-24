@@ -82,6 +82,9 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
             )
           }
           preview={newDesign.imageUrl}
+          handleGallerySelect={(url: string) => {
+            setNewDesign({ ...newDesign, imageUrl: url });
+          }}
         />
         <Button onClick={addDesign} className="w-full">
           <Plus className="mr-2 h-4 w-4" /> Add Design

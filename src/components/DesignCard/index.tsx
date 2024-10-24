@@ -86,6 +86,17 @@ const DesignCard: React.FC<DesignCardProps> = ({
               )
             }
             preview={design.imageUrl}
+            handleGallerySelect={(url: string) => {
+              const updatedDesigns = [...product.designs];
+              updatedDesigns[designIndex] = {
+                ...updatedDesigns[designIndex],
+                imageUrl: url,
+              };
+              setProduct({
+                ...product,
+                designs: updatedDesigns,
+              });
+            }}
           />
         </div>
       </CardContent>

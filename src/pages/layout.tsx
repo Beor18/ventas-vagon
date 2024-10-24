@@ -89,6 +89,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       Administrador
                     </Button>
                   </Link>
+                  <Link key="/gallery" href="/gallery">
+                    <Button
+                      variant="ghost"
+                      className={`w-full justify-start text-white hover:bg-gray-800 ${
+                        pathname === "/gallery" ? "bg-gray-800" : ""
+                      }`}
+                    >
+                      Subir Imagenes / Galeria
+                    </Button>
+                  </Link>
                   <Link key="/register" href="/register">
                     <Button
                       variant="ghost"

@@ -17,8 +17,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, Upload as UploadIcon } from "lucide-react";
 import ImageGallery from "@/components/Gallery/ImageGallery";
+import withAuth from "@/lib/withAuth";
 
-export default function Gallery() {
+const Gallery = () => {
   const [isOpen, setIsOpen] = useState(false);
   const inputFileRef = useRef<HTMLInputElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -151,4 +152,6 @@ export default function Gallery() {
       <ImageGallery />
     </div>
   );
-}
+};
+
+export default withAuth(Gallery, ["Administrador", "Vendedor"]);

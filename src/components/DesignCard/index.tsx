@@ -86,11 +86,26 @@ const DesignCard: React.FC<DesignCardProps> = ({
               )
             }
             preview={design.imageUrl}
+            // handleGallerySelect={(url: any) => {
+            //   setProduct((prev) => ({ ...prev, imageUrl: url?.downloadUrl }));
+            // }}
+            // setProduct={setProduct}
             handleGallerySelect={(url: string) => {
               const updatedDesigns = [...product.designs];
               updatedDesigns[designIndex] = {
                 ...updatedDesigns[designIndex],
                 imageUrl: url,
+              };
+              setProduct({
+                ...product,
+                designs: updatedDesigns,
+              });
+            }}
+            setProduct={(updatedProduct) => {
+              const updatedDesigns = [...product.designs];
+              updatedDesigns[designIndex] = {
+                ...updatedDesigns[designIndex],
+                designType: updatedProduct.name,
               };
               setProduct({
                 ...product,

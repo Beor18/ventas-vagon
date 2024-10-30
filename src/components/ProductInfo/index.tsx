@@ -16,7 +16,7 @@ interface ProductInfoProps {
     setImageUrlCallback: (url: string) => void,
     setPreviewCallback: (url: string) => void
   ) => void;
-  setProduct: (product: ProductType) => void;
+  setProduct: (product: any) => void;
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({
@@ -46,14 +46,15 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           handleImagePreview(
             e,
-            (url: string) => setProduct({ ...product, imageUrl: url }),
-            (url: string) => setProduct({ ...product, imageUrl: url })
+            (url: string) => setProduct((prev) => ({ ...prev, imageUrl: url })),
+            (url: string) => setProduct((prev) => ({ ...prev, imageUrl: url }))
           )
         }
         preview={product.imageUrl}
         handleGallerySelect={(url: any) => {
-          setProduct({ ...product, imageUrl: url?.downloadUrl });
+          setProduct((prev) => ({ ...prev, imageUrl: url?.downloadUrl }));
         }}
+        setProduct={setProduct}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField

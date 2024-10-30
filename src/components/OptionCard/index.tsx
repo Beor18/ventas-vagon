@@ -91,6 +91,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                 (url: string) => {
                   const updatedOptions = [...product.options];
                   updatedOptions[optionIndex].imageUrl = url;
+                  updatedOptions[optionIndex].name = url;
                   setProduct({
                     ...product,
                     options: updatedOptions,
@@ -99,16 +100,31 @@ const OptionCard: React.FC<OptionCardProps> = ({
               )
             }
             preview={option.imageUrl}
-            handleGallerySelect={(url: string) => {
+            handleGallerySelect={(url: any) => {
               const updatedOptions = [...product.options];
               updatedOptions[optionIndex] = {
                 ...updatedOptions[optionIndex],
+                name: url.pathname,
                 imageUrl: url,
               };
               setProduct({
                 ...product,
                 options: updatedOptions,
               });
+            }}
+            setProduct={(updatedProduct) => {
+              const updatedOptions = [...product.options];
+              if (updatedProduct.imageUrl) {
+                updatedOptions[optionIndex] = {
+                  ...updatedOptions[optionIndex],
+                  imageUrl: updatedProduct.imageUrl,
+                  name: updatedProduct.name || updatedOptions[optionIndex].name, // Update name if provided
+                };
+                setProduct({
+                  ...product,
+                  options: updatedOptions,
+                });
+              }
             }}
           />
           <InputField
@@ -254,16 +270,34 @@ const SuboptionCard: React.FC<{
             )
           }
           preview={suboption.imageUrl}
-          handleGallerySelect={(url: string) => {
+          handleGallerySelect={(url: any) => {
+            console.log("urlurlurlurl: ", url);
             const updatedOptions = [...product.options];
             updatedOptions[optionIndex].suboptions[subOptionIndex] = {
               ...updatedOptions[optionIndex].suboptions[subOptionIndex],
+              name: url.pathname,
               imageUrl: url,
             };
             setProduct({
               ...product,
               options: updatedOptions,
             });
+          }}
+          setProduct={(updatedProduct) => {
+            const updatedOptions = [...product.options];
+            if (updatedProduct.imageUrl) {
+              updatedOptions[optionIndex].suboptions[subOptionIndex] = {
+                ...updatedOptions[optionIndex].suboptions[subOptionIndex],
+                imageUrl: updatedProduct.imageUrl,
+                name:
+                  updatedProduct.name ||
+                  updatedOptions[optionIndex].suboptions[subOptionIndex].name,
+              };
+              setProduct({
+                ...product,
+                options: updatedOptions,
+              });
+            }
           }}
         />
         <InputField

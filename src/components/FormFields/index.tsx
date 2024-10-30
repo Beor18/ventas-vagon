@@ -72,6 +72,7 @@ interface ImageUploadFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   preview: any;
   handleGallerySelect: (url: string) => void;
+  setProduct?: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
@@ -79,6 +80,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   onChange,
   preview,
   handleGallerySelect,
+  setProduct,
 }) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<"upload" | "gallery">("upload");
@@ -94,8 +96,34 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     fetchImages();
   }, []);
 
-  const handleGalleryImageSelect = (imageUrl: string) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e);
+    if (e.target.files && e.target.files.length > 0) {
+      const fileName = e.target.files[0].name;
+      const nameWithoutExtension = fileName.split(".").slice(0, -1).join(".");
+      if (setProduct) {
+        setProduct((prev) => ({ ...prev, name: nameWithoutExtension }));
+      }
+    }
+  };
+
+  const handleGalleryImageSelect = (imageUrl: any) => {
     handleGallerySelect(imageUrl);
+
+    let fileName = "";
+
+    if (typeof imageUrl === "string") {
+      fileName = imageUrl.split("/").pop() || "";
+    } else if (imageUrl && typeof imageUrl.pathname === "string") {
+      fileName = imageUrl.pathname;
+    } else if (imageUrl && typeof imageUrl.downloadUrl === "string") {
+      fileName = imageUrl.downloadUrl.split("/").pop() || "";
+    }
+
+    if (fileName && setProduct) {
+      const nameWithoutExtension = fileName.split(".").slice(0, -1).join(".");
+      setProduct((prev) => ({ ...prev, name: nameWithoutExtension }));
+    }
   };
 
   return (
@@ -104,18 +132,18 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
         <Label>{label}</Label>
         <Tabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "upload" | "gallery")}
+          onValueChange={(value) => setActiveTab(value as "gallery")}
         >
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="upload">Upload</TabsTrigger>
+            {/* <TabsTrigger value="upload">Upload</TabsTrigger> */}
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
           </TabsList>
-          <TabsContent value="upload">
+          {/* <TabsContent value="upload">
             <div className="flex items-center space-x-4">
               <Input
                 type="file"
                 ref={inputFileRef}
-                onChange={onChange}
+                onChange={handleFileChange}
                 className="hidden"
                 accept="image/*"
               />
@@ -136,7 +164,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                 </div>
               )}
             </div>
-          </TabsContent>
+          </TabsContent> */}
           <TabsContent value="gallery">
             <ScrollArea className="h-[300px]">
               <div className="grid grid-cols-3 gap-4">

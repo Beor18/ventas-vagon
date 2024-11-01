@@ -266,9 +266,33 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   const handleSaveProduct = async () => {
     setLoading(true);
     try {
-      // Lógica para guardar el producto en la base de datos
-      setMessage("Product saved successfully");
-      closeProductModal();
+      const method = product._id ? "PUT" : "POST";
+      const endpoint = product._id
+        ? `/api/products/${product._id}`
+        : "/api/products";
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(product),
+      });
+
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        setProducts((prevProducts) => {
+          if (product._id) {
+            return prevProducts.map((p) =>
+              p._id === updatedProduct._id ? updatedProduct : p
+            );
+          } else {
+            return [...prevProducts, updatedProduct];
+          }
+        });
+        setMessage("Product saved successfully");
+        closeProductModal();
+      } else {
+        throw new Error("Failed to save product");
+      }
     } catch (error) {
       console.error("Error saving product:", error);
       setMessage("Error saving product");

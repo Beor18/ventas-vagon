@@ -92,8 +92,15 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     async function fetchImages() {
       const response = await fetch("/api/upload/list", { cache: "no-cache" });
       const data = await response.json();
-      setImages(data?.blobs || []);
-      setVisibleImages(data?.blobs.slice(0, imagesPerPage) || []);
+
+      // Ordenar imágenes por fecha de subida en orden descendente
+      const sortedImages = (data?.blobs || []).sort(
+        (a: any, b: any) =>
+          new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+      );
+
+      setImages(sortedImages);
+      setVisibleImages(sortedImages.slice(0, imagesPerPage));
     }
 
     fetchImages();

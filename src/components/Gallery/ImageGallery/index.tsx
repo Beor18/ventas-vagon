@@ -9,12 +9,16 @@ import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 
 interface ImageData {
   downloadUrl: string;
+  uploadedAt: string;
 }
 
 export default function ImageGallery() {
   const [images, setImages] = useState<ImageData[]>([]);
+  const [visibleImages, setVisibleImages] = useState<ImageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const imagesPerPage = 12;
 
   useEffect(() => {
     async function fetchImages() {
@@ -22,8 +26,20 @@ export default function ImageGallery() {
         setLoading(true);
         const response = await fetch("/api/upload/list", { cache: "no-cache" });
         const data = await response.json();
-        const urls = data?.blobs.map((blob: any) => ({ downloadUrl: blob }));
-        setImages(urls);
+
+        const sortedImages = data?.blobs
+          .map((blob: any) => ({
+            downloadUrl: blob.downloadUrl,
+            uploadedAt: blob.uploadedAt,
+          }))
+          .sort(
+            (a: ImageData, b: ImageData) =>
+              new Date(b.uploadedAt).getTime() -
+              new Date(a.uploadedAt).getTime()
+          );
+
+        setImages(sortedImages);
+        setVisibleImages(sortedImages.slice(0, imagesPerPage));
       } catch (error) {
         console.error("Failed to fetch images:", error);
       } finally {
@@ -33,6 +49,16 @@ export default function ImageGallery() {
 
     fetchImages();
   }, []);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    const nextImages = images.slice(
+      nextPage * imagesPerPage,
+      (nextPage + 1) * imagesPerPage
+    );
+    setVisibleImages((prev) => [...prev, ...nextImages]);
+    setPage(nextPage);
+  };
 
   const openModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
@@ -55,12 +81,12 @@ export default function ImageGallery() {
               />
             ))}
           </div>
-        ) : images.length > 0 ? (
+        ) : visibleImages.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-            {images.map((image: any, index) => (
+            {visibleImages.map((image: ImageData, index) => (
               <div key={index} className="relative group">
                 <img
-                  src={image?.downloadUrl?.downloadUrl}
+                  src={image.downloadUrl}
                   alt={`Gallery image ${index + 1}`}
                   className="w-full aspect-square object-cover rounded-md transition-transform duration-300 ease-in-out group-hover:scale-105"
                 />
@@ -68,7 +94,7 @@ export default function ImageGallery() {
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => openModal(image?.downloadUrl?.downloadUrl)}
+                    onClick={() => openModal(image.downloadUrl)}
                     className="text-white hover:underline flex items-center"
                   >
                     <Image className="mr-2 h-4 w-4" />
@@ -82,6 +108,15 @@ export default function ImageGallery() {
           <p className="text-center text-muted-foreground">
             No images uploaded yet.
           </p>
+        )}
+
+        {visibleImages.length < images.length && (
+          <button
+            onClick={handleLoadMore}
+            className="w-full mt-4 text-blue-500"
+          >
+            Load More
+          </button>
         )}
       </CardContent>
 

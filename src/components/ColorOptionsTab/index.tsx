@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProductType, ColorOptionType } from "@/types/types";
+import { ImageUploadField } from "@/components/FormFields";
 
 interface ColorOptionsTabProps {
   product: ProductType;
@@ -31,9 +32,36 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
   removeColorOption,
   handleImagePreview,
 }) => {
+  const handleGallerySelect = (url: any) => {
+    const downloadUrl =
+      typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
+
+    // Procesa el nombre de la imagen para usarlo como `Color Name`
+    let fileName =
+      typeof downloadUrl === "string"
+        ? decodeURIComponent(downloadUrl.split("/").pop() || "")
+        : "";
+
+    let nameWithoutExtension = fileName
+      .substring(0, fileName.lastIndexOf("."))
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .split(" ")
+      .slice(0, 3)
+      .join(" ");
+
+    // Actualiza la nueva opción de color con la imagen seleccionada y el nombre procesado
+    setNewColorOption({
+      ...newColorOption,
+      imageUrl: downloadUrl,
+      colorName: nameWithoutExtension || newColorOption.colorName,
+      colorCode: nameWithoutExtension || newColorOption.colorCode,
+    });
+  };
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Color Options</h3>
+      <h3 className="text-lg font-semibold">Add New Color Option</h3>
       {product.colorOptions &&
         product.colorOptions.map((colorOption, index) => (
           <Card key={index}>
@@ -70,7 +98,6 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
         ))}
       <Card>
         <CardContent className="p-4 space-y-2">
-          <h4 className="font-semibold">Add New Color Option</h4>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="colorName">Color Name</Label>
@@ -102,11 +129,9 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
             </div>
             <div>
               <Label htmlFor="colorImage">Color Image</Label>
-              <Input
-                id="colorImage"
-                name="colorImage"
-                type="file"
-                onChange={(e) =>
+              <ImageUploadField
+                label="Select Color Image"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleImagePreview(
                     e,
                     (url) =>
@@ -114,6 +139,9 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
                     () => {}
                   )
                 }
+                preview={newColorOption.imageUrl}
+                handleGallerySelect={handleGallerySelect}
+                setProduct={setProduct}
               />
             </div>
           </div>

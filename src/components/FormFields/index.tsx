@@ -118,9 +118,9 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                   <div
                     key={index}
                     className={`cursor-pointer border-2 rounded-md overflow-hidden ${
-                      preview === image
-                        ? "border-primary"
-                        : "border-transparent"
+                      preview === image.downloadUrl
+                        ? "border-blue-600"
+                        : "border-gray-300"
                     }`}
                     onClick={() => handleGalleryImageSelect(image)}
                   >

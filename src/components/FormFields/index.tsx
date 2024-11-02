@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -80,21 +80,34 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   onChange,
   preview,
   handleGallerySelect,
-  setProduct,
 }) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<"upload" | "gallery">("gallery");
   const [images, setImages] = useState<string[]>([]);
+  const [visibleImages, setVisibleImages] = useState<string[]>([]);
+  const [page, setPage] = useState(0);
+  const imagesPerPage = 9; // Define cuántas imágenes cargar por página
 
   useEffect(() => {
     async function fetchImages() {
       const response = await fetch("/api/upload/list", { cache: "no-cache" });
       const data = await response.json();
       setImages(data?.blobs || []);
+      setVisibleImages(data?.blobs.slice(0, imagesPerPage) || []);
     }
 
     fetchImages();
   }, []);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    const nextImages = images.slice(
+      nextPage * imagesPerPage,
+      (nextPage + 1) * imagesPerPage
+    );
+    setVisibleImages((prev) => [...prev, ...nextImages]);
+    setPage(nextPage);
+  };
 
   const handleGalleryImageSelect = (imageUrl: any) => {
     handleGallerySelect(imageUrl);
@@ -114,7 +127,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           <TabsContent value="gallery">
             <ScrollArea className="h-[300px]">
               <div className="grid grid-cols-3 gap-4">
-                {images.map((image: any, index) => (
+                {visibleImages.map((image: any, index) => (
                   <div
                     key={index}
                     className={`cursor-pointer border-2 rounded-md overflow-hidden ${
@@ -124,14 +137,27 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                     }`}
                     onClick={() => handleGalleryImageSelect(image)}
                   >
-                    <img
-                      src={image?.downloadUrl}
-                      alt={`Gallery image ${index}`}
-                      className="w-full h-auto object-cover aspect-square"
-                    />
+                    <Suspense
+                      fallback={<div className="w-full h-auto bg-gray-200" />}
+                    >
+                      <img
+                        src={image?.downloadUrl}
+                        alt={`Gallery image ${index}`}
+                        className="w-full h-auto object-cover aspect-square"
+                        loading="lazy"
+                      />
+                    </Suspense>
                   </div>
                 ))}
               </div>
+              {visibleImages.length < images.length && (
+                <button
+                  onClick={handleLoadMore}
+                  className="w-full mt-4 text-blue-500"
+                >
+                  Load More
+                </button>
+              )}
             </ScrollArea>
           </TabsContent>
         </Tabs>

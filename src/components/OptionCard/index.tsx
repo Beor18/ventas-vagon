@@ -41,6 +41,54 @@ const OptionCard: React.FC<OptionCardProps> = ({
   handleSubOptionChange,
   removeSubOption,
 }) => {
+  const handleGallerySelect = (
+    url: any,
+    isSubOption = false,
+    subOptionIndex = 0
+  ) => {
+    const downloadUrl =
+      typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
+
+    let fileName =
+      typeof downloadUrl === "string"
+        ? decodeURIComponent(downloadUrl.split("/").pop() || "")
+        : "";
+
+    let nameWithoutExtension = fileName
+      .substring(0, fileName.lastIndexOf("."))
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .split(" ")
+      .slice(0, 3)
+      .join(" ");
+
+    const updatedOptions = [...product.options];
+
+    if (isSubOption) {
+      // Actualiza solo la suboption específica
+      updatedOptions[optionIndex].suboptions[subOptionIndex] = {
+        ...updatedOptions[optionIndex].suboptions[subOptionIndex],
+        imageUrl: downloadUrl,
+        name:
+          nameWithoutExtension ||
+          updatedOptions[optionIndex].suboptions[subOptionIndex].name,
+      };
+    } else {
+      // Actualiza la opción principal
+      updatedOptions[optionIndex] = {
+        ...updatedOptions[optionIndex],
+        imageUrl: downloadUrl,
+        name: nameWithoutExtension || updatedOptions[optionIndex].name,
+      };
+    }
+
+    // Aplica los cambios al producto
+    setProduct({
+      ...product,
+      options: updatedOptions,
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -91,7 +139,6 @@ const OptionCard: React.FC<OptionCardProps> = ({
                 (url: string) => {
                   const updatedOptions = [...product.options];
                   updatedOptions[optionIndex].imageUrl = url;
-                  updatedOptions[optionIndex].name = url;
                   setProduct({
                     ...product,
                     options: updatedOptions,
@@ -100,32 +147,9 @@ const OptionCard: React.FC<OptionCardProps> = ({
               )
             }
             preview={option.imageUrl}
-            handleGallerySelect={(url: any) => {
-              const updatedOptions = [...product.options];
-              updatedOptions[optionIndex] = {
-                ...updatedOptions[optionIndex],
-                name: url.pathname,
-                imageUrl: url,
-              };
-              setProduct({
-                ...product,
-                options: updatedOptions,
-              });
-            }}
-            setProduct={(updatedProduct) => {
-              const updatedOptions = [...product.options];
-              if (updatedProduct.imageUrl) {
-                updatedOptions[optionIndex] = {
-                  ...updatedOptions[optionIndex],
-                  imageUrl: updatedProduct.imageUrl,
-                  name: updatedProduct.name || updatedOptions[optionIndex].name, // Update name if provided
-                };
-                setProduct({
-                  ...product,
-                  options: updatedOptions,
-                });
-              }
-            }}
+            handleGallerySelect={(url: any) =>
+              handleGallerySelect(url, false, optionIndex)
+            }
           />
           <InputField
             label="Option Type"
@@ -164,6 +188,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                 handleImagePreview={handleImagePreview}
                 setProduct={setProduct}
                 product={product}
+                handleGallerySelect={handleGallerySelect}
               />
             )
           )}
@@ -197,6 +222,12 @@ const SuboptionCard: React.FC<{
   ) => void;
   setProduct: (product: ProductType) => void;
   product: ProductType;
+  handleGallerySelect: (
+    url: any,
+    isSubOption: boolean,
+    optionIndex: number,
+    subOptionIndex: number
+  ) => void;
 }> = ({
   suboption,
   optionIndex,
@@ -206,6 +237,7 @@ const SuboptionCard: React.FC<{
   handleImagePreview,
   setProduct,
   product,
+  handleGallerySelect,
 }) => (
   <Card>
     <CardHeader>
@@ -271,13 +303,36 @@ const SuboptionCard: React.FC<{
           }
           preview={suboption.imageUrl}
           handleGallerySelect={(url: any) => {
-            console.log("urlurlurlurl: ", url);
+            // Extrae la URL de descarga si está presente como propiedad
+            const downloadUrl =
+              typeof url === "object" && url.downloadUrl
+                ? url.downloadUrl
+                : url;
+
+            // Decodifica y extrae el nombre del archivo
+            let fileName =
+              typeof downloadUrl === "string"
+                ? decodeURIComponent(downloadUrl.split("/").pop() || "")
+                : "";
+
+            // Procesa el nombre para eliminar la extensión y limpiar caracteres
+            let nameWithoutExtension = fileName
+              .substring(0, fileName.lastIndexOf("."))
+              .replace(/[^\w\s]/g, " ")
+              .replace(/\s+/g, " ")
+              .split(" ")
+              .slice(0, 3)
+              .join(" ");
+
             const updatedOptions = [...product.options];
+
+            // Actualiza el suboption con el nombre procesado y la URL de imagen
             updatedOptions[optionIndex].suboptions[subOptionIndex] = {
               ...updatedOptions[optionIndex].suboptions[subOptionIndex],
-              name: url.pathname,
-              imageUrl: url,
+              name: nameWithoutExtension, // Usa el nombre procesado
+              imageUrl: downloadUrl,
             };
+
             setProduct({
               ...product,
               options: updatedOptions,

@@ -63,21 +63,6 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
       ))}
       <div className="space-y-4">
         <h6 className="text-lg font-semibold">New Option</h6>
-        <InputField
-          label="Option Name"
-          name="name"
-          value={newOption.name}
-          onChange={handleNewOptionChange}
-          placeholder="Enter new option name"
-        />
-        <InputField
-          label="Option Price"
-          name="price"
-          type="number"
-          value={newOption.price}
-          onChange={handleNewOptionChange}
-          placeholder="Enter new option price"
-        />
         <Button onClick={addOption} className="w-full">
           <Plus className="mr-2 h-4 w-4" /> Add Option
         </Button>

@@ -57,7 +57,7 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
         ))}
       <div className="space-y-4">
         <h6 className="text-lg font-semibold">New Design</h6>
-        <InputField
+        {/* <InputField
           label="Design Name"
           name="designType"
           value={newDesign.designType}
@@ -85,7 +85,7 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
           handleGallerySelect={(url: string) => {
             setNewDesign({ ...newDesign, imageUrl: url });
           }}
-        />
+        /> */}
         <Button onClick={addDesign} className="w-full">
           <Plus className="mr-2 h-4 w-4" /> Add Design
         </Button>

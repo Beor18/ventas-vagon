@@ -25,6 +25,32 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   handleImagePreview,
   setProduct,
 }) => {
+  const handleGallerySelect = (url: any) => {
+    // Asegura que usamos la URL de descarga
+    const downloadUrl =
+      typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
+
+    // Extrae y decodifica el nombre del archivo
+    let fileName =
+      typeof downloadUrl === "string"
+        ? decodeURIComponent(downloadUrl.split("/").pop() || "")
+        : "";
+
+    let nameWithoutExtension = fileName
+      .substring(0, fileName.lastIndexOf("."))
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .split(" ")
+      .slice(0, 3)
+      .join(" ");
+
+    setProduct((prev) => ({
+      ...prev,
+      imageUrl: downloadUrl,
+      name: nameWithoutExtension || prev.name,
+    }));
+  };
+
   return (
     <div className="space-y-4">
       <InputField
@@ -51,9 +77,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           )
         }
         preview={product.imageUrl}
-        handleGallerySelect={(url: any) => {
-          setProduct((prev) => ({ ...prev, imageUrl: url?.downloadUrl }));
-        }}
+        handleGallerySelect={handleGallerySelect}
         setProduct={setProduct}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

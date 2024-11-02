@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Minus } from "lucide-react";
@@ -8,7 +8,10 @@ import { ProductType, DesignType } from "@/types/types";
 interface DesignCardProps {
   design: DesignType;
   designIndex: number;
-  handleDesignChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleDesignChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    designIndex: number
+  ) => void;
   handleImagePreview: (
     e: React.ChangeEvent<HTMLInputElement>,
     setImageUrlCallback: (url: string) => void,
@@ -28,6 +31,40 @@ const DesignCard: React.FC<DesignCardProps> = ({
   product,
   removeDesign,
 }) => {
+  const handleGallerySelect = (url: any, designIndex: number) => {
+    // Obtiene la URL de descarga
+    const downloadUrl =
+      typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
+
+    // Extrae el nombre del archivo sin extensión
+    let fileName = "";
+    if (typeof downloadUrl === "string") {
+      fileName = decodeURIComponent(downloadUrl.split("/").pop() || "");
+    }
+
+    // Procesa el nombre para dejar solo letras, números y espacios
+    let nameWithoutExtension = fileName
+      .substring(0, fileName.lastIndexOf("."))
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .split(" ")
+      .slice(0, 3)
+      .join(" ");
+
+    // Actualiza el diseño correspondiente en el producto
+    const updatedDesigns = [...product.designs];
+    updatedDesigns[designIndex] = {
+      ...updatedDesigns[designIndex],
+      imageUrl: downloadUrl,
+      designType: nameWithoutExtension,
+    };
+
+    setProduct({
+      ...product,
+      designs: updatedDesigns,
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -46,17 +83,19 @@ const DesignCard: React.FC<DesignCardProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InputField
             label="Design Name"
-            name="name"
+            name="designType"
             value={design.designType}
-            onChange={(e) => handleDesignChange(e)}
+            onChange={(e) => {
+              handleDesignChange(e, designIndex);
+            }}
             placeholder="Enter design name"
           />
           <InputField
             label="Design Price"
-            name="price"
+            name="cost"
             type="number"
             value={design.cost}
-            onChange={(e) => handleDesignChange(e)}
+            onChange={(e) => handleDesignChange(e, designIndex)}
             placeholder="Enter design price"
           />
           <ImageUploadField
@@ -86,32 +125,9 @@ const DesignCard: React.FC<DesignCardProps> = ({
               )
             }
             preview={design.imageUrl}
-            // handleGallerySelect={(url: any) => {
-            //   setProduct((prev) => ({ ...prev, imageUrl: url?.downloadUrl }));
-            // }}
-            // setProduct={setProduct}
-            handleGallerySelect={(url: string) => {
-              const updatedDesigns = [...product.designs];
-              updatedDesigns[designIndex] = {
-                ...updatedDesigns[designIndex],
-                imageUrl: url,
-              };
-              setProduct({
-                ...product,
-                designs: updatedDesigns,
-              });
-            }}
-            setProduct={(updatedProduct) => {
-              const updatedDesigns = [...product.designs];
-              updatedDesigns[designIndex] = {
-                ...updatedDesigns[designIndex],
-                designType: updatedProduct.name,
-              };
-              setProduct({
-                ...product,
-                designs: updatedDesigns,
-              });
-            }}
+            handleGallerySelect={(url: any) =>
+              handleGallerySelect(url, designIndex)
+            }
           />
         </div>
       </CardContent>

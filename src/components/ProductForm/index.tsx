@@ -105,7 +105,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center overflow-y-auto">
-      <Card className="w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+      <Card className="w-full max-w-full mx-4 max-h-[100vh] flex flex-col p-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>{product._id ? "Edit Product" : "New Product"}</CardTitle>
           <Button

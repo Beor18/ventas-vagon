@@ -133,7 +133,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
           </TabsList>
           <TabsContent value="gallery">
             <ScrollArea className="h-[300px]">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 {visibleImages.map((image: any, index) => (
                   <div
                     key={index}

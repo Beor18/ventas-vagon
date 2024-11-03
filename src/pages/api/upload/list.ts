@@ -7,7 +7,7 @@ export default async function handler(
 ) {
   try {
     const blobs = await list({
-      limit: 100,
+      limit: 10000,
     });
 
     return res.status(200).json(blobs);

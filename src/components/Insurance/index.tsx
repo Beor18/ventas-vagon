@@ -225,20 +225,7 @@ export default function InsurancePolicies() {
           subject: isNew
             ? "Nueva Póliza de Seguro Creada"
             : "Póliza de Seguro Actualizada",
-          text: `
-            Detalles de la póliza:
-            Nombre: ${policy.nombre}
-            Dirección Postal: ${policy.direccion_postal}
-            Dirección Física: ${policy.direccion_fisica}
-            Fecha de Nacimiento: ${policy.fecha_nacimiento}
-            Teléfono de Contacto: ${policy.telefono_contacto}
-            Costo de Propiedad: ${policy.costo_propiedad}
-            Modelo de Propiedad: ${policy.modelo_propiedad}
-            Uso de Propiedad: ${policy.uso_propiedad}
-            Vendedor: ${policy.vendedor}
-            Comentarios: ${policy.comentarios}
-            Documentos: ${policy.documentos.join(", ")}
-          `,
+          policy,
         }),
       });
 
@@ -253,7 +240,6 @@ export default function InsurancePolicies() {
         title: "Advertencia",
         description:
           "La póliza se guardó, pero hubo un problema al enviar el correo electrónico.",
-        //variant: "warning",
       });
     }
   };

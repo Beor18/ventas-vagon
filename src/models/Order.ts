@@ -48,6 +48,7 @@ const orderSchema = new Schema({
   vendedorName: { type: String },
   comentaries: { type: String, default: "" },
   cliente: { type: Schema.Types.ObjectId, ref: "Client" },
+  signatureImage: { type: String },
 });
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);

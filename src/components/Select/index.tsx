@@ -1,9 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import SignatureCanvas from "react-signature-canvas";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -72,6 +74,9 @@ export default function SelectComponent({ product, onClose }: any) {
   const [selectedClient, setSelectedClient] = useState("");
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const { data: session, status } = useSession();
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  // const [clarification, setClarification] = useState("");
+  const sigCanvasRef = useRef<SignatureCanvas | null>(null);
 
   useEffect(() => {
     if (session) {
@@ -169,11 +174,27 @@ export default function SelectComponent({ product, onClose }: any) {
     return total.toFixed(2);
   };
 
+  const clearSignature = () => {
+    sigCanvasRef.current?.clear();
+  };
+
   const exportOrder = async () => {
     if (!selectedClient) {
       alert("Por favor seleccione un cliente");
       return;
     }
+
+    if (!termsAccepted) {
+      alert("Debe aceptar los términos y condiciones");
+      return;
+    }
+
+    if (sigCanvasRef.current?.isEmpty()) {
+      alert("Debe firmar digitalmente");
+      return;
+    }
+
+    const signatureImage = sigCanvasRef.current?.toDataURL();
 
     const preparedOptions = Object.values(selectedOptions).map((option) => ({
       ...option,
@@ -194,6 +215,7 @@ export default function SelectComponent({ product, onClose }: any) {
       vendedorEmail: session?.user?.email,
       vendedorName: session?.user?.name,
       cliente: selectedClient,
+      signatureImage: signatureImage,
     };
 
     try {
@@ -424,6 +446,50 @@ export default function SelectComponent({ product, onClose }: any) {
             <span className="text-lg font-semibold">Total:</span>
             <span className="text-2xl font-bold">${calculateTotal()}</span>
           </div>
+          <Separator />
+          {/* Casillero de términos y condiciones y firma digital */}
+          <div className="space-y-4">
+            <div className="flex flex-row gap-2 items-center">
+              <Checkbox
+                checked={termsAccepted}
+                onCheckedChange={(checked) =>
+                  setTermsAccepted(checked === true)
+                }
+                id="terms"
+              />
+              <Label htmlFor="terms">Acepto los términos y condiciones</Label>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Firma digital</Label>
+              <SignatureCanvas
+                ref={sigCanvasRef}
+                penColor="black"
+                canvasProps={{
+                  width: 500,
+                  height: 150,
+                  className: "border rounded-md",
+                  backgroundColor: "rgba(0, 0, 0, 0)",
+                }}
+              />
+              <Button variant="outline" onClick={clearSignature}>
+                Limpiar firma
+              </Button>
+            </div>
+
+            {/* <div className="space-y-2">
+              <Label htmlFor="clarification">Aclaración</Label>
+              <Input
+                id="clarification"
+                type="text"
+                value={clarification}
+                onChange={(e) => setClarification(e.target.value)}
+                placeholder="Ingrese su nombre"
+              />
+            </div> */}
+          </div>
+
+          {/* Botones de acción */}
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose}>
               Cancelar

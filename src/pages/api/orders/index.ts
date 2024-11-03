@@ -43,6 +43,7 @@ export default async function handler(
         vendedorName,
         comentaries,
         cliente,
+        signatureImage,
       } = req.body;
 
       const newOrder = new Order({
@@ -59,6 +60,7 @@ export default async function handler(
         vendedorName,
         comentaries,
         cliente,
+        signatureImage,
       });
 
       await newOrder.save();

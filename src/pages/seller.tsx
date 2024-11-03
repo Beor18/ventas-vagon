@@ -325,6 +325,14 @@ function Seller({ products }: { products: any[] }) {
       });
     }
 
+    // Signature
+    if (order.signatureImage) {
+      yOffset += addText("Signature", yOffset, 14);
+      // Agregar la imagen de la firma en formato PNG para preservar la transparencia
+      doc.addImage(order.signatureImage, "PNG", 10, yOffset, 150, 50);
+      yOffset += 55; // Ajusta el espacio después de la imagen
+    }
+
     doc.save(`order_${order._id}.pdf`);
   };
 

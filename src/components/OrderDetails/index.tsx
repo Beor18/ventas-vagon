@@ -296,6 +296,22 @@ export function OrderDetail({
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
+            <div>
+              {order.signatureImage ? (
+                <img
+                  src={order.signatureImage}
+                  alt="Firma del cliente"
+                  style={{
+                    maxWidth: "100%",
+                    height: "auto",
+                    border: "1px solid #ccc",
+                    borderRadius: "5px",
+                  }}
+                />
+              ) : (
+                <p>No hay firma disponible</p>
+              )}
+            </div>
           </div>
         </ScrollArea>
         <DialogClose asChild>

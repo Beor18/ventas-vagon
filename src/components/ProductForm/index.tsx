@@ -58,6 +58,7 @@ interface ProductFormProps {
     setImageUrlCallback: (url: string) => void,
     setPreviewCallback: (url: string) => void
   ) => void;
+  handleGallerySelect: any;
   saveProduct: () => void;
   setModalOpen: (open: boolean) => void;
   loading: boolean;
@@ -90,6 +91,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   removeDesign,
   removeColorOption,
   handleImagePreview,
+  handleGallerySelect,
   saveProduct,
   setModalOpen,
   loading,
@@ -177,6 +179,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   removeOption={removeOption}
                   removeSubOption={removeSubOption}
                   handleImagePreview={handleImagePreview}
+                  handleGallerySelect={handleGallerySelect}
                 />
               </TabsContent>
               <TabsContent value="color-options">

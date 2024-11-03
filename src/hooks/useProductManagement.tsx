@@ -137,36 +137,22 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   };
 
   const addOption = () => {
-    console.log("Estado de newOption antes de agregar:", newOption);
-
-    // Crear una copia profunda de `newOption` para evitar referencias compartidas
     const newOptionWithId = {
       ...JSON.parse(JSON.stringify(newOption)),
       id: new Date().getTime(), // Genera un ID único
     };
 
     setProduct((prevProduct) => {
-      console.log(
-        "Estado de product.options antes de agregar:",
-        prevProduct.options
-      );
-
       const updatedProduct = {
         ...prevProduct,
         options: [
           ...JSON.parse(JSON.stringify(prevProduct.options)),
           newOptionWithId,
-        ], // Clonación profunda del array
+        ],
       };
-
-      console.log(
-        "Estado de product.options después de agregar:",
-        updatedProduct.options
-      );
       return updatedProduct;
     });
 
-    // Reiniciar `newOption` para que no mantenga referencias a la opción agregada
     setNewOption({
       name: "",
       price: 0,
@@ -289,6 +275,52 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     }
   };
 
+  const handleGallerySelect = (
+    url: any,
+    isSubOption: boolean,
+    optionIndex: number,
+    subOptionIndex: number = 0
+  ) => {
+    const downloadUrl =
+      typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
+
+    let fileName =
+      typeof downloadUrl === "string"
+        ? decodeURIComponent(downloadUrl.split("/").pop() || "")
+        : "";
+
+    let nameWithoutExtension = fileName
+      .substring(0, fileName.lastIndexOf("."))
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .split(" ")
+      .slice(0, 3)
+      .join(" ");
+
+    const updatedOptions = [...product.options];
+
+    if (isSubOption) {
+      updatedOptions[optionIndex].suboptions[subOptionIndex] = {
+        ...updatedOptions[optionIndex].suboptions[subOptionIndex],
+        imageUrl: downloadUrl,
+        name:
+          nameWithoutExtension ||
+          updatedOptions[optionIndex].suboptions[subOptionIndex].name,
+      };
+    } else {
+      updatedOptions[optionIndex] = {
+        ...updatedOptions[optionIndex],
+        imageUrl: downloadUrl,
+        name: nameWithoutExtension || updatedOptions[optionIndex].name,
+      };
+    }
+
+    setProduct({
+      ...product,
+      options: updatedOptions,
+    });
+  };
+
   const handleSaveProduct = async () => {
     setLoading(true);
     try {
@@ -374,6 +406,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     handleNewColorOptionChange,
     handleImagePreview,
     handleImageUpload,
+    handleGallerySelect,
     handleSaveProduct,
     editProduct,
     deleteProduct,

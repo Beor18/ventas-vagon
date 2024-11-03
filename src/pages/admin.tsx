@@ -69,6 +69,7 @@ const Admin = ({ initialProducts, orders }) => {
     removeDesign,
     removeColorOption,
     handleImagePreview,
+    handleGallerySelect,
   } = useProductManagement(initialProducts);
 
   const {
@@ -155,6 +156,7 @@ const Admin = ({ initialProducts, orders }) => {
           removeDesign={removeDesign}
           removeColorOption={removeColorOption}
           handleImagePreview={handleImagePreview}
+          handleGallerySelect={handleGallerySelect}
           saveProduct={handleSaveProduct}
           setModalOpen={closeProductModal}
           loading={loading}

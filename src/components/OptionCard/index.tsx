@@ -107,7 +107,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
             ref={provided.innerRef}
             className="flex flex-row w-full grid grid-cols-3 gap-2"
           >
-            {console.log("PPPPP 00: ", product.options)}
+            {/* {console.log("PPPPP 00: ", product.options)} */}
             {product.options.map((option: any, optionIndex) => (
               <Draggable
                 key={option.id}

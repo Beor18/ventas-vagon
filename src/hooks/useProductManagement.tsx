@@ -137,10 +137,36 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   };
 
   const addOption = () => {
-    setProduct({
-      ...product,
-      options: [...product.options, { ...newOption, suboptions: [] }],
+    console.log("Estado de newOption antes de agregar:", newOption);
+
+    // Crear una copia profunda de `newOption` para evitar referencias compartidas
+    const newOptionWithId = {
+      ...JSON.parse(JSON.stringify(newOption)),
+      id: new Date().getTime(), // Genera un ID único
+    };
+
+    setProduct((prevProduct) => {
+      console.log(
+        "Estado de product.options antes de agregar:",
+        prevProduct.options
+      );
+
+      const updatedProduct = {
+        ...prevProduct,
+        options: [
+          ...JSON.parse(JSON.stringify(prevProduct.options)),
+          newOptionWithId,
+        ], // Clonación profunda del array
+      };
+
+      console.log(
+        "Estado de product.options después de agregar:",
+        updatedProduct.options
+      );
+      return updatedProduct;
     });
+
+    // Reiniciar `newOption` para que no mantenga referencias a la opción agregada
     setNewOption({
       name: "",
       price: 0,

@@ -53,7 +53,7 @@ export function ProductDetails({ product }) {
           </div>
           {product.colorOptions && product.colorOptions.length > 0 && (
             <div className="space-y-2">
-              <h3 className="font-semibold text-sm">Color Options:</h3>
+              <h3 className="font-semibold text-sm">Frame Color:</h3>
               <div className="flex flex-wrap gap-2">
                 {product.colorOptions.map((color) => (
                   <button
@@ -62,7 +62,7 @@ export function ProductDetails({ product }) {
                     className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 flex-shrink-0 ${
                       selectedColor?.colorCode === color.colorCode
                         ? "border-primary"
-                        : "border-transparent"
+                        : "border-slate-300"
                     }`}
                     style={{
                       backgroundImage: `url(${color.imageUrl})`,

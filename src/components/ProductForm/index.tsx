@@ -101,7 +101,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const steps = [
     { title: "Información de producto", value: "product-info" },
     { title: "Agregar tipo de estructura", value: "designs" },
-    { title: "Opciones de color", value: "color-options" },
+    { title: "Frame color", value: "color-options" },
     { title: "Opciones", value: "options" },
   ];
 

@@ -64,7 +64,7 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
-              className="grid grid-cols-3 gap-4"
+              className="grid grid-cols-2 gap-4"
             >
               {product.options.map((option, optionIndex) => (
                 <Draggable

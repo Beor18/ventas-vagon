@@ -64,6 +64,7 @@ const Admin = ({ initialProducts, orders }) => {
     addSubOption,
     addDesign,
     addColorOption,
+    editColorOption,
     removeOption,
     removeSubOption,
     removeDesign,
@@ -151,6 +152,7 @@ const Admin = ({ initialProducts, orders }) => {
           addSubOption={addSubOption}
           addDesign={addDesign}
           addColorOption={addColorOption}
+          editColorOption={editColorOption}
           removeOption={removeOption}
           removeSubOption={removeSubOption}
           removeDesign={removeDesign}

@@ -49,6 +49,7 @@ interface ProductFormProps {
   addSubOption: (optionIndex: number) => void;
   addDesign: () => void;
   addColorOption: () => void;
+  editColorOption: (optionIndex: any, updatedColorOption: any) => void;
   removeOption: (optionIndex: number) => void;
   removeSubOption: (optionIndex: number, subOptionIndex: number) => void;
   removeDesign: (designIndex: number) => void;
@@ -86,6 +87,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   addSubOption,
   addDesign,
   addColorOption,
+  editColorOption,
   removeOption,
   removeSubOption,
   removeDesign,
@@ -190,6 +192,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   setNewColorOption={setNewColorOption}
                   handleNewColorOptionChange={handleNewColorOptionChange}
                   addColorOption={addColorOption}
+                  editColorOption={editColorOption}
                   removeColorOption={removeColorOption}
                   handleImagePreview={handleImagePreview}
                 />

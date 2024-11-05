@@ -232,6 +232,20 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     });
   };
 
+  const editColorOption = (
+    index: number,
+    updatedColorOption: ColorOptionType
+  ) => {
+    setProduct((prev) => {
+      const updatedColorOptions = [...prev.colorOptions];
+      updatedColorOptions[index] = updatedColorOption;
+      return {
+        ...prev,
+        colorOptions: updatedColorOptions,
+      };
+    });
+  };
+
   const removeColorOption = (index: number) => {
     setProduct((prev) => ({
       ...prev,
@@ -402,6 +416,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     removeDesign,
     handleNewDesignChange,
     addColorOption,
+    editColorOption,
     removeColorOption,
     handleNewColorOptionChange,
     handleImagePreview,

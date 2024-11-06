@@ -71,6 +71,7 @@ const Admin = ({ initialProducts, orders }) => {
     removeColorOption,
     handleImagePreview,
     handleGallerySelect,
+    duplicateProduct,
   } = useProductManagement(initialProducts);
 
   const {
@@ -108,6 +109,7 @@ const Admin = ({ initialProducts, orders }) => {
             editProduct={editProduct}
             deleteProduct={deleteProduct}
             setSelectedProduct={setSelectedProduct}
+            duplicateProduct={duplicateProduct}
           />
         </TabsContent>
 

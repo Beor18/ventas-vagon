@@ -378,6 +378,34 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     setModalOpen(true);
   };
 
+  const duplicateProduct = async (product: ProductType) => {
+    try {
+      // Crear el objeto duplicado sin el campo `_id`
+      const duplicatedProduct: ProductType = {
+        ...product,
+        _id: undefined, // Eliminar el ID para crear uno nuevo en la base de datos
+        name: `${product.name} (Copy)`, // Agregar un indicador de duplicado al nombre
+      };
+
+      // Realizar la solicitud POST para guardar el producto duplicado
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(duplicatedProduct),
+      });
+
+      if (response.ok) {
+        const newProduct = await response.json();
+        setProducts((prevProducts) => [...prevProducts, newProduct]);
+        console.log("Producto duplicado con éxito:", newProduct);
+      } else {
+        throw new Error("No se pudo duplicar el producto");
+      }
+    } catch (error) {
+      console.error("Error al duplicar el producto:", error);
+    }
+  };
+
   const deleteProduct = async (id: string) => {
     setLoading(true);
     try {
@@ -424,6 +452,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     handleGallerySelect,
     handleSaveProduct,
     editProduct,
+    duplicateProduct,
     deleteProduct,
     product,
     setProduct,

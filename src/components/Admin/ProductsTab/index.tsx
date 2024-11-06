@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Edit, Trash2, Eye } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Eye, Copy } from "lucide-react";
 import { ProductType } from "@/types/types";
 
 interface ProductsTabProps {
@@ -11,6 +11,7 @@ interface ProductsTabProps {
   editProduct: (product: ProductType) => void;
   deleteProduct: (id: string) => void;
   setSelectedProduct: (product: ProductType) => void;
+  duplicateProduct: (product: ProductType) => void; // Nueva prop para duplicar producto
 }
 
 export const ProductsTab: React.FC<ProductsTabProps> = ({
@@ -19,6 +20,7 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
   editProduct,
   deleteProduct,
   setSelectedProduct,
+  duplicateProduct,
 }) => {
   return (
     <div className="space-y-8">
@@ -58,6 +60,13 @@ export const ProductsTab: React.FC<ProductsTabProps> = ({
                   onClick={() => editProduct(product)}
                 >
                   <Edit className="h-4 w-4 mr-2" /> Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => duplicateProduct(product)}
+                >
+                  <Copy className="h-4 w-4 mr-2" /> Duplicate
                 </Button>
                 <Button
                   variant="destructive"

@@ -136,15 +136,35 @@ function Seller({ products }: { products: any[] }) {
       url: string,
       y: number,
       maxWidth = 180,
-      maxHeight = 100
+      maxHeight = 140 // Limit to half of the page height
     ) => {
       try {
         const img = await loadImage(url);
         const imgProps = doc.getImageProperties(img);
-        const width = Math.min(maxWidth, imgProps.width);
-        const height = (imgProps.height * width) / imgProps.width;
-        doc.addImage(img, "JPEG", 10, y, width, Math.min(height, maxHeight));
-        return Math.min(height, maxHeight) + 5;
+
+        // Calculate width and height to maintain aspect ratio within max dimensions
+        let width = imgProps.width;
+        let height = imgProps.height;
+
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+        if (height > maxHeight) {
+          width = (maxHeight / height) * width;
+          height = maxHeight;
+        }
+
+        // Ensure image won't be cut off at the bottom of the page
+        if (y + height > doc.internal.pageSize.height - 10) {
+          doc.addPage();
+          y = 10;
+        }
+
+        // Center image horizontally
+        const xOffset = (doc.internal.pageSize.width - width) / 2;
+        doc.addImage(img, "JPEG", xOffset, y, width, height);
+        return height + 5;
       } catch (error) {
         console.error("Error loading image:", error);
         return 0;
@@ -192,7 +212,7 @@ function Seller({ products }: { products: any[] }) {
       styles: { fontSize: 10, cellPadding: 5 },
     });
 
-    yOffset = (doc as any).lastAutoTable.finalY + 10;
+    yOffset = (doc as any).lastAutoTable.finalY + 5;
 
     // Client Information
     if (order.cliente) {
@@ -228,7 +248,7 @@ function Seller({ products }: { products: any[] }) {
         styles: { fontSize: 10, cellPadding: 5 },
       });
 
-      yOffset = (doc as any).lastAutoTable.finalY + 10;
+      yOffset = (doc as any).lastAutoTable.finalY + 5;
     }
 
     // Options
@@ -238,12 +258,6 @@ function Seller({ products }: { products: any[] }) {
         autoTable(doc, {
           startY: yOffset + 5,
           head: [[option.name]],
-          body: [
-            ["Price", `$${option.price}`],
-            ["Type", option.type],
-            ["Specification", option.specification],
-            ["Pieces", option.pcs.toString()],
-          ],
           theme: "striped",
           headStyles: { fillColor: [41, 128, 185], textColor: 255 },
           styles: { fontSize: 10, cellPadding: 5 },
@@ -252,17 +266,16 @@ function Seller({ products }: { products: any[] }) {
         yOffset = (doc as any).lastAutoTable.finalY + 5;
 
         if (option.imageUrl) {
-          yOffset += await addImage(option.imageUrl, yOffset);
+          yOffset += await addImage(option.imageUrl, yOffset, 180, 140);
         }
 
         if (option.suboptions && option.suboptions.length > 0) {
           autoTable(doc, {
             startY: yOffset + 5,
-            head: [["Suboption", "Code", "Price", "Details"]],
+            head: [["Suboption", "Code", "Details"]],
             body: option.suboptions.map((suboption: any) => [
               suboption.name,
               suboption.code,
-              `$${suboption.price}`,
               suboption.details,
             ]),
             theme: "striped",
@@ -291,11 +304,8 @@ function Seller({ products }: { products: any[] }) {
       yOffset += addText("Designs", yOffset, 14);
       autoTable(doc, {
         startY: yOffset + 5,
-        head: [["Design Type", "Cost"]],
-        body: order.designs.map((design: any) => [
-          design.designType,
-          `$${design.cost}`,
-        ]),
+        head: [["Design Type"]],
+        body: order.designs.map((design: any) => [design.designType]),
         theme: "striped",
         headStyles: { fillColor: [41, 128, 185], textColor: 255 },
         styles: { fontSize: 10, cellPadding: 5 },
@@ -305,7 +315,7 @@ function Seller({ products }: { products: any[] }) {
 
       for (const design of order.designs) {
         if (design.imageUrl) {
-          yOffset += await addImage(design.imageUrl, yOffset);
+          yOffset += await addImage(design.imageUrl, yOffset, 180, 140);
         }
         if (yOffset > 270) {
           doc.addPage();
@@ -323,14 +333,14 @@ function Seller({ products }: { products: any[] }) {
         theme: "plain",
         styles: { fontSize: 10, cellPadding: 5 },
       });
+      yOffset = (doc as any).lastAutoTable.finalY + 5;
     }
 
     // Signature
     if (order.signatureImage) {
       yOffset += addText("Signature", yOffset, 14);
-      // Agregar la imagen de la firma en formato PNG para preservar la transparencia
       doc.addImage(order.signatureImage, "PNG", 10, yOffset, 150, 50);
-      yOffset += 55; // Ajusta el espacio después de la imagen
+      yOffset += 55; // Adjust space after signature
     }
 
     doc.save(`order_${order._id}.pdf`);

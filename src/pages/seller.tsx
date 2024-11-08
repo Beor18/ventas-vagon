@@ -195,9 +195,9 @@ function Seller({ products }: { products: any[] }) {
 
     // Order Information
     const orderInfo = [
-      { label: "Total", value: `$${order.total}` },
-      { label: "Discount", value: `$${order.discount}` },
-      { label: "Tax", value: `${order.tax}%` },
+      // { label: "Total", value: `$${order.total}` },
+      // { label: "Discount", value: `$${order.discount}` },
+      // { label: "Tax", value: `${order.tax}%` },
       { label: "Status", value: order.status },
       { label: "Vendor", value: order.vendedorName },
       { label: "Vendor Email", value: order.vendedorEmail },

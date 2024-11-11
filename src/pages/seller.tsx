@@ -190,17 +190,18 @@ function Seller({ products }: { products: any[] }) {
     };
 
     // Title
-    yOffset += addText(`Order Details: ${order.productName}`, yOffset, 18);
+    yOffset += addText(
+      `Order Details: ${order.productName || "N/A"}`,
+      yOffset,
+      18
+    );
     yOffset += 10;
 
     // Order Information
     const orderInfo = [
-      // { label: "Total", value: `$${order.total}` },
-      // { label: "Discount", value: `$${order.discount}` },
-      // { label: "Tax", value: `${order.tax}%` },
-      { label: "Status", value: order.status },
-      { label: "Vendor", value: order.vendedorName },
-      { label: "Vendor Email", value: order.vendedorEmail },
+      { label: "Status", value: order.status || "N/A" },
+      { label: "Vendor", value: order.vendedorName || "N/A" },
+      { label: "Vendor Email", value: order.vendedorEmail || "N/A" },
     ];
 
     autoTable(doc, {
@@ -218,20 +219,31 @@ function Seller({ products }: { products: any[] }) {
     if (order.cliente) {
       yOffset += addText("Client Information", yOffset, 14);
       const clientInfo = [
-        { label: "Name", value: order.cliente.nombre },
-        { label: "Email", value: order.cliente.email },
-        { label: "Phone", value: order.cliente.telefono },
-        { label: "Address", value: order.cliente.direccion_residencial },
-        { label: "Unit Address", value: order.cliente.direccion_unidad },
-        { label: "Land Owner", value: order.cliente.propietario_terreno },
-        { label: "Unit Purpose", value: order.cliente.proposito_unidad },
-        { label: "Marital Status", value: order.cliente.estado_civil },
-        { label: "Workplace", value: order.cliente.lugar_empleo },
-        { label: "ID", value: order.cliente.identificacion },
-        { label: "Payment Method", value: order.cliente.forma_pago },
+        { label: "Name", value: order.cliente.nombre || "N/A" },
+        { label: "Email", value: order.cliente.email || "N/A" },
+        { label: "Phone", value: order.cliente.telefono || "N/A" },
+        {
+          label: "Address",
+          value: order.cliente.direccion_residencial || "N/A",
+        },
+        {
+          label: "Unit Address",
+          value: order.cliente.direccion_unidad || "N/A",
+        },
+        {
+          label: "Land Owner",
+          value: order.cliente.propietario_terreno || "N/A",
+        },
+        {
+          label: "Unit Purpose",
+          value: order.cliente.proposito_unidad || "N/A",
+        },
+        { label: "Marital Status", value: order.cliente.estado_civil || "N/A" },
+        { label: "Workplace", value: order.cliente.lugar_empleo || "N/A" },
+        { label: "Payment Method", value: order.cliente.forma_pago || "N/A" },
         {
           label: "Reference Contact",
-          value: order.cliente.contacto_referencia,
+          value: order.cliente.contacto_referencia || "N/A",
         },
         {
           label: "Insurance Purchased",
@@ -257,7 +269,7 @@ function Seller({ products }: { products: any[] }) {
       for (const option of order.options) {
         autoTable(doc, {
           startY: yOffset + 5,
-          head: [[option.name]],
+          head: [[option.name || "N/A"]],
           theme: "striped",
           headStyles: { fillColor: [41, 128, 185], textColor: 255 },
           styles: { fontSize: 10, cellPadding: 5 },
@@ -265,18 +277,14 @@ function Seller({ products }: { products: any[] }) {
 
         yOffset = (doc as any).lastAutoTable.finalY + 5;
 
-        if (option.imageUrl) {
-          yOffset += await addImage(option.imageUrl, yOffset, 180, 140);
-        }
-
         if (option.suboptions && option.suboptions.length > 0) {
           autoTable(doc, {
             startY: yOffset + 5,
             head: [["Suboption", "Code", "Details"]],
             body: option.suboptions.map((suboption: any) => [
-              suboption.name,
-              suboption.code,
-              suboption.details,
+              suboption.name || "N/A",
+              suboption.code || "N/A",
+              suboption.details || "N/A",
             ]),
             theme: "striped",
             headStyles: { fillColor: [52, 152, 219], textColor: 255 },
@@ -305,7 +313,7 @@ function Seller({ products }: { products: any[] }) {
       autoTable(doc, {
         startY: yOffset + 5,
         head: [["Design Type"]],
-        body: order.designs.map((design: any) => [design.designType]),
+        body: order.designs.map((design: any) => [design.designType || "N/A"]),
         theme: "striped",
         headStyles: { fillColor: [41, 128, 185], textColor: 255 },
         styles: { fontSize: 10, cellPadding: 5 },
@@ -329,7 +337,7 @@ function Seller({ products }: { products: any[] }) {
       yOffset += addText("Comments", yOffset, 14);
       autoTable(doc, {
         startY: yOffset + 5,
-        body: [[order.comentaries]],
+        body: [[order.comentaries || "N/A"]],
         theme: "plain",
         styles: { fontSize: 10, cellPadding: 5 },
       });

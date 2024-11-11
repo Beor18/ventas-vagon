@@ -5,6 +5,7 @@ import { FileText } from "lucide-react";
 
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { format } from "date-fns";
 
 interface OrderType {
   _id: string;
@@ -35,11 +36,36 @@ const handleExportToPDF = async (order: any) => {
   const doc = new jsPDF();
   let yOffset = 10;
 
+  const pageHeight = doc.internal.pageSize.height;
+  const margin = 10;
+
   // Helper function to add text
-  const addText = (text: string, y: number, fontSize = 12) => {
+  const addText = (
+    text: string,
+    y: number,
+    fontSize = 12,
+    align: "left" | "center" | "right" = "left",
+    color = "#000000"
+  ) => {
     doc.setFontSize(fontSize);
-    doc.text(text, 10, y);
+    doc.setTextColor(color);
+    doc.text(
+      text,
+      align === "center" ? doc.internal.pageSize.width / 2 : 10,
+      y,
+      { align }
+    );
     return doc.getTextDimensions(text).h + 2;
+  };
+
+  // Helper function to check if there's enough space on the current page
+  const checkSpace = (height: number) => {
+    if (yOffset + height > pageHeight - margin) {
+      doc.addPage();
+      yOffset = margin;
+      return true;
+    }
+    return false;
   };
 
   // Helper function to add image
@@ -47,13 +73,12 @@ const handleExportToPDF = async (order: any) => {
     url: string,
     y: number,
     maxWidth = 180,
-    maxHeight = 140 // Limit to half of the page height
+    maxHeight = 140
   ) => {
     try {
       const img = await loadImage(url);
       const imgProps = doc.getImageProperties(img);
 
-      // Calculate width and height to maintain aspect ratio within max dimensions
       let width = imgProps.width;
       let height = imgProps.height;
 
@@ -66,16 +91,14 @@ const handleExportToPDF = async (order: any) => {
         height = maxHeight;
       }
 
-      // Ensure image won't be cut off at the bottom of the page
-      if (y + height > doc.internal.pageSize.height - 10) {
-        doc.addPage();
-        y = 10;
+      // Check if image fits on current page, if not, add a new page
+      if (checkSpace(height + 10)) {
+        y = yOffset;
       }
 
-      // Center image horizontally
       const xOffset = (doc.internal.pageSize.width - width) / 2;
       doc.addImage(img, "JPEG", xOffset, y, width, height);
-      return height + 5;
+      return height + 10;
     } catch (error) {
       console.error("Error loading image:", error);
       return 0;
@@ -100,19 +123,26 @@ const handleExportToPDF = async (order: any) => {
     });
   };
 
-  // Title
-  yOffset += addText(
-    `Order Details: ${order.productName || "NA"}`,
-    yOffset,
-    18
-  );
-  yOffset += 10;
+  // Add header
+  doc.setFillColor(41, 128, 185);
+  doc.rect(0, 0, doc.internal.pageSize.width, 40, "F");
+  yOffset += addText("Order Details", 25, 24, "center", "#FFFFFF");
+  yOffset += addText(`Order ID: ${order._id}`, 35, 12, "center", "#FFFFFF");
+  yOffset += 20;
 
-  // Order Information
+  // Add order information
+  yOffset += addText("Order Information", yOffset, 18, "left", "#2980b9");
+  yOffset += 5;
+
   const orderInfo = [
-    { label: "Status", value: order.status || "NA" },
-    { label: "Vendor", value: order.vendedorName || "NA" },
-    { label: "Vendor Email", value: order.vendedorEmail || "NA" },
+    { label: "Product Name", value: order.productName || "N/A" },
+    { label: "Status", value: order.status || "N/A" },
+    { label: "Vendor", value: order.vendedorName || "N/A" },
+    { label: "Vendor Email", value: order.vendedorEmail || "N/A" },
+    {
+      label: "Order Date",
+      value: format(new Date(order.createdAt), "PPpp") || "N/A",
+    },
   ];
 
   autoTable(doc, {
@@ -121,28 +151,46 @@ const handleExportToPDF = async (order: any) => {
     body: orderInfo.map((info) => [info.label, info.value]),
     theme: "striped",
     headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+    bodyStyles: { fillColor: [245, 245, 245] },
+    alternateRowStyles: { fillColor: [255, 255, 255] },
     styles: { fontSize: 10, cellPadding: 5 },
+    didDrawPage: (data) => {
+      yOffset = data.cursor.y + 10;
+    },
   });
 
-  yOffset = (doc as any).lastAutoTable.finalY + 5;
-
-  // Client Information
+  // Add client information
   if (order.cliente) {
-    yOffset += addText("Client Information", yOffset, 14);
+    checkSpace(30);
+    yOffset += addText("Client Information", yOffset, 18, "left", "#2980b9");
+    yOffset += 5;
+
     const clientInfo = [
-      { label: "Name", value: order.cliente.nombre || "NA" },
-      { label: "Email", value: order.cliente.email || "NA" },
-      { label: "Phone", value: order.cliente.telefono || "NA" },
-      { label: "Address", value: order.cliente.direccion_residencial || "NA" },
-      { label: "Unit Address", value: order.cliente.direccion_unidad || "NA" },
-      { label: "Land Owner", value: order.cliente.propietario_terreno || "NA" },
-      { label: "Unit Purpose", value: order.cliente.proposito_unidad || "NA" },
-      { label: "Marital Status", value: order.cliente.estado_civil || "NA" },
-      { label: "Workplace", value: order.cliente.lugar_empleo || "NA" },
-      { label: "Payment Method", value: order.cliente.forma_pago || "NA" },
+      { label: "Name", value: order.cliente.nombre || "N/A" },
+      { label: "Email", value: order.cliente.email || "N/A" },
+      { label: "Phone", value: order.cliente.telefono || "N/A" },
+      {
+        label: "Address",
+        value: order.cliente.direccion_residencial || "N/A",
+      },
+      {
+        label: "Unit Address",
+        value: order.cliente.direccion_unidad || "N/A",
+      },
+      {
+        label: "Land Owner",
+        value: order.cliente.propietario_terreno || "N/A",
+      },
+      {
+        label: "Unit Purpose",
+        value: order.cliente.proposito_unidad || "N/A",
+      },
+      { label: "Marital Status", value: order.cliente.estado_civil || "N/A" },
+      { label: "Workplace", value: order.cliente.lugar_empleo || "N/A" },
+      { label: "Payment Method", value: order.cliente.forma_pago || "N/A" },
       {
         label: "Reference Contact",
-        value: order.cliente.contacto_referencia || "NA",
+        value: order.cliente.contacto_referencia || "N/A",
       },
       {
         label: "Insurance Purchased",
@@ -151,103 +199,136 @@ const handleExportToPDF = async (order: any) => {
     ];
 
     autoTable(doc, {
-      startY: yOffset + 5,
+      startY: yOffset,
       head: [["Field", "Value"]],
       body: clientInfo.map((info) => [info.label, info.value]),
       theme: "striped",
       headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      bodyStyles: { fillColor: [245, 245, 245] },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 5 },
+      didDrawPage: (data) => {
+        yOffset = data.cursor.y + 10;
+      },
     });
-
-    yOffset = (doc as any).lastAutoTable.finalY + 5;
   }
 
-  // Options
+  // Add options
   if (order.options && order.options.length > 0) {
-    yOffset += addText("Options", yOffset, 14);
+    checkSpace(30);
+    yOffset += addText("Options", yOffset, 18, "left", "#2980b9");
+    yOffset += 5;
+
     for (const option of order.options) {
+      checkSpace(20);
       autoTable(doc, {
-        startY: yOffset + 5,
-        head: [[option.name || "NA"]],
+        startY: yOffset,
+        head: [[option.name || "N/A"]],
         theme: "striped",
         headStyles: { fillColor: [41, 128, 185], textColor: 255 },
         styles: { fontSize: 10, cellPadding: 5 },
+        didDrawPage: (data) => {
+          yOffset = data.cursor.y + 5;
+        },
       });
 
-      yOffset = (doc as any).lastAutoTable.finalY + 5;
-
       if (option.suboptions && option.suboptions.length > 0) {
+        checkSpace(20);
         autoTable(doc, {
-          startY: yOffset + 5,
+          startY: yOffset,
           head: [["Suboption", "Code", "Details"]],
           body: option.suboptions.map((suboption: any) => [
-            suboption.name || "NA",
-            suboption.code || "NA",
-            suboption.details || "NA",
+            suboption.name || "N/A",
+            suboption.code || "N/A",
+            suboption.details || "N/A",
           ]),
           theme: "striped",
           headStyles: { fillColor: [52, 152, 219], textColor: 255 },
+          bodyStyles: { fillColor: [245, 245, 245] },
+          alternateRowStyles: { fillColor: [255, 255, 255] },
           styles: { fontSize: 9, cellPadding: 3 },
+          didDrawPage: (data) => {
+            yOffset = data.cursor.y + 5;
+          },
         });
-
-        yOffset = (doc as any).lastAutoTable.finalY + 5;
 
         for (const suboption of option.suboptions) {
           if (suboption.imageUrl) {
+            checkSpace(60);
             yOffset += await addImage(suboption.imageUrl, yOffset, 90, 50);
           }
         }
       }
-
-      if (yOffset > 270) {
-        doc.addPage();
-        yOffset = 10;
-      }
     }
   }
 
-  // Designs
+  // Add designs
   if (order.designs && order.designs.length > 0) {
-    yOffset += addText("Designs", yOffset, 14);
+    checkSpace(30);
+    yOffset += addText("Designs", yOffset, 18, "left", "#2980b9");
+    yOffset += 5;
+
     autoTable(doc, {
-      startY: yOffset + 5,
+      startY: yOffset,
       head: [["Design Type"]],
-      body: order.designs.map((design: any) => [design.designType || "NA"]),
+      body: order.designs.map((design: any) => [design.designType || "N/A"]),
       theme: "striped",
       headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      bodyStyles: { fillColor: [245, 245, 245] },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 5 },
+      didDrawPage: (data) => {
+        yOffset = data.cursor.y + 5;
+      },
     });
-
-    yOffset = (doc as any).lastAutoTable.finalY + 5;
 
     for (const design of order.designs) {
       if (design.imageUrl) {
+        checkSpace(150);
         yOffset += await addImage(design.imageUrl, yOffset, 180, 140);
-      }
-      if (yOffset > 270) {
-        doc.addPage();
-        yOffset = 10;
       }
     }
   }
 
-  // Comments
+  // Add comments
   if (order.comentaries) {
-    yOffset += addText("Comments", yOffset, 14);
+    checkSpace(30);
+    yOffset += addText("Comments", yOffset, 18, "left", "#2980b9");
+    yOffset += 5;
+
     autoTable(doc, {
-      startY: yOffset + 5,
-      body: [[order.comentaries || "NA"]],
+      startY: yOffset,
+      body: [[order.comentaries || "N/A"]],
       theme: "plain",
       styles: { fontSize: 10, cellPadding: 5 },
+      didDrawPage: (data) => {
+        yOffset = data.cursor.y + 10;
+      },
     });
-    yOffset = (doc as any).lastAutoTable.finalY + 5;
   }
 
-  // Signature
+  // Add signature
   if (order.signatureImage) {
-    yOffset += addText("Signature", yOffset, 14);
+    checkSpace(70);
+    yOffset += addText("Signature", yOffset, 18, "left", "#2980b9");
+    yOffset += 5;
     doc.addImage(order.signatureImage, "PNG", 10, yOffset, 150, 50);
-    yOffset += 55; // Adjust space after signature
+    yOffset += 55;
+  }
+
+  // Add footer to all pages
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(41, 128, 185);
+    doc.rect(0, pageHeight - 20, doc.internal.pageSize.width, 20, "F");
+    addText(
+      `Generated on ${format(new Date(), "PPpp")} - Page ${i} of ${pageCount}`,
+      pageHeight - 10,
+      10,
+      "center",
+      "#FFFFFF"
+    );
   }
 
   doc.save(`order_${order._id}.pdf`);

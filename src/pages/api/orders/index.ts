@@ -20,12 +20,20 @@ export default async function handler(
   }
 
   if (req.method === "GET") {
-    const { status } = req.query;
-    let query = {};
+    const { status, fabricanteEmail } = req.query;
+    let query: any = {};
+
+    // Filtrar por estado si está presente
     if (status) {
-      query = { status: status };
+      query.status = status;
     }
 
+    // Filtrar por fabricanteEmail si está presente en la consulta
+    if (fabricanteEmail) {
+      query.fabricanteEmail = fabricanteEmail;
+    }
+
+    // Obtener las órdenes filtradas y los datos del cliente
     const orders = await Order.find(query).populate("cliente").lean();
     res.status(200).json(orders);
   } else if (req.method === "POST") {

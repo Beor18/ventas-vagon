@@ -44,8 +44,8 @@ function Manufacture() {
   }, [session]);
 
   useEffect(() => {
-    if (accessToken) {
-      fetch("/api/orders", {
+    if (accessToken && session?.user?.email) {
+      fetch(`/api/orders?fabricanteEmail=${session?.user?.email}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -53,9 +53,9 @@ function Manufacture() {
         },
       })
         .then((res) => res.json())
-        .then((data) => setOrders(data));
+        .then((data) => setOrders(data)); // `data` será un array filtrado de órdenes
     }
-  }, [accessToken]);
+  }, [accessToken, session?.user?.email]);
 
   const fetchProductDetails = async (productId: string) => {
     const res = await fetch(`/api/products/${productId}`);

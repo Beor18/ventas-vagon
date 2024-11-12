@@ -71,7 +71,9 @@ export default function SelectComponent({ product, onClose }: any) {
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [clients, setClients] = useState<any[]>([]);
+  const [fabricante, setFabricante] = useState<any[]>([]);
   const [selectedClient, setSelectedClient] = useState("");
+  const [selectedFabricante, setSelectedFabricante] = useState("");
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -83,6 +85,7 @@ export default function SelectComponent({ product, onClose }: any) {
       fetchAccessToken().then((token) => {
         setAccessToken(token);
         fetchClients(token);
+        fetchFabricante(token);
       });
     }
   }, [session]);
@@ -101,6 +104,16 @@ export default function SelectComponent({ product, onClose }: any) {
     });
     const data = await response.json();
     setClients(data);
+  };
+
+  const fetchFabricante = async (token: string) => {
+    const response = await fetch("/api/fabricante", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    setFabricante(data);
   };
 
   const handleOptionSelect = (option: ProductOption) => {
@@ -214,6 +227,7 @@ export default function SelectComponent({ product, onClose }: any) {
       tax,
       vendedorEmail: session?.user?.email,
       vendedorName: session?.user?.name,
+      fabricanteEmail: selectedFabricante,
       cliente: selectedClient,
       signatureImage: signatureImage,
     };
@@ -435,6 +449,24 @@ export default function SelectComponent({ product, onClose }: any) {
                   {clients.map((client: any) => (
                     <SelectItem key={client._id} value={client._id}>
                       {client.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="client">Fabricante</Label>
+              <Select
+                value={selectedFabricante}
+                onValueChange={setSelectedFabricante}
+              >
+                <SelectTrigger id="fabricante">
+                  <SelectValue placeholder="Seleccione un fabricante" />
+                </SelectTrigger>
+                <SelectContent>
+                  {fabricante.map((client: any) => (
+                    <SelectItem key={client._id} value={client.email}>
+                      {client.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

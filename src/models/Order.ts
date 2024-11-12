@@ -46,6 +46,8 @@ const orderSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   vendedorEmail: { type: String },
   vendedorName: { type: String },
+  fabricanteEmail: { type: String },
+  fabricanteName: { type: String },
   comentaries: { type: String, default: "" },
   cliente: { type: Schema.Types.ObjectId, ref: "Client" },
   signatureImage: { type: String },

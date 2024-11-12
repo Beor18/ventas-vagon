@@ -1,123 +1,165 @@
-import { useState } from "react";
-import { useRouter } from "next/router";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Pencil, Loader2, Trash, Plus } from "lucide-react";
 import withAuth from "@/lib/withAuth";
+import EditUserModal from "@/components/Register/EditUserModal";
+import AddUserModal from "@/components/Register/AddUserModal";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 
-const Register = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("Vendedor");
-  const router = useRouter();
+interface User {
+  _id: string;
+  email: string;
+  name: string;
+  role: string;
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const UserList = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/register", { method: "GET" });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      } else {
+        throw new Error("Failed to fetch users");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          "No se pudieron cargar los usuarios. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    setShowEditModal(true);
+  };
+
+  const handleDelete = async (userId: string) => {
     try {
       const response = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          name,
-          role,
-        }),
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id: userId }),
       });
 
       if (response.ok) {
-        router.push("/login");
+        toast({
+          title: "Usuario eliminado",
+          description: "El usuario ha sido eliminado correctamente.",
+        });
+        fetchUsers(); // Actualiza la lista después de eliminar
       } else {
-        const errorData = await response.json();
-        alert(errorData.message || "Failed to register. Please try again.");
+        throw new Error("Failed to delete user");
       }
     } catch (error) {
-      alert("Failed to register. Please try again.");
+      toast({
+        title: "Error",
+        description:
+          "No se pudo eliminar el usuario. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-sm"
-      >
-        <h1 className="text-2xl font-bold mb-4">Register</h1>
-        <div className="mb-4">
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Lista de Usuarios</h1>
+        <Button onClick={() => setShowAddModal(true)} variant="outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Usuario
+        </Button>
+      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-        <div className="mb-4">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Nombre
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor="role"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Role
-          </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          >
-            <option value="Vendedor">Vendedor</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Fabricante">Fabricante</option>
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-md w-full"
-        >
-          Register
-        </button>
-      </form>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Email</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user._id}>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(user)}
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(user._id)}
+                  >
+                    <Trash className="h-4 w-4 mr-2" />
+                    Eliminar
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+      {showEditModal && selectedUser && (
+        <EditUserModal
+          user={selectedUser}
+          onClose={() => {
+            setShowEditModal(false);
+            fetchUsers();
+          }}
+        />
+      )}
+      {showAddModal && (
+        <AddUserModal
+          onClose={() => {
+            setShowAddModal(false);
+            fetchUsers();
+          }}
+        />
+      )}
     </div>
   );
 };
 
-export default withAuth(Register, ["Administrador"]);
+export default withAuth(UserList, ["Administrador"]);

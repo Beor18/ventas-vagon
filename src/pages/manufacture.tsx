@@ -1,25 +1,36 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
+
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import withAuth from "@/lib/withAuth";
-import Modal from "@/components/Modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 function Manufacture() {
   const [orders, setOrders] = useState<any[]>([]);
   const { data: session, status } = useSession();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
   const [showCommentInput, setShowCommentInput] = useState<boolean>(false);
   const [comment, setComment] = useState<string>("");
 
-  const openModal = (order: any) => {
+  const openDialog = (order: any) => {
     handleViewOrder(order);
   };
 
-  const closeModal = () => {
+  const closeDialog = () => {
     setSelectedOrder(null);
-    setShowModal(false);
+    setShowDialog(false);
     setShowCommentInput(false);
     setComment("");
   };
@@ -88,7 +99,7 @@ function Manufacture() {
               order._id === orderId ? updatedOrder : order
             )
           );
-          closeModal(); // Cerrar modal al aprobar
+          closeDialog();
         });
     }
   };
@@ -110,15 +121,16 @@ function Manufacture() {
               order._id === orderId ? updatedOrder : order
             )
           );
-          closeModal(); // Cerrar modal al rechazar
+          closeDialog();
         });
     }
   };
 
   const handleViewOrder = async (order: any) => {
     const productDetails = await fetchProductDetails(order.productId);
+    console.log("handleViewOrder: ", productDetails, " ||||| Order: ", order);
     setSelectedOrder({ ...order, productDetails });
-    setShowModal(true);
+    setShowDialog(true);
   };
 
   return (
@@ -132,145 +144,120 @@ function Manufacture() {
               <p>Status: {order.status}</p>
               <p>Customer: {order.vendedorName}</p>
               <div className="flex flex-row gap-4">
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded-md mt-2"
-                  onClick={() => openModal(order)}
-                >
+                <Button className="mt-2" onClick={() => openDialog(order)}>
                   Ver Orden
-                </button>
+                </Button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {selectedOrder && (
-        <Modal isOpen={false} onClose={closeModal}>
-          <div className="bg-white p-6 rounded-lg w-full overflow-y-auto overflow-hidden h-[700px]">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">
-                Orden: {selectedOrder.productDetails.name}
-              </h2>
-              <table className="min-w-full bg-white">
-                <tbody>
-                  {" "}
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      Status
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {selectedOrder.status}
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      Customer
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {selectedOrder.vendedorName}
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      Email
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {selectedOrder.vendedorEmail}
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      Comentarios
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Orden: {selectedOrder?.name}</DialogTitle>
+            <DialogDescription>Detalles de la orden</DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="mt-4">
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">Status</TableCell>
+                    <TableCell>{selectedOrder.status}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Customer</TableCell>
+                    <TableCell>{selectedOrder.vendedorName}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Email</TableCell>
+                    <TableCell>{selectedOrder.vendedorEmail}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Comentarios</TableCell>
+                    <TableCell>
                       {selectedOrder.comentaries ||
                         "No hay comentarios disponibles"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      Producto
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Producto</TableCell>
+                    <TableCell>
                       <img
                         src={selectedOrder.productDetails.imageUrl}
                         alt={selectedOrder.productDetails.name}
+                        width={320}
+                        height={240}
                         className="w-[320px] h-auto mb-4"
                       />
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      Nombre
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {selectedOrder.productDetails.name}
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                      Descripción
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Nombre</TableCell>
+                    <TableCell>{selectedOrder.productDetails.name}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">Descripción</TableCell>
+                    <TableCell>
                       {selectedOrder.productDetails.description ||
                         "No hay descripción disponible"}
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
                       Dimensiones externas
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       {selectedOrder.productDetails.externalDimensions ||
                         "No hay dimensiones externas disponibles"}
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
                       Dimensiones internas
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       {selectedOrder.productDetails.internalDimensions ||
                         "No hay dimensiones internas disponibles"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
 
-            <div className="flex gap-4 mt-4">
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                onClick={() => approveOrder(selectedOrder._id)}
-              >
-                Aprobar
-              </button>
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded-md"
-                onClick={() => setShowCommentInput((prev) => !prev)}
-              >
-                Cancelar orden
-              </button>
-            </div>
-            {showCommentInput && (
-              <div className="mt-4">
-                <textarea
-                  className="w-full p-2 border rounded-md"
-                  placeholder="Añadir comentarios"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                />
-                <button
-                  className="bg-red-500 text-white px-4 py-2 rounded-md mt-2"
-                  onClick={() => rejectOrder(selectedOrder._id)}
+              <div className="flex gap-4 mt-4">
+                <Button onClick={() => approveOrder(selectedOrder._id)}>
+                  Aprobar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowCommentInput((prev) => !prev)}
                 >
-                  Confirmar
-                </button>
+                  Cancelar orden
+                </Button>
               </div>
-            )}
-          </div>
-        </Modal>
-      )}
+              {showCommentInput && (
+                <div className="mt-4">
+                  <Textarea
+                    className="w-full p-2 border rounded-md"
+                    placeholder="Añadir comentarios"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                  <Button
+                    variant="destructive"
+                    className="mt-2"
+                    onClick={() => rejectOrder(selectedOrder._id)}
+                  >
+                    Confirmar
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

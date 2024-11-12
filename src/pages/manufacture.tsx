@@ -128,7 +128,6 @@ function Manufacture() {
 
   const handleViewOrder = async (order: any) => {
     const productDetails = await fetchProductDetails(order.productId);
-    console.log("handleViewOrder: ", productDetails, " ||||| Order: ", order);
     setSelectedOrder({ ...order, productDetails });
     setShowDialog(true);
   };

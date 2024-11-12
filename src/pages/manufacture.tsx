@@ -155,7 +155,7 @@ function Manufacture() {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Orden: {selectedOrder?.name}</DialogTitle>
+            <DialogTitle>Orden: {selectedOrder?._id}</DialogTitle>
             <DialogDescription>Detalles de la orden</DialogDescription>
           </DialogHeader>
           {selectedOrder && (

@@ -204,58 +204,58 @@ function Manufacture() {
     });
 
     // Add client information
-    // if (order.cliente) {
-    //   checkSpace(30);
-    //   yOffset += addText("Client Information", yOffset, 18, "left", "#2980b9");
-    //   yOffset += 5;
+    if (order.cliente) {
+      checkSpace(30);
+      yOffset += addText("Client Information", yOffset, 18, "left", "#2980b9");
+      yOffset += 5;
 
-    //   const clientInfo = [
-    //     { label: "Name", value: order.cliente.nombre || "N/A" },
-    //     { label: "Email", value: order.cliente.email || "N/A" },
-    //     { label: "Phone", value: order.cliente.telefono || "N/A" },
-    //     {
-    //       label: "Address",
-    //       value: order.cliente.direccion_residencial || "N/A",
-    //     },
-    //     {
-    //       label: "Unit Address",
-    //       value: order.cliente.direccion_unidad || "N/A",
-    //     },
-    //     {
-    //       label: "Land Owner",
-    //       value: order.cliente.propietario_terreno || "N/A",
-    //     },
-    //     {
-    //       label: "Unit Purpose",
-    //       value: order.cliente.proposito_unidad || "N/A",
-    //     },
-    //     { label: "Marital Status", value: order.cliente.estado_civil || "N/A" },
-    //     { label: "Workplace", value: order.cliente.lugar_empleo || "N/A" },
-    //     { label: "Payment Method", value: order.cliente.forma_pago || "N/A" },
-    //     {
-    //       label: "Reference Contact",
-    //       value: order.cliente.contacto_referencia || "N/A",
-    //     },
-    //     {
-    //       label: "Insurance Purchased",
-    //       value: order.cliente.seguro_comprado ? "Yes" : "No",
-    //     },
-    //   ];
+      const clientInfo = [
+        { label: "Name", value: order.cliente.nombre || "N/A" },
+        // { label: "Email", value: order.cliente.email || "N/A" },
+        // { label: "Phone", value: order.cliente.telefono || "N/A" },
+        // {
+        //   label: "Address",
+        //   value: order.cliente.direccion_residencial || "N/A",
+        // },
+        // {
+        //   label: "Unit Address",
+        //   value: order.cliente.direccion_unidad || "N/A",
+        // },
+        // {
+        //   label: "Land Owner",
+        //   value: order.cliente.propietario_terreno || "N/A",
+        // },
+        // {
+        //   label: "Unit Purpose",
+        //   value: order.cliente.proposito_unidad || "N/A",
+        // },
+        // { label: "Marital Status", value: order.cliente.estado_civil || "N/A" },
+        // { label: "Workplace", value: order.cliente.lugar_empleo || "N/A" },
+        // { label: "Payment Method", value: order.cliente.forma_pago || "N/A" },
+        // {
+        //   label: "Reference Contact",
+        //   value: order.cliente.contacto_referencia || "N/A",
+        // },
+        // {
+        //   label: "Insurance Purchased",
+        //   value: order.cliente.seguro_comprado ? "Yes" : "No",
+        // },
+      ];
 
-    //   autoTable(doc, {
-    //     startY: yOffset,
-    //     head: [["Field", "Value"]],
-    //     body: clientInfo.map((info) => [info.label, info.value]),
-    //     theme: "striped",
-    //     headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-    //     bodyStyles: { fillColor: [245, 245, 245] },
-    //     alternateRowStyles: { fillColor: [255, 255, 255] },
-    //     styles: { fontSize: 10, cellPadding: 5 },
-    //     didDrawPage: (data) => {
-    //       yOffset = data.cursor.y + 10;
-    //     },
-    //   });
-    // }
+      autoTable(doc, {
+        startY: yOffset,
+        head: [["Field", "Value"]],
+        body: clientInfo.map((info) => [info.label, info.value]),
+        theme: "striped",
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        bodyStyles: { fillColor: [245, 245, 245] },
+        alternateRowStyles: { fillColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 5 },
+        didDrawPage: (data) => {
+          yOffset = data.cursor.y + 10;
+        },
+      });
+    }
 
     // Add options
     if (order.options && order.options.length > 0) {
@@ -460,6 +460,7 @@ function Manufacture() {
               <h2 className="text-xl font-semibold">{order.productName}</h2>
               <p>Status: {order.status}</p>
               <p>Customer: {order.vendedorName}</p>
+              <p>Creado el: {format(new Date(order.createdAt), "PPpp")}</p>
               <div className="flex flex-row gap-4 items-center mt-4">
                 <Button
                   className="flex items-center"

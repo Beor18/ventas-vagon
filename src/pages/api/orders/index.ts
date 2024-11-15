@@ -81,6 +81,30 @@ export default async function handler(
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
+  } else if (req.method === "PUT") {
+    try {
+      const { id } = req.query;
+
+      if (!id) {
+        return res.status(400).json({ error: "Order ID is required" });
+      }
+
+      const updates = req.body;
+
+      const updatedOrder = await Order.findByIdAndUpdate(id, updates, {
+        new: true, // Devuelve el documento actualizado
+        runValidators: true, // Ejecuta validadores de esquema
+      });
+
+      if (!updatedOrder) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      res.status(200).json(updatedOrder);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   } else if (req.method === "DELETE") {
     try {
       const { id } = req.query;

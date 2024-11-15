@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +22,7 @@ import {
 import { format } from "date-fns";
 import { handleExportToPDFAdmin } from "@/lib/exportToPdf";
 import { handleExportToPDFManufacture } from "@/lib/exportToPdfManufacture";
+import { OrderEditModal } from "@/components/OrderEditModal";
 
 interface OrderType {
   _id: string;
@@ -38,13 +41,26 @@ interface OrderType {
 
 interface OrdersTabProps {
   orders: OrderType[];
+  editOrder: (id: string, updatedData: Partial<OrderType>) => void;
   deleteOrder: (id: string) => void;
 }
 
 export const OrdersTab: React.FC<OrdersTabProps> = ({
   orders,
+  editOrder,
   deleteOrder,
 }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+
+  const handleEditOrder = (orderId: string) => {
+    const orderToEdit = orders.find((order) => order._id === orderId);
+    if (orderToEdit) {
+      setSelectedOrder(orderToEdit);
+      setIsEditModalOpen(true);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <h2 className="text-3xl font-bold text-center md:text-left">
@@ -123,6 +139,13 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
             <CardFooter className="flex flex-col gap-3 bg-muted/50 pt-6">
               <Button
                 className="w-full text-xs sm:text-sm"
+                onClick={() => handleEditOrder(order._id)}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Editar Orden
+              </Button>
+              <Button
+                className="w-full text-xs sm:text-sm"
                 onClick={() => handleExportToPDFAdmin(order)}
               >
                 <FileText className="mr-2 h-4 w-4" />
@@ -147,6 +170,16 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
           </Card>
         ))}
       </div>
+      <OrderEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        orderId={selectedOrder?._id || ""}
+        editOrder={editOrder}
+        initialData={selectedOrder || ({} as OrderType)}
+      />
     </div>
   );
 };

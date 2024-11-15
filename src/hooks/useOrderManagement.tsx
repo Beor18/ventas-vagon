@@ -30,6 +30,32 @@ export const useOrderManagement = (initialOrders) => {
     }
   };
 
+  const editOrder = async (orderId, updatedData) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/orders?id=${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        const updatedOrder = await response.json();
+        setOrdersList((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === updatedOrder._id ? updatedOrder : order
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error editing order:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -37,6 +63,8 @@ export const useOrderManagement = (initialOrders) => {
   return {
     ordersList,
     loading,
+    fetchOrders,
     deleteOrder,
+    editOrder,
   };
 };

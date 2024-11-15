@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import { handleExportToPDFAdmin } from "@/lib/exportToPdf";
 import { handleExportToPDFManufacture } from "@/lib/exportToPdfManufacture";
 import { OrderEditModal } from "@/components/OrderEditModal";
+import { Card } from "@/components/ui/card";
 
 interface OrderType {
   _id: string;
@@ -87,7 +88,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
           </div>
         </div>
       </div>
-      <div className="rounded-md border shadow-sm overflow-hidden">
+      <Card className="rounded-md border shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
@@ -165,7 +166,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
             ))}
           </TableBody>
         </Table>
-      </div>
+      </Card>
       <OrderEditModal
         isOpen={isEditModalOpen}
         onClose={() => {

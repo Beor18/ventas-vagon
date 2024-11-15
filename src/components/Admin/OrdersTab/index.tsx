@@ -1,11 +1,25 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText } from "lucide-react";
-
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  FileText,
+  Trash2,
+  User,
+  Calendar,
+  DollarSign,
+  Percent,
+  Tag,
+  MessageSquare,
+} from "lucide-react";
 import { format } from "date-fns";
+import { handleExportToPDFAdmin } from "@/lib/exportToPdf";
+import { handleExportToPDFManufacture } from "@/lib/exportToPdfManufacture";
 
 interface OrderType {
   _id: string;
@@ -27,397 +41,109 @@ interface OrdersTabProps {
   deleteOrder: (id: string) => void;
 }
 
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: typeof autoTable;
-  }
-}
-
-const handleExportToPDF = async (order: any) => {
-  const doc = new jsPDF();
-  let yOffset = 10;
-
-  const pageHeight = doc.internal.pageSize.height;
-  const margin = 10;
-
-  // Helper function to add text
-  const addText = (
-    text: string,
-    y: number,
-    fontSize = 12,
-    align: "left" | "center" | "right" = "left",
-    color = "#000000"
-  ) => {
-    doc.setFontSize(fontSize);
-    doc.setTextColor(color);
-    doc.text(
-      text,
-      align === "center" ? doc.internal.pageSize.width / 2 : 10,
-      y,
-      { align }
-    );
-    return doc.getTextDimensions(text).h + 2;
-  };
-
-  // Helper function to check if there's enough space on the current page
-  const checkSpace = (height: number) => {
-    if (yOffset + height > pageHeight - margin) {
-      doc.addPage();
-      yOffset = margin;
-      return true;
-    }
-    return false;
-  };
-
-  // Helper function to add image
-  const addImage = async (
-    url: string,
-    y: number,
-    maxWidth = 180,
-    maxHeight = 140
-  ) => {
-    try {
-      const img = await loadImage(url);
-      const imgProps = doc.getImageProperties(img);
-
-      let width = imgProps.width;
-      let height = imgProps.height;
-
-      if (width > maxWidth) {
-        height = (maxWidth / width) * height;
-        width = maxWidth;
-      }
-      if (height > maxHeight) {
-        width = (maxHeight / height) * width;
-        height = maxHeight;
-      }
-
-      // Check if image fits on current page, if not, add a new page
-      if (checkSpace(height + 10)) {
-        y = yOffset;
-      }
-
-      const xOffset = (doc.internal.pageSize.width - width) / 2;
-      doc.addImage(img, "JPEG", xOffset, y, width, height);
-      return height + 10;
-    } catch (error) {
-      console.error("Error loading image:", error);
-      return 0;
-    }
-  };
-
-  // Helper function to load image
-  const loadImage = (url: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx?.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL("image/jpeg"));
-      };
-      img.onerror = reject;
-      img.src = url;
-    });
-  };
-
-  // Add header
-  doc.setFillColor(41, 128, 185);
-  doc.rect(0, 0, doc.internal.pageSize.width, 40, "F");
-  yOffset += addText("Order Details", 25, 24, "center", "#FFFFFF");
-  yOffset += addText(`Order ID: ${order._id}`, 35, 12, "center", "#FFFFFF");
-  yOffset += 20;
-
-  // Add order information
-  yOffset += addText("Order Information", yOffset, 18, "left", "#2980b9");
-  yOffset += 5;
-
-  const orderInfo = [
-    { label: "Product Name", value: order.productName || "N/A" },
-    { label: "Status", value: order.status || "N/A" },
-    { label: "Vendor", value: order.vendedorName || "N/A" },
-    { label: "Vendor Email", value: order.vendedorEmail || "N/A" },
-    {
-      label: "Order Date",
-      value: format(new Date(order.createdAt), "PPpp") || "N/A",
-    },
-  ];
-
-  autoTable(doc, {
-    startY: yOffset,
-    head: [["Field", "Value"]],
-    body: orderInfo.map((info) => [info.label, info.value]),
-    theme: "striped",
-    headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-    bodyStyles: { fillColor: [245, 245, 245] },
-    alternateRowStyles: { fillColor: [255, 255, 255] },
-    styles: { fontSize: 10, cellPadding: 5 },
-    didDrawPage: (data) => {
-      yOffset = data.cursor.y + 10;
-    },
-  });
-
-  // Add client information
-  if (order.cliente) {
-    checkSpace(30);
-    yOffset += addText("Client Information", yOffset, 18, "left", "#2980b9");
-    yOffset += 5;
-
-    const clientInfo = [
-      { label: "Name", value: order.cliente.nombre || "N/A" },
-      { label: "Email", value: order.cliente.email || "N/A" },
-      { label: "Phone", value: order.cliente.telefono || "N/A" },
-      {
-        label: "Address",
-        value: order.cliente.direccion_residencial || "N/A",
-      },
-      {
-        label: "Unit Address",
-        value: order.cliente.direccion_unidad || "N/A",
-      },
-      {
-        label: "Land Owner",
-        value: order.cliente.propietario_terreno || "N/A",
-      },
-      {
-        label: "Unit Purpose",
-        value: order.cliente.proposito_unidad || "N/A",
-      },
-      { label: "Marital Status", value: order.cliente.estado_civil || "N/A" },
-      { label: "Workplace", value: order.cliente.lugar_empleo || "N/A" },
-      { label: "Payment Method", value: order.cliente.forma_pago || "N/A" },
-      {
-        label: "Reference Contact",
-        value: order.cliente.contacto_referencia || "N/A",
-      },
-      {
-        label: "Insurance Purchased",
-        value: order.cliente.seguro_comprado ? "Yes" : "No",
-      },
-    ];
-
-    autoTable(doc, {
-      startY: yOffset,
-      head: [["Field", "Value"]],
-      body: clientInfo.map((info) => [info.label, info.value]),
-      theme: "striped",
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-      bodyStyles: { fillColor: [245, 245, 245] },
-      alternateRowStyles: { fillColor: [255, 255, 255] },
-      styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
-        yOffset = data.cursor.y + 10;
-      },
-    });
-  }
-
-  // Add color options
-  if (order.colorOptions && order.colorOptions.length > 0) {
-    checkSpace(30);
-    yOffset += addText("Color Options", yOffset, 18, "left", "#2980b9");
-    yOffset += 5;
-
-    autoTable(doc, {
-      startY: yOffset,
-      head: [["Color Name", "Color Code", "Additional Price"]],
-      body: order.colorOptions.map((color: any) => [
-        color.colorName || "N/A",
-        color.colorCode || "N/A",
-        `$${color.additionalPrice || 0}`,
-      ]),
-      theme: "striped",
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-      bodyStyles: { fillColor: [245, 245, 245] },
-      alternateRowStyles: { fillColor: [255, 255, 255] },
-      styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
-        yOffset = data.cursor.y + 5;
-      },
-    });
-
-    for (const color of order.colorOptions) {
-      if (color.imageUrl) {
-        checkSpace(60);
-        yOffset += addText(
-          color.colorName || "N/A",
-          yOffset,
-          12,
-          "left",
-          "#555555"
-        );
-        yOffset += await addImage(color.imageUrl, yOffset, 90, 50);
-      }
-    }
-  }
-
-  // Add options
-  if (order.options && order.options.length > 0) {
-    checkSpace(30);
-    yOffset += addText("Options", yOffset, 18, "left", "#2980b9");
-    yOffset += 5;
-
-    for (const option of order.options) {
-      checkSpace(20);
-      autoTable(doc, {
-        startY: yOffset,
-        head: [[option.name || "N/A"]],
-        theme: "striped",
-        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-        styles: { fontSize: 10, cellPadding: 5 },
-        didDrawPage: (data) => {
-          yOffset = data.cursor.y + 5;
-        },
-      });
-
-      if (option.suboptions && option.suboptions.length > 0) {
-        checkSpace(20);
-        autoTable(doc, {
-          startY: yOffset,
-          head: [["Suboption", "Code", "Details"]],
-          body: option.suboptions.map((suboption: any) => [
-            suboption.name || "N/A",
-            suboption.code || "N/A",
-            suboption.details || "N/A",
-          ]),
-          theme: "striped",
-          headStyles: { fillColor: [52, 152, 219], textColor: 255 },
-          bodyStyles: { fillColor: [245, 245, 245] },
-          alternateRowStyles: { fillColor: [255, 255, 255] },
-          styles: { fontSize: 9, cellPadding: 3 },
-          didDrawPage: (data) => {
-            yOffset = data.cursor.y + 5;
-          },
-        });
-
-        for (const suboption of option.suboptions) {
-          if (suboption.imageUrl) {
-            checkSpace(60);
-            yOffset += await addImage(suboption.imageUrl, yOffset, 90, 50);
-          }
-        }
-      }
-    }
-  }
-
-  // Add designs
-  if (order.designs && order.designs.length > 0) {
-    checkSpace(30);
-    yOffset += addText("Designs", yOffset, 18, "left", "#2980b9");
-    yOffset += 5;
-
-    autoTable(doc, {
-      startY: yOffset,
-      head: [["Design Type"]],
-      body: order.designs.map((design: any) => [design.designType || "N/A"]),
-      theme: "striped",
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-      bodyStyles: { fillColor: [245, 245, 245] },
-      alternateRowStyles: { fillColor: [255, 255, 255] },
-      styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
-        yOffset = data.cursor.y + 5;
-      },
-    });
-
-    for (const design of order.designs) {
-      if (design.imageUrl) {
-        checkSpace(150);
-        yOffset += await addImage(design.imageUrl, yOffset, 180, 140);
-      }
-    }
-  }
-
-  // Add comments
-  if (order.comentaries) {
-    checkSpace(30);
-    yOffset += addText("Comments", yOffset, 18, "left", "#2980b9");
-    yOffset += 5;
-
-    autoTable(doc, {
-      startY: yOffset,
-      body: [[order.comentaries || "N/A"]],
-      theme: "plain",
-      styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
-        yOffset = data.cursor.y + 10;
-      },
-    });
-  }
-
-  // Add signature
-  if (order.signatureImage) {
-    checkSpace(70);
-    yOffset += addText("Signature", yOffset, 18, "left", "#2980b9");
-    yOffset += 5;
-    doc.addImage(order.signatureImage, "PNG", 10, yOffset, 150, 50);
-    yOffset += 55;
-  }
-
-  // Add footer to all pages
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFillColor(41, 128, 185);
-    doc.rect(0, pageHeight - 20, doc.internal.pageSize.width, 20, "F");
-    addText(
-      `Generated on ${format(new Date(), "PPpp")} - Page ${i} of ${pageCount}`,
-      pageHeight - 10,
-      10,
-      "center",
-      "#FFFFFF"
-    );
-  }
-
-  doc.save(`order_${order._id}.pdf`);
-};
-
 export const OrdersTab: React.FC<OrdersTabProps> = ({
   orders,
   deleteOrder,
 }) => {
   return (
     <div className="space-y-8">
-      <h2 className="text-3xl font-bold">All Orders ({orders.length})</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <h2 className="text-3xl font-bold text-center md:text-left">
+        All Orders ({orders.length})
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order: OrderType) => (
-          <Card key={order._id}>
-            <CardHeader>
-              <CardTitle>{order.productName}</CardTitle>
+          <Card key={order._id} className="flex flex-col">
+            <CardHeader className="bg-primary/10">
+              <CardTitle className="text-xl font-semibold truncate">
+                {order.productName}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-lg font-semibold">
-                Total price: ${order.total}
-              </p>
-              <p>Discount: {order.discount}%</p>
-              <p>Tax: {order.tax}%</p>
-              <p>Status: {order.status}</p>
-              <p className="border-t pt-4 mt-4">Seller: {order.vendedorName}</p>
-              <p>Client: {order.cliente?.nombre || "N/A"}</p>
-              <p>Creado: {format(new Date(order.createdAt), "PPpp")}</p>
-              <p>
-                Comments:{" "}
-                {order.comentaries === "" ? (
-                  <span className="font-bold">No comments yet!</span>
-                ) : (
-                  order.comentaries
-                )}
-              </p>
-              <div className="flex flex-row gap-4">
-                <Button onClick={() => handleExportToPDF(order)}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Exportar a PDF
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => deleteOrder(order._id)}
+            <CardContent className="flex-grow space-y-4 py-6">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-sm text-muted-foreground">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Total
+                </span>
+                <span className="text-lg font-semibold">
+                  ${order.total.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-sm text-muted-foreground">
+                  <Percent className="w-4 h-4 mr-2" />
+                  Discount
+                </span>
+                <span>{order.discount}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-sm text-muted-foreground">
+                  <Tag className="w-4 h-4 mr-2" />
+                  Tax
+                </span>
+                <span>{order.tax}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center text-sm text-muted-foreground">
+                  Status
+                </span>
+                <span
+                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    order.status === "Completed"
+                      ? "bg-green-100 text-green-800"
+                      : order.status === "Pending"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
                 >
-                  Delete Order
-                </Button>
+                  {order.status}
+                </span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <User className="w-4 h-4 mr-2" />
+                Seller: {order.vendedorName}
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <User className="w-4 h-4 mr-2" />
+                Client: {order.cliente?.nombre || "N/A"}
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="w-4 h-4 mr-2" />
+                Created: {format(new Date(order.createdAt), "PPpp")}
+              </div>
+              <div className="flex items-start text-sm text-muted-foreground">
+                <MessageSquare className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
+                <span>
+                  Comments:{" "}
+                  {order.comentaries || (
+                    <span className="font-semibold">No comments yet!</span>
+                  )}
+                </span>
               </div>
             </CardContent>
+            <CardFooter className="flex flex-col gap-3 bg-muted/50 pt-6">
+              <Button
+                className="w-full text-xs sm:text-sm"
+                onClick={() => handleExportToPDFAdmin(order)}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Export PDF (Seller)
+              </Button>
+              <Button
+                className="w-full text-xs sm:text-sm"
+                onClick={() => handleExportToPDFManufacture(order)}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Export PDF (Manufacturer)
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-full text-xs sm:text-sm"
+                onClick={() => deleteOrder(order._id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Order
+              </Button>
+            </CardFooter>
           </Card>
         ))}
       </div>

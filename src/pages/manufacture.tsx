@@ -257,6 +257,47 @@ function Manufacture() {
       });
     }
 
+    // Add colorOptions
+
+    // Add color options
+    if (order.colorOptions && order.colorOptions.length > 0) {
+      checkSpace(30);
+      yOffset += addText("Color Options", yOffset, 18, "left", "#2980b9");
+      yOffset += 5;
+
+      autoTable(doc, {
+        startY: yOffset,
+        head: [["Color Name", "Color Code"]],
+        body: order.colorOptions.map((color: any) => [
+          color.colorName || "N/A",
+          color.colorCode || "N/A",
+          // `$${color.additionalPrice || 0}`,
+        ]),
+        theme: "striped",
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+        bodyStyles: { fillColor: [245, 245, 245] },
+        alternateRowStyles: { fillColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 5 },
+        didDrawPage: (data) => {
+          yOffset = data.cursor.y + 5;
+        },
+      });
+
+      for (const color of order.colorOptions) {
+        if (color.imageUrl) {
+          checkSpace(60);
+          yOffset += addText(
+            color.colorName || "N/A",
+            yOffset,
+            12,
+            "left",
+            "#555555"
+          );
+          yOffset += await addImage(color.imageUrl, yOffset, 90, 50);
+        }
+      }
+    }
+
     // Add options
     if (order.options && order.options.length > 0) {
       checkSpace(30);

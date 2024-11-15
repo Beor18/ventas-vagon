@@ -3,22 +3,23 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import {
-  FileText,
-  Trash2,
-  User,
-  Calendar,
-  DollarSign,
-  Percent,
-  Tag,
-  MessageSquare,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FileText, Trash2, MoreVertical, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { handleExportToPDFAdmin } from "@/lib/exportToPdf";
 import { handleExportToPDFManufacture } from "@/lib/exportToPdfManufacture";
@@ -52,6 +53,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
 }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleEditOrder = (orderId: string) => {
     const orderToEdit = orders.find((order) => order._id === orderId);
@@ -61,114 +63,108 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
     }
   };
 
+  const filteredOrders = orders.filter(
+    (order) =>
+      order.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.vendedorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.cliente?.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-bold text-center md:text-left">
-        All Orders ({orders.length})
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {orders.map((order: OrderType) => (
-          <Card key={order._id} className="flex flex-col">
-            <CardHeader className="bg-primary/10">
-              <CardTitle className="text-xl font-semibold truncate">
-                {order.productName}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow space-y-4 py-6">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center text-sm text-muted-foreground">
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  Total
-                </span>
-                <span className="text-lg font-semibold">
-                  ${order.total.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center text-sm text-muted-foreground">
-                  <Percent className="w-4 h-4 mr-2" />
-                  Discount
-                </span>
-                <span>{order.discount}%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center text-sm text-muted-foreground">
-                  <Tag className="w-4 h-4 mr-2" />
-                  Tax
-                </span>
-                <span>{order.tax}%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center text-sm text-muted-foreground">
-                  Status
-                </span>
-                <span
-                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    order.status === "Completed"
-                      ? "bg-green-100 text-green-800"
-                      : order.status === "Pending"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {order.status}
-                </span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <User className="w-4 h-4 mr-2" />
-                Seller: {order.vendedorName}
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <User className="w-4 h-4 mr-2" />
-                Client: {order.cliente?.nombre || "N/A"}
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Calendar className="w-4 h-4 mr-2" />
-                Created: {format(new Date(order.createdAt), "PPpp")}
-              </div>
-              <div className="flex items-start text-sm text-muted-foreground">
-                <MessageSquare className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
-                <span>
-                  Comments:{" "}
-                  {order.comentaries || (
-                    <span className="font-semibold">No comments yet!</span>
-                  )}
-                </span>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-3 bg-muted/50 pt-6">
-              <Button
-                className="w-full text-xs sm:text-sm"
-                onClick={() => handleEditOrder(order._id)}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold">Orders ({orders.length})</h2>
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search orders..."
+              className="pl-8 pr-4"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="rounded-md border shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="font-semibold">Product</TableHead>
+              <TableHead className="font-semibold">Total</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="font-semibold">Seller</TableHead>
+              <TableHead className="font-semibold">Client</TableHead>
+              <TableHead className="font-semibold">Created</TableHead>
+              <TableHead className="font-semibold">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredOrders.map((order: OrderType) => (
+              <TableRow
+                key={order._id}
+                className="hover:bg-muted/50 transition-colors"
               >
-                <FileText className="mr-2 h-4 w-4" />
-                Editar Orden
-              </Button>
-              <Button
-                className="w-full text-xs sm:text-sm"
-                onClick={() => handleExportToPDFAdmin(order)}
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Export PDF (Seller)
-              </Button>
-              <Button
-                className="w-full text-xs sm:text-sm"
-                onClick={() => handleExportToPDFManufacture(order)}
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Export PDF (Manufacturer)
-              </Button>
-              <Button
-                variant="destructive"
-                className="w-full text-xs sm:text-sm"
-                onClick={() => deleteOrder(order._id)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Order
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+                <TableCell className="font-medium">
+                  {order.productName}
+                </TableCell>
+                <TableCell>${order.total.toFixed(2)}</TableCell>
+                <TableCell>
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      order.status === "Completed"
+                        ? "bg-green-100 text-green-800"
+                        : order.status === "Pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </TableCell>
+                <TableCell>{order.vendedorName}</TableCell>
+                <TableCell>{order.cliente?.nombre || "N/A"}</TableCell>
+                <TableCell>{format(new Date(order.createdAt), "PP")}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => handleEditOrder(order._id)}
+                      >
+                        Edit order
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleExportToPDFAdmin(order)}
+                      >
+                        Export PDF (Seller)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleExportToPDFManufacture(order)}
+                      >
+                        Export PDF (Manufacturer)
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => deleteOrder(order._id)}
+                        className="text-red-600"
+                      >
+                        Delete order
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
       <OrderEditModal
         isOpen={isEditModalOpen}

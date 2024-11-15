@@ -24,24 +24,28 @@ import {
   Download,
   FileText,
   FileSpreadsheet,
+  MoreVertical,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { OrderDetail } from "@/components/OrderDetails";
 import InsurancePolicies from "@/components/Insurance";
 import { handleExportToPDFSeller } from "@/lib/exportToPdf";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface FullScreenImageProps {
   src: string;
@@ -279,57 +283,101 @@ function Seller({ products }: { products: any[] }) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {orders
-                  .filter(
-                    (order: any) => order.vendedorEmail === session?.user?.email
-                  )
-                  .map((order: any) => (
-                    <Card key={order._id}>
-                      <CardContent className="p-6">
-                        <h3 className="text-xl font-semibold uppercase mb-2">
-                          {order.productName}
-                        </h3>
-                        <p>Total precio: ${order.total}</p>
-                        <p>Descuento: {order.discount}%</p>
-                        <p>Tax: {order.tax}%</p>
-                        <p>Status: {order.status}</p>
-                        <p className="mt-2 pt-2 border-t">
-                          Vendedor: {order.vendedorName}
-                        </p>
-                        <p>Cliente: {order.cliente?.nombre || "N/A"}</p>
-                        <p>
-                          Comentarios:{" "}
-                          {order.comentaries === "" ? (
-                            <span className="font-bold">
-                              Todavía sin comentarios!
-                            </span>
-                          ) : (
-                            order.comentaries
-                          )}
-                        </p>
-                        <div className="flex space-x-2 mt-4">
-                          <Button onClick={() => handleOpenOrderDetail(order)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver detalle
-                          </Button>
-                          {/* <Button onClick={() => handleDownloadOrder(order)}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Descargar
-                          </Button> */}
-                          <Button
-                            onClick={() => handleExportToPDFSeller(order)}
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            Exportar a PDF
-                          </Button>
-                          {/* <Button onClick={() => handleExportToCSV(order)}>
-                            <FileSpreadsheet className="mr-2 h-4 w-4" />
-                            Exportar a CSV
-                          </Button> */}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                {/* <div className="flex items-center space-x-2">
+              <div className="relative flex-grow">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Buscar órdenes..."
+                  className="pl-8 pr-4"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div> */}
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-semibold">
+                          Producto
+                        </TableHead>
+                        <TableHead className="font-semibold">Total</TableHead>
+                        <TableHead className="font-semibold">
+                          Descuento
+                        </TableHead>
+                        <TableHead className="font-semibold">Tax</TableHead>
+                        <TableHead className="font-semibold">Status</TableHead>
+                        <TableHead className="font-semibold">Cliente</TableHead>
+                        <TableHead className="font-semibold">
+                          Comentarios
+                        </TableHead>
+                        <TableHead className="font-semibold">
+                          Acciones
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orders
+                        .filter(
+                          (order: any) =>
+                            order.vendedorEmail === session?.user?.email
+                        )
+                        .map((order: any) => (
+                          <TableRow key={order._id}>
+                            <TableCell className="font-medium uppercase">
+                              {order.productName}
+                            </TableCell>
+                            <TableCell>${order.total}</TableCell>
+                            <TableCell>{order.discount}%</TableCell>
+                            <TableCell>{order.tax}%</TableCell>
+                            <TableCell>{order.status}</TableCell>
+                            <TableCell>
+                              {order.cliente?.nombre || "N/A"}
+                            </TableCell>
+                            <TableCell>
+                              {order.comentaries === "" ? (
+                                <span className="font-bold">
+                                  Todavía sin comentarios!
+                                </span>
+                              ) : (
+                                order.comentaries
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <span className="sr-only">Abrir menú</span>
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => handleOpenOrderDetail(order)}
+                                  >
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Ver detalle
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleExportToPDFSeller(order)
+                                    }
+                                  >
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    Exportar a PDF
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             </CardContent>
           </Card>

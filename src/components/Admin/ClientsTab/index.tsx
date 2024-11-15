@@ -1,7 +1,26 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { PlusCircle, MoreVertical, Search } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface ClientType {
   _id: string;
@@ -35,78 +54,85 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
   editClient,
   deleteClient,
 }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredClients = clients.filter(
+    (client) =>
+      client.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.telefono.includes(searchTerm)
+  );
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">All Clients</h2>
+        <h2 className="text-3xl font-bold">All Clients ({clients.length})</h2>
         <Button onClick={openClientForm} size="lg">
           <PlusCircle className="mr-2 h-5 w-5" /> Create New Client
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {clients.map((client: ClientType) => (
-          <Card key={client._id}>
-            <CardContent className="p-6 space-y-4">
-              <h3 className="text-xl font-semibold">{client.nombre}</h3>
-              <p>
-                <strong>Residential Address:</strong>{" "}
-                {client.direccion_residencial}
-              </p>
-              <p>
-                <strong>Unit Address:</strong> {client.direccion_unidad}
-              </p>
-              <p>
-                <strong>Land Owner:</strong> {client.propietario_terreno}
-              </p>
-              <p>
-                <strong>Unit Purpose:</strong> {client.proposito_unidad}
-              </p>
-              <p>
-                <strong>Marital Status:</strong> {client.estado_civil}
-              </p>
-              <p>
-                <strong>Workplace:</strong> {client.lugar_empleo}
-              </p>
-              <p>
-                <strong>Email:</strong> {client.email}
-              </p>
-              <p>
-                <strong>ID:</strong> {client.identificacion}
-              </p>
-              <p>
-                <strong>Phone:</strong> {client.telefono}
-              </p>
-              <p>
-                <strong>Alternate Phone:</strong> {client.telefono_alterno}
-              </p>
-              <p>
-                <strong>Payment Method:</strong> {client.forma_pago}
-              </p>
-              <p>
-                <strong>Reference Contact:</strong> {client.contacto_referencia}
-              </p>
-              <p>
-                <strong>Insurer:</strong> {client.asegurador}
-              </p>
-              <p>
-                <strong>Insurance Purchased:</strong>{" "}
-                {client.seguro_comprado ? "Yes" : "No"}
-              </p>
-              <div className="flex justify-between pt-4">
-                <Button variant="outline" onClick={() => editClient(client)}>
-                  Edit Client
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => deleteClient(client._id)}
-                >
-                  Delete Client
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-grow">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search clients..."
+            className="pl-8 pr-4"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
+      <Card className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="font-semibold">Name</TableHead>
+              <TableHead className="font-semibold">Email</TableHead>
+              <TableHead className="font-semibold">Phone</TableHead>
+              <TableHead className="font-semibold">
+                Residential Address
+              </TableHead>
+              <TableHead className="font-semibold">Unit Address</TableHead>
+              <TableHead className="font-semibold">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredClients.map((client: ClientType) => (
+              <TableRow key={client._id}>
+                <TableCell className="font-medium">{client.nombre}</TableCell>
+                <TableCell>{client.email}</TableCell>
+                <TableCell>{client.telefono}</TableCell>
+                <TableCell>{client.direccion_residencial}</TableCell>
+                <TableCell>{client.direccion_unidad}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => editClient(client)}>
+                        Edit Client
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => deleteClient(client._id)}
+                        className="text-red-600"
+                      >
+                        Delete Client
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   );
 };

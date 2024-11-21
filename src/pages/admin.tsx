@@ -26,6 +26,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Client from "@/models/Client";
 import Order from "@/models/Order";
 import Product from "@/models/Product";
+import Financiamiento from "@/components/Financiamiento";
 
 const Admin = ({ initialProducts, orders }) => {
   const {
@@ -95,11 +96,12 @@ const Admin = ({ initialProducts, orders }) => {
         onValueChange={setActiveTab}
         className="space-y-8"
       >
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-6 mb-8">
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="clients">Clients</TabsTrigger>
           <TabsTrigger value="seguros">Insurance</TabsTrigger>
+          <TabsTrigger value="financiamiento">Financiamiento</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products">
@@ -132,6 +134,9 @@ const Admin = ({ initialProducts, orders }) => {
 
         <TabsContent value="seguros">
           <InsurancePolicies />
+        </TabsContent>
+        <TabsContent value="financiamiento">
+          <Financiamiento />
         </TabsContent>
       </Tabs>
 

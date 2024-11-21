@@ -46,6 +46,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Financiamiento from "@/components/Financiamiento";
 
 interface FullScreenImageProps {
   src: string;
@@ -261,7 +262,7 @@ function Seller({ products }: { products: any[] }) {
   return (
     <div className="container mx-auto py-8">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4 mb-12">
+        <TabsList className="grid w-full grid-cols-6 mb-12">
           <TabsTrigger value="orders">
             <ClipboardList className="mr-2 h-4 w-4" />
             Mis Órdenes
@@ -275,6 +276,7 @@ function Seller({ products }: { products: any[] }) {
             Mis Clientes
           </TabsTrigger>
           <TabsTrigger value="insurance">Seguros</TabsTrigger>
+          <TabsTrigger value="financiamiento">Financiamiento</TabsTrigger>
         </TabsList>
         <TabsContent value="orders">
           <Card>
@@ -473,6 +475,9 @@ function Seller({ products }: { products: any[] }) {
         </TabsContent>
         <TabsContent value="insurance">
           <InsurancePolicies />
+        </TabsContent>
+        <TabsContent value="financiamiento">
+          <Financiamiento />
         </TabsContent>
       </Tabs>
 

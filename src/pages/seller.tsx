@@ -279,11 +279,31 @@ function Seller({ products }: { products: any[] }) {
           <TabsTrigger value="financiamiento">Financiamiento</TabsTrigger>
         </TabsList>
         <TabsContent value="orders">
-          <Card>
-            <CardHeader>
-              <CardTitle>Mis Órdenes</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-3xl font-bold">
+                Mis Ordenes (
+                {
+                  orders.filter(
+                    (order: any) => order.vendedorEmail === session?.user?.email
+                  ).length
+                }
+                )
+              </h2>
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  {/* <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search orders..."
+                  className="pl-8 pr-4"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                /> */}
+                </div>
+              </div>
+            </div>
+            <Card className="rounded-md border shadow-sm overflow-hidden">
               <div className="space-y-4">
                 {/* <div className="flex items-center space-x-2">
               <div className="relative flex-grow">
@@ -300,7 +320,7 @@ function Seller({ products }: { products: any[] }) {
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
-                      <TableRow>
+                      <TableRow className="bg-muted/50">
                         <TableHead className="font-semibold">
                           Producto
                         </TableHead>
@@ -327,13 +347,26 @@ function Seller({ products }: { products: any[] }) {
                         )
                         .map((order: any) => (
                           <TableRow key={order._id}>
-                            <TableCell className="font-medium uppercase">
+                            <TableCell className="hover:bg-muted/50 transition-colors">
                               {order.productName}
                             </TableCell>
                             <TableCell>${order.total}</TableCell>
                             <TableCell>{order.discount}%</TableCell>
                             <TableCell>{order.tax}%</TableCell>
-                            <TableCell>{order.status}</TableCell>
+                            <TableCell>
+                              {" "}
+                              <span
+                                className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                  order.status === "Completed"
+                                    ? "bg-green-100 text-green-800"
+                                    : order.status === "Pending"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {order.status}
+                              </span>
+                            </TableCell>
                             <TableCell>
                               {order.cliente?.nombre || "N/A"}
                             </TableCell>
@@ -381,8 +414,8 @@ function Seller({ products }: { products: any[] }) {
                   </Table>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </Card>
+          </div>
         </TabsContent>
         <TabsContent value="products">
           <Card>

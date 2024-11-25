@@ -1,8 +1,8 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,9 +24,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { ChevronDown, ChevronUp, Plus, Minus, X } from "lucide-react";
 
 interface OrderEditModalProps {
+  fabricante?: any;
   isOpen: boolean;
   onClose: () => void;
   orderId: string;
@@ -35,6 +35,7 @@ interface OrderEditModalProps {
 }
 
 export function OrderEditModal({
+  fabricante,
   isOpen,
   onClose,
   orderId,
@@ -48,6 +49,9 @@ export function OrderEditModal({
     colorOptions: initialData?.colorOptions || [],
     designs: initialData?.designs || [],
   }));
+
+  // const [fabricante, setFabricante] = useState<any[]>([]);
+  const [selectedFabricante, setSelectedFabricante] = useState("");
 
   useEffect(() => {
     setFormData({
@@ -160,15 +164,15 @@ export function OrderEditModal({
               <TabsTrigger value="options">Opciones</TabsTrigger>
               <TabsTrigger value="colors">Colores</TabsTrigger>
               <TabsTrigger value="designs">Diseños</TabsTrigger>
-              <TabsTrigger value="customer">Cliente</TabsTrigger>
+              <TabsTrigger value="customer">Fabricante</TabsTrigger>
             </TabsList>
             <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
               <TabsContent value="basic" className="mt-0 space-y-4">
-                <Card>
-                  <CardHeader>
+                <div className="p-4">
+                  <div className="mb-8">
                     <CardTitle>Detalles del Producto</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                  </div>
+                  <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       {/* <div className="space-y-2">
                         <Label htmlFor="productName">Producto</Label>
@@ -232,9 +236,21 @@ export function OrderEditModal({
                           onChange={handleInputChange}
                         />
                       </div>
+                      <div className="flex flex-col gap-4">
+                        <h2 className="font-semibold">Firma digital: </h2>
+                        <img
+                          src={formData.signatureImage}
+                          style={{
+                            maxWidth: "100%",
+                            height: "auto",
+                            border: "1px solid #ccc",
+                            borderRadius: "5px",
+                          }}
+                        />
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </TabsContent>
               <TabsContent value="options" className="mt-0 space-y-4">
                 {(formData.product?.options || []).map(
@@ -243,7 +259,7 @@ export function OrderEditModal({
                       <CardHeader>
                         <CardTitle>{option.name}</CardTitle>
                       </CardHeader>
-                      <CardContent>
+                      <div>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                           {option.suboptions?.map(
                             (suboption: any, suboptionIndex: number) => {
@@ -293,7 +309,7 @@ export function OrderEditModal({
                             }
                           )}
                         </div>
-                      </CardContent>
+                      </div>
                     </Card>
                   )
                 )}
@@ -303,7 +319,7 @@ export function OrderEditModal({
                   <CardHeader>
                     <CardTitle>Opciones de Color</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {(formData.product?.colorOptions || []).map(
                         (color: any, index: number) => {
@@ -336,7 +352,7 @@ export function OrderEditModal({
                         }
                       )}
                     </div>
-                  </CardContent>
+                  </div>
                 </Card>
               </TabsContent>
               <TabsContent value="designs" className="mt-0 space-y-4">
@@ -344,7 +360,7 @@ export function OrderEditModal({
                   <CardHeader>
                     <CardTitle>Diseños</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {(formData.product?.designs || []).map(
                         (design: any, index: number) => {
@@ -376,108 +392,30 @@ export function OrderEditModal({
                         }
                       )}
                     </div>
-                  </CardContent>
+                  </div>
                 </Card>
               </TabsContent>
               <TabsContent value="customer" className="mt-0 space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Información del Cliente</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="clientName">Nombre</Label>
-                        <Input
-                          id="clientName"
-                          name="clientName"
-                          value={formData.cliente?.nombre || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              cliente: {
-                                ...prev.cliente,
-                                nombre: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="clientEmail">Email</Label>
-                        <Input
-                          id="clientEmail"
-                          name="clientEmail"
-                          value={formData.cliente?.email || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              cliente: {
-                                ...prev.cliente,
-                                email: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="clientAddress">Dirección</Label>
-                      <Input
-                        id="clientAddress"
-                        name="clientAddress"
-                        value={formData.cliente?.direccion_residencial || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            cliente: {
-                              ...prev.cliente,
-                              direccion_residencial: e.target.value,
-                            },
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="clientPhone">Teléfono</Label>
-                        <Input
-                          id="clientPhone"
-                          name="clientPhone"
-                          value={formData.cliente?.telefono || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              cliente: {
-                                ...prev.cliente,
-                                telefono: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="clientAltPhone">
-                          Teléfono Alternativo
-                        </Label>
-                        <Input
-                          id="clientAltPhone"
-                          name="clientAltPhone"
-                          value={formData.cliente?.telefono_alterno || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              cliente: {
-                                ...prev.cliente,
-                                telefono_alterno: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="client">Fabricante</Label>
+                    <Select
+                      value={selectedFabricante}
+                      onValueChange={setSelectedFabricante}
+                    >
+                      <SelectTrigger id="fabricante">
+                        <SelectValue placeholder="Seleccione un fabricante" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fabricante.map((client: any) => (
+                          <SelectItem key={client._id} value={client.email}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </TabsContent>
             </ScrollArea>
           </Tabs>

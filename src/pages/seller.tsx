@@ -73,6 +73,8 @@ function Seller({ products }: { products: any[] }) {
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const [fabricante, setFabricante] = useState<any[]>([]);
+
   const { editOrder } = useOrderManagement(orders);
 
   useEffect(() => {
@@ -82,6 +84,7 @@ function Seller({ products }: { products: any[] }) {
       });
       fetchOrders();
       fetchClients();
+      fetchFabricante();
     }
   }, [session]);
 
@@ -121,6 +124,16 @@ function Seller({ products }: { products: any[] }) {
     });
     const data = await response.json();
     setClients(data);
+  };
+
+  const fetchFabricante = async () => {
+    const response = await fetch("/api/fabricante", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    setFabricante(data);
   };
 
   const handleCreateClient = async (client: any) => {
@@ -319,6 +332,7 @@ function Seller({ products }: { products: any[] }) {
       />
 
       <OrderEditModal
+        fabricante={fabricante}
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);

@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "../ui/badge";
 
 interface OrderEditModalProps {
   fabricante?: any;
@@ -173,6 +174,13 @@ export function OrderEditModal({
                     <CardTitle>Detalles del Producto</CardTitle>
                   </div>
                   <div className="space-y-4">
+                    <div className="flex flex-col gap-4 mb-8">
+                      <p>
+                        <span className="font-semibold">Cliente:</span>{" "}
+                        {formData?.cliente?.nombre}
+                      </p>
+                    </div>
+                    <Separator />
                     <div className="grid grid-cols-2 gap-4">
                       {/* <div className="space-y-2">
                         <Label htmlFor="productName">Producto</Label>
@@ -183,6 +191,7 @@ export function OrderEditModal({
                           onChange={handleInputChange}
                         />
                       </div> */}
+
                       <div className="space-y-2">
                         <Label htmlFor="status">Estado</Label>
                         <Select
@@ -255,12 +264,14 @@ export function OrderEditModal({
               <TabsContent value="options" className="mt-0 space-y-4">
                 {(formData.product?.options || []).map(
                   (option: any, optionIndex: number) => (
-                    <Card key={optionIndex}>
+                    <Card key={optionIndex} className="w-full">
                       <CardHeader>
-                        <CardTitle>{option.name}</CardTitle>
+                        <CardTitle className="text-2xl font-bold">
+                          {option.name}
+                        </CardTitle>
                       </CardHeader>
-                      <div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
                           {option.suboptions?.map(
                             (suboption: any, suboptionIndex: number) => {
                               const isSelected = formData.options?.some(
@@ -273,18 +284,26 @@ export function OrderEditModal({
                               return (
                                 <div
                                   key={suboptionIndex}
-                                  className="flex flex-col items-center space-y-2"
+                                  className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
                                 >
-                                  <img
-                                    src={suboption.imageUrl}
-                                    alt={suboption.name}
-                                    width={100}
-                                    height={100}
-                                    className="rounded-md object-cover"
-                                  />
-                                  <div className="text-center">
-                                    <p className="font-medium">
+                                  <div className="aspect-square relative">
+                                    <img
+                                      src={suboption.imageUrl}
+                                      alt={suboption.name}
+                                      className="rounded-t-lg bg-cover"
+                                    />
+                                    {isSelected && (
+                                      <Badge className="absolute top-2 right-2 bg-primary text-white">
+                                        Seleccionado
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="p-4 bg-card">
+                                    <h3 className="font-semibold text-lg mb-1">
                                       {suboption.name}
+                                    </h3>
+                                    <p className="text-muted-foreground mb-3">
+                                      $ {suboption.price}
                                     </p>
                                     <Button
                                       type="button"
@@ -292,6 +311,7 @@ export function OrderEditModal({
                                         isSelected ? "default" : "outline"
                                       }
                                       size="sm"
+                                      className="w-full"
                                       onClick={() =>
                                         handleOptionChange(
                                           optionIndex,
@@ -309,13 +329,13 @@ export function OrderEditModal({
                             }
                           )}
                         </div>
-                      </div>
+                      </CardContent>
                     </Card>
                   )
                 )}
               </TabsContent>
               <TabsContent value="colors" className="mt-0 space-y-4">
-                <Card>
+                <div>
                   <CardHeader>
                     <CardTitle>Opciones de Color</CardTitle>
                   </CardHeader>
@@ -329,34 +349,44 @@ export function OrderEditModal({
                           return (
                             <div
                               key={index}
-                              className="flex flex-col items-center space-y-2"
+                              className="relative rounded-lg overflow-hidden shadow-md border transition-all duration-300 hover:shadow-lg"
                             >
-                              <img
-                                src={color.imageUrl}
-                                alt={color.colorName}
-                                width={100}
-                                height={100}
-                                className="rounded-md object-cover"
-                              />
-                              <p className="font-medium">{color.colorName}</p>
-                              <Button
-                                type="button"
-                                variant={isSelected ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => handleColorChange(color)}
-                              >
-                                {isSelected ? "Deseleccionar" : "Seleccionar"}
-                              </Button>
+                              <div className="aspect-square relative">
+                                <img
+                                  src={color.imageUrl}
+                                  alt={color.colorName}
+                                  className="rounded-t-lg bg-cover"
+                                />
+                                {isSelected && (
+                                  <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                    Seleccionado
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="p-4 bg-card">
+                                <h3 className="font-semibold text-lg mb-3 text-center">
+                                  {color.colorName}
+                                </h3>
+                                <Button
+                                  type="button"
+                                  variant={isSelected ? "default" : "outline"}
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={() => handleColorChange(color)}
+                                >
+                                  {isSelected ? "Deseleccionar" : "Seleccionar"}
+                                </Button>
+                              </div>
                             </div>
                           );
                         }
                       )}
                     </div>
                   </div>
-                </Card>
+                </div>
               </TabsContent>
               <TabsContent value="designs" className="mt-0 space-y-4">
-                <Card>
+                <div>
                   <CardHeader>
                     <CardTitle>Diseños</CardTitle>
                   </CardHeader>
@@ -369,31 +399,41 @@ export function OrderEditModal({
                           return (
                             <div
                               key={index}
-                              className="flex flex-col items-center space-y-2"
+                              className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
                             >
-                              <img
-                                src={design.imageUrl}
-                                alt={design.designType}
-                                width={100}
-                                height={100}
-                                className="rounded-md object-cover"
-                              />
-                              <p className="font-medium">{design.designType}</p>
-                              <Button
-                                type="button"
-                                variant={isSelected ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => handleDesignChange(design)}
-                              >
-                                {isSelected ? "Seleccionado" : "Seleccionar"}
-                              </Button>
+                              <div className="aspect-square relative">
+                                <img
+                                  src={design.imageUrl}
+                                  alt={design.designType}
+                                  className="rounded-t-lg bg-cover"
+                                />
+                                {isSelected && (
+                                  <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                    Seleccionado
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="p-4 bg-card">
+                                <h3 className="font-semibold text-lg mb-3 text-center">
+                                  {design.designType}
+                                </h3>
+                                <Button
+                                  type="button"
+                                  variant={isSelected ? "default" : "outline"}
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={() => handleDesignChange(design)}
+                                >
+                                  {isSelected ? "Seleccionado" : "Seleccionar"}
+                                </Button>
+                              </div>
                             </div>
                           );
                         }
                       )}
                     </div>
                   </div>
-                </Card>
+                </div>
               </TabsContent>
               <TabsContent value="customer" className="mt-0 space-y-4">
                 <div>

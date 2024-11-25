@@ -1,6 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -19,28 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { ChevronDown, ChevronUp, Plus, Minus, X } from "lucide-react";
 
 interface OrderEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderId: string;
-  editOrder: (orderId: string, updatedData: Partial<OrderType>) => void;
-  initialData: OrderType;
-}
-
-interface OrderType {
-  _id: string;
-  productName: string;
-  total: number;
-  discount: number;
-  tax: number;
-  status: string;
-  vendedorName: string;
-  createdAt: string;
-  cliente?: {
-    nombre: string;
-  };
-  comentaries: string;
+  editOrder: (orderId: string, updatedData: Partial<any>) => void;
+  initialData: any;
 }
 
 export function OrderEditModal({
@@ -50,10 +41,22 @@ export function OrderEditModal({
   editOrder,
   initialData,
 }: OrderEditModalProps) {
-  const [formData, setFormData] = useState<Partial<OrderType>>(initialData);
+  const [formData, setFormData] = useState<Partial<any>>(() => ({
+    ...initialData,
+    product: initialData?.product || {},
+    options: initialData?.options || [],
+    colorOptions: initialData?.colorOptions || [],
+    designs: initialData?.designs || [],
+  }));
 
   useEffect(() => {
-    setFormData(initialData);
+    setFormData({
+      ...initialData,
+      product: initialData?.product || {},
+      options: initialData?.options || [],
+      colorOptions: initialData?.colorOptions || [],
+      designs: initialData?.designs || [],
+    });
   }, [initialData]);
 
   const handleInputChange = (
@@ -63,8 +66,66 @@ export function OrderEditModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, status: value }));
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleOptionChange = (optionIndex: number, suboptionIndex: number) => {
+    setFormData((prev) => {
+      const newOptions = [...prev.options];
+      const productOption = prev.product?.options?.[optionIndex];
+      const productSuboption = productOption?.suboptions?.[suboptionIndex];
+
+      if (!productOption || !productSuboption) return prev;
+
+      const existingOptionIndex = newOptions.findIndex(
+        (o) => o.name === productOption.name
+      );
+      if (existingOptionIndex > -1) {
+        const existingSuboptionIndex = newOptions[
+          existingOptionIndex
+        ].suboptions.findIndex((s) => s._id === productSuboption._id);
+        if (existingSuboptionIndex > -1) {
+          // Deseleccionar: Eliminar la subopción
+          newOptions[existingOptionIndex].suboptions.splice(
+            existingSuboptionIndex,
+            1
+          );
+          if (newOptions[existingOptionIndex].suboptions.length === 0) {
+            newOptions.splice(existingOptionIndex, 1);
+          }
+        } else {
+          // Seleccionar: Agregar la subopción
+          newOptions[existingOptionIndex].suboptions.push({
+            ...productSuboption,
+            selected: true,
+          });
+        }
+      } else {
+        // Seleccionar: Agregar nueva opción con la subopción
+        newOptions.push({
+          ...productOption,
+          suboptions: [{ ...productSuboption, selected: true }],
+        });
+      }
+      return { ...prev, options: newOptions };
+    });
+  };
+
+  const handleColorChange = (color: any) => {
+    setFormData((prev) => {
+      const newColorOptions = prev.colorOptions.some((c) => c._id === color._id)
+        ? prev.colorOptions.filter((c) => c._id !== color._id)
+        : [...prev.colorOptions, { ...color, selected: true }];
+      return { ...prev, colorOptions: newColorOptions };
+    });
+  };
+
+  const handleDesignChange = (design: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      designs: [{ ...design, selected: true }],
+    }));
   };
 
   const handleClose = () => {
@@ -74,131 +135,356 @@ export function OrderEditModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    editOrder(orderId, formData);
+    const updatedData = {
+      ...formData,
+      options: formData.options,
+      colorOptions: formData.colorOptions,
+      designs: formData.designs,
+    };
+    editOrder(orderId, updatedData);
     handleClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Editar Orden</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            Editar Orden: {formData.productName}
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="productName" className="text-right">
-                Producto
-              </Label>
-              <Input
-                id="productName"
-                name="productName"
-                value={formData.productName}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="total" className="text-right">
-                Total
-              </Label>
-              <Input
-                id="total"
-                name="total"
-                type="number"
-                value={formData.total}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="discount" className="text-right">
-                Descuento
-              </Label>
-              <Input
-                id="discount"
-                name="discount"
-                type="number"
-                value={formData.discount}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="tax" className="text-right">
-                Impuesto
-              </Label>
-              <Input
-                id="tax"
-                name="tax"
-                type="number"
-                value={formData.tax}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Estado
-              </Label>
-              <Select
-                onValueChange={handleSelectChange}
-                defaultValue={formData.status}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Completed">Completado</SelectItem>
-                  <SelectItem value="Pending">Pendiente</SelectItem>
-                  <SelectItem value="Cancelled">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="vendedorName" className="text-right">
-                Vendedor
-              </Label>
-              <Input
-                id="vendedorName"
-                name="vendedorName"
-                value={formData.vendedorName}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="clienteName" className="text-right">
-                Cliente
-              </Label>
-              <Input
-                id="clienteName"
-                name="clienteName"
-                value={formData.cliente?.nombre || ""}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    cliente: { ...prev.cliente, nombre: e.target.value },
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="comentaries" className="text-right">
-                Comentarios
-              </Label>
-              <Textarea
-                id="comentaries"
-                name="comentaries"
-                value={formData.comentaries}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit">Guardar cambios</Button>
+        <form onSubmit={handleSubmit} className="flex-grow overflow-hidden">
+          <Tabs defaultValue="basic" className="w-full h-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="basic">Información Básica</TabsTrigger>
+              <TabsTrigger value="options">Opciones</TabsTrigger>
+              <TabsTrigger value="colors">Colores</TabsTrigger>
+              <TabsTrigger value="designs">Diseños</TabsTrigger>
+              <TabsTrigger value="customer">Cliente</TabsTrigger>
+            </TabsList>
+            <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+              <TabsContent value="basic" className="mt-0 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Detalles del Producto</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* <div className="space-y-2">
+                        <Label htmlFor="productName">Producto</Label>
+                        <Input
+                          id="productName"
+                          name="productName"
+                          value={formData.productName || ""}
+                          onChange={handleInputChange}
+                        />
+                      </div> */}
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Estado</Label>
+                        <Select
+                          onValueChange={(value) =>
+                            handleSelectChange("status", value)
+                          }
+                          defaultValue={formData.status}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar estado" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Completed">
+                              Completado
+                            </SelectItem>
+                            <SelectItem value="Pending">Pendiente</SelectItem>
+                            <SelectItem value="Cancelled">Cancelado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="total">Total</Label>
+                        <Input
+                          id="total"
+                          name="total"
+                          type="number"
+                          value={formData.total}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="discount">Descuento</Label>
+                        <Input
+                          id="discount"
+                          name="discount"
+                          type="number"
+                          value={formData.discount}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="tax">Impuesto</Label>
+                        <Input
+                          id="tax"
+                          name="tax"
+                          type="number"
+                          value={formData.tax}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="options" className="mt-0 space-y-4">
+                {(formData.product?.options || []).map(
+                  (option: any, optionIndex: number) => (
+                    <Card key={optionIndex}>
+                      <CardHeader>
+                        <CardTitle>{option.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {option.suboptions?.map(
+                            (suboption: any, suboptionIndex: number) => {
+                              const isSelected = formData.options?.some(
+                                (o) =>
+                                  o.name === option.name &&
+                                  o.suboptions?.some(
+                                    (s) => s._id === suboption._id
+                                  )
+                              );
+                              return (
+                                <div
+                                  key={suboptionIndex}
+                                  className="flex flex-col items-center space-y-2"
+                                >
+                                  <img
+                                    src={suboption.imageUrl}
+                                    alt={suboption.name}
+                                    width={100}
+                                    height={100}
+                                    className="rounded-md object-cover"
+                                  />
+                                  <div className="text-center">
+                                    <p className="font-medium">
+                                      {suboption.name}
+                                    </p>
+                                    <Button
+                                      type="button"
+                                      variant={
+                                        isSelected ? "default" : "outline"
+                                      }
+                                      size="sm"
+                                      onClick={() =>
+                                        handleOptionChange(
+                                          optionIndex,
+                                          suboptionIndex
+                                        )
+                                      }
+                                    >
+                                      {isSelected
+                                        ? "Deseleccionar"
+                                        : "Seleccionar"}
+                                    </Button>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                )}
+              </TabsContent>
+              <TabsContent value="colors" className="mt-0 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Opciones de Color</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {(formData.product?.colorOptions || []).map(
+                        (color: any, index: number) => {
+                          const isSelected = formData.colorOptions?.some(
+                            (c) => c._id === color._id
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className="flex flex-col items-center space-y-2"
+                            >
+                              <img
+                                src={color.imageUrl}
+                                alt={color.colorName}
+                                width={100}
+                                height={100}
+                                className="rounded-md object-cover"
+                              />
+                              <p className="font-medium">{color.colorName}</p>
+                              <Button
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => handleColorChange(color)}
+                              >
+                                {isSelected ? "Deseleccionar" : "Seleccionar"}
+                              </Button>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="designs" className="mt-0 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Diseños</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {(formData.product?.designs || []).map(
+                        (design: any, index: number) => {
+                          const isSelected =
+                            formData.designs?.[0]?._id === design._id;
+                          return (
+                            <div
+                              key={index}
+                              className="flex flex-col items-center space-y-2"
+                            >
+                              <img
+                                src={design.imageUrl}
+                                alt={design.designType}
+                                width={100}
+                                height={100}
+                                className="rounded-md object-cover"
+                              />
+                              <p className="font-medium">{design.designType}</p>
+                              <Button
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => handleDesignChange(design)}
+                              >
+                                {isSelected ? "Seleccionado" : "Seleccionar"}
+                              </Button>
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="customer" className="mt-0 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Información del Cliente</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="clientName">Nombre</Label>
+                        <Input
+                          id="clientName"
+                          name="clientName"
+                          value={formData.cliente?.nombre || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cliente: {
+                                ...prev.cliente,
+                                nombre: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="clientEmail">Email</Label>
+                        <Input
+                          id="clientEmail"
+                          name="clientEmail"
+                          value={formData.cliente?.email || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cliente: {
+                                ...prev.cliente,
+                                email: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="clientAddress">Dirección</Label>
+                      <Input
+                        id="clientAddress"
+                        name="clientAddress"
+                        value={formData.cliente?.direccion_residencial || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            cliente: {
+                              ...prev.cliente,
+                              direccion_residencial: e.target.value,
+                            },
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="clientPhone">Teléfono</Label>
+                        <Input
+                          id="clientPhone"
+                          name="clientPhone"
+                          value={formData.cliente?.telefono || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cliente: {
+                                ...prev.cliente,
+                                telefono: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="clientAltPhone">
+                          Teléfono Alternativo
+                        </Label>
+                        <Input
+                          id="clientAltPhone"
+                          name="clientAltPhone"
+                          value={formData.cliente?.telefono_alterno || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              cliente: {
+                                ...prev.cliente,
+                                telefono_alterno: e.target.value,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </ScrollArea>
+          </Tabs>
+          <DialogFooter className="mt-4">
+            <Button type="submit" className="w-full sm:w-auto">
+              Guardar cambios
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

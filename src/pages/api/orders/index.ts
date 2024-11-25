@@ -20,7 +20,7 @@ export default async function handler(
   }
 
   if (req.method === "GET") {
-    const { status, fabricanteEmail } = req.query;
+    const { id, status, fabricanteEmail } = req.query;
     let query: any = {};
 
     // Filtrar por estado si está presente
@@ -31,6 +31,10 @@ export default async function handler(
     // Filtrar por fabricanteEmail si está presente en la consulta
     if (fabricanteEmail) {
       query.fabricanteEmail = fabricanteEmail;
+    }
+
+    if (id) {
+      query.id = id;
     }
 
     // Obtener las órdenes filtradas y los datos del cliente

@@ -1,9 +1,12 @@
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 export const useClientManagement = () => {
   const [clients, setClients] = useState([]);
   const [currentClient, setCurrentClient] = useState(null);
   const [isClientFormModalOpen, setIsClientFormModalOpen] = useState(false);
+
+  const { data: session } = useSession();
 
   const openClientForm = (client = null) => {
     setCurrentClient(client);
@@ -20,7 +23,7 @@ export const useClientManagement = () => {
       const response = await fetch(`/api/client`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(clientData),
+        body: JSON.stringify({ ...clientData, vendedor: session.user?.email }),
       });
       if (response.ok) {
         await fetchClients(); // Refresca la lista de clientes

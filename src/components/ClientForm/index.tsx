@@ -149,7 +149,7 @@ function ClientForm({ onSubmit, initialClientData }: any) {
             id="pin_localidad_lat"
             name="pin_localidad_lat"
             type="number"
-            value={newClient.pin_localidad.lat}
+            value={newClient?.pin_localidad?.lat}
             onChange={handleLatChange}
             required
           />
@@ -160,7 +160,7 @@ function ClientForm({ onSubmit, initialClientData }: any) {
             id="pin_localidad_long"
             name="pin_localidad_long"
             type="number"
-            value={newClient.pin_localidad.long}
+            value={newClient?.pin_localidad?.long}
             onChange={handleLongChange}
             required
           />
@@ -170,7 +170,7 @@ function ClientForm({ onSubmit, initialClientData }: any) {
           <Input
             id="propietario_terreno"
             name="propietario_terreno"
-            value={newClient.propietario_terreno}
+            value={newClient?.propietario_terreno}
             onChange={handleInputChange}
             required
           />

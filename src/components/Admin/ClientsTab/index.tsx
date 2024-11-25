@@ -67,7 +67,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">All Clients ({clients.length})</h2>
-        <Button onClick={openClientForm} size="lg">
+        <Button onClick={() => openClientForm()} size="lg">
           <PlusCircle className="mr-2 h-5 w-5" /> Create New Client
         </Button>
       </div>

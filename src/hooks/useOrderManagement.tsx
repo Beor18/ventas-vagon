@@ -14,6 +14,16 @@ export const useOrderManagement = (initialOrders) => {
     }
   };
 
+  const fetchOrdersById = async (id: any) => {
+    try {
+      const response = await fetch(`/api/orders?id=${id}`);
+      const data = await response.json();
+      setOrdersList(data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
   const deleteOrder = async (orderId) => {
     setLoading(true);
     try {
@@ -48,6 +58,7 @@ export const useOrderManagement = (initialOrders) => {
             order._id === updatedOrder._id ? updatedOrder : order
           )
         );
+        await fetchOrdersById(orderId);
       }
     } catch (error) {
       console.error("Error editing order:", error);

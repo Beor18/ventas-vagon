@@ -42,12 +42,14 @@ interface OrderType {
 }
 
 interface OrdersTabProps {
+  fabricante?: any;
   orders: OrderType[];
   editOrder: (id: string, updatedData: Partial<OrderType>) => void;
   deleteOrder: (id: string) => void;
 }
 
 export const OrdersTab: React.FC<OrdersTabProps> = ({
+  fabricante,
   orders,
   editOrder,
   deleteOrder,
@@ -168,6 +170,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
         </Table>
       </Card>
       <OrderEditModal
+        fabricante={fabricante}
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);

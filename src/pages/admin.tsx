@@ -86,7 +86,8 @@ const Admin = ({ initialProducts, orders }) => {
     handleSaveClient,
   } = useClientManagement();
 
-  const { ordersList, deleteOrder, editOrder } = useOrderManagement(orders);
+  const { ordersList, deleteOrder, editOrder, fabricante } =
+    useOrderManagement(orders);
 
   return (
     <div className="container mx-auto p-8 space-y-12">
@@ -117,6 +118,7 @@ const Admin = ({ initialProducts, orders }) => {
 
         <TabsContent value="orders">
           <OrdersTab
+            fabricante={fabricante}
             orders={ordersList}
             editOrder={editOrder}
             deleteOrder={deleteOrder}

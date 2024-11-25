@@ -1,8 +1,28 @@
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 export const useOrderManagement = (initialOrders) => {
   const [ordersList, setOrdersList] = useState(initialOrders);
+  const [fabricante, setFabricante] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (session) {
+      fetchAccessToken().then((token) => {
+        setAccessToken(token);
+      });
+      fetchFabricante();
+    }
+  }, [session]);
+
+  const fetchAccessToken = async () => {
+    const response = await fetch("/api/jwt");
+    const data = await response.json();
+    return data.accessToken;
+  };
 
   const fetchOrders = async () => {
     try {
@@ -67,11 +87,22 @@ export const useOrderManagement = (initialOrders) => {
     }
   };
 
+  const fetchFabricante = async () => {
+    const response = await fetch("/api/fabricante", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    setFabricante(data);
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
 
   return {
+    fabricante,
     ordersList,
     loading,
     fetchOrders,

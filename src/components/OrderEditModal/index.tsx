@@ -447,7 +447,7 @@ export function OrderEditModal({
                         <SelectValue placeholder="Seleccione un fabricante" />
                       </SelectTrigger>
                       <SelectContent>
-                        {fabricante.map((client: any) => (
+                        {fabricante?.map((client: any) => (
                           <SelectItem key={client._id} value={client.email}>
                             {client.name}
                           </SelectItem>

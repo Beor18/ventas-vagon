@@ -22,7 +22,7 @@ interface OrderDetailProps {
   isOpen: boolean;
   onClose: () => void;
   order: any;
-  openFullScreenImage: (imageUrl: string) => void;
+  openFullScreenImage?: (imageUrl: string) => void;
 }
 
 export function OrderDetail({

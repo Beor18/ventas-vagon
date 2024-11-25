@@ -19,12 +19,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FileText, Trash2, MoreVertical, Search, Filter } from "lucide-react";
+import {
+  FileText,
+  Trash2,
+  MoreVertical,
+  Search,
+  Filter,
+  Eye,
+} from "lucide-react";
 import { format } from "date-fns";
 import { handleExportToPDFAdmin } from "@/lib/exportToPdf";
 import { handleExportToPDFManufacture } from "@/lib/exportToPdfManufacture";
 import { OrderEditModal } from "@/components/OrderEditModal";
 import { Card } from "@/components/ui/card";
+import { OrderDetail } from "@/components/OrderDetails";
 
 interface OrderType {
   _id: string;
@@ -57,6 +65,17 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
+
+  const handleOpenOrderDetail = (orderId) => {
+    const order = orders.find((order) => order._id === orderId);
+    setSelectedOrder({ ...order });
+    setIsOrderDetailOpen(true);
+  };
+
+  const handleCloseOrderDetail = () => {
+    setIsOrderDetailOpen(false);
+  };
 
   const handleEditOrder = (orderId: string) => {
     const orderToEdit = orders.find((order) => order._id === orderId);
@@ -140,6 +159,11 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem
+                        onClick={() => handleOpenOrderDetail(order._id)}
+                      >
+                        Ver detalle
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
                         onClick={() => handleEditOrder(order._id)}
                       >
                         Edit order
@@ -169,6 +193,14 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
           </TableBody>
         </Table>
       </Card>
+
+      <OrderDetail
+        isOpen={isOrderDetailOpen}
+        onClose={handleCloseOrderDetail}
+        order={selectedOrder}
+        //openFullScreenImage={openFullScreenImage}
+      />
+
       <OrderEditModal
         fabricante={fabricante}
         isOpen={isEditModalOpen}

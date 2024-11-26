@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Eye, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { format } from "date-fns";
 
 const OrderTable = ({
   orders,
@@ -64,6 +65,7 @@ const OrderTable = ({
                 <TableHead>Status</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Comentarios</TableHead>
+                <TableHead>Fecha de la orden</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -93,6 +95,9 @@ const OrderTable = ({
                   <TableCell>{order.cliente?.nombre || "N/A"}</TableCell>
                   <TableCell>
                     {order.comentaries || "Sin comentarios"}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(order.createdAt), "PP")}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

@@ -20,10 +20,10 @@ import { handleExportToPDFSeller } from "@/lib/exportToPdf";
 import Financiamiento from "@/components/Financiamiento";
 
 import OrderTable from "@/components/Seller/OrderTable";
-import ClientCard from "@/components/Seller/ClientCard";
 import ProductList from "@/components/Seller/ProductList";
 import { useOrderManagement } from "@/hooks/useOrderManagement";
 import { OrderEditModal } from "@/components/OrderEditModal";
+import ClientsTable from "@/components/Seller/ClientTable";
 
 interface FullScreenImageProps {
   src: string;
@@ -290,16 +290,11 @@ function Seller({ products }: { products: any[] }) {
           <ProductList products={products} onView={openModal} />
         </TabsContent>
         <TabsContent value="clients">
-          <div className="flex flex-col space-y-4">
-            {clients.map((client) => (
-              <ClientCard
-                key={client._id}
-                client={client}
-                onEdit={openClientFormModal}
-                onDelete={handleDeleteClient}
-              />
-            ))}
-          </div>
+          <ClientsTable
+            clients={clients}
+            openClientFormModal={openClientFormModal}
+            handleDeleteClient={handleDeleteClient}
+          />
         </TabsContent>
         <TabsContent value="insurance">
           <InsurancePolicies />

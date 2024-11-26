@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
 
 const OrderTable = ({
+  loading,
   orders,
   session,
   onOpenOrderDetail,
@@ -27,6 +28,14 @@ const OrderTable = ({
   const filteredOrders = orders.filter(
     (order) => order.vendedorEmail === session?.user?.email
   );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

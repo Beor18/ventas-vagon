@@ -73,47 +73,21 @@ function Seller({ products }: { products: any[] }) {
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const [fabricante, setFabricante] = useState<any[]>([]);
-
-  const { editOrder } = useOrderManagement(orders);
+  const { fabricante, ordersList, editOrder, loading } = useOrderManagement([]);
 
   useEffect(() => {
     if (session) {
       fetchAccessToken().then((token) => {
         setAccessToken(token);
       });
-      fetchOrders();
       fetchClients();
-      fetchFabricante();
     }
   }, [session]);
-
-  // const handleDownloadOrder = (order: any) => {
-  //   const orderString = JSON.stringify(order, null, 2);
-  //   const blob = new Blob([orderString], { type: "application/json" });
-  //   const url = URL.createObjectURL(blob);
-  //   const link = document.createElement("a");
-  //   link.href = url;
-  //   link.download = `order_${order._id}.json`;
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
 
   const fetchAccessToken = async () => {
     const response = await fetch("/api/jwt");
     const data = await response.json();
     return data.accessToken;
-  };
-
-  const fetchOrders = async () => {
-    const response = await fetch("/api/orders", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const data = await response.json();
-    setOrders(data);
   };
 
   const fetchClients = async () => {
@@ -124,16 +98,6 @@ function Seller({ products }: { products: any[] }) {
     });
     const data = await response.json();
     setClients(data);
-  };
-
-  const fetchFabricante = async () => {
-    const response = await fetch("/api/fabricante", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const data = await response.json();
-    setFabricante(data);
   };
 
   const handleCreateClient = async (client: any) => {
@@ -279,7 +243,8 @@ function Seller({ products }: { products: any[] }) {
         </TabsList>
         <TabsContent value="orders">
           <OrderTable
-            orders={orders}
+            loading={loading}
+            orders={ordersList}
             editOrder={handleOpenOrderEdit}
             session={session}
             onOpenOrderDetail={handleOpenOrderDetail}

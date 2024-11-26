@@ -22,7 +22,7 @@ const withAuth = (
       !session ||
       !allowedRoles.includes(session.user.role)
     ) {
-      return <p>Loading...</p>;
+      return <p></p>;
     }
 
     return <WrappedComponent {...props} />;

@@ -118,8 +118,8 @@ function Manufacture() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <div className="container mx-auto py-4 flex-grow">
+    <div className="min-h-screen bg-white flex flex-col">
+      <div className="container mx-auto p-8 flex-grow">
         <h1 className="text-2xl font-bold mb-4">Manufacture Orders</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {orders.map((order: any) => (

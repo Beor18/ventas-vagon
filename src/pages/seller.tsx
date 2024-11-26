@@ -259,7 +259,7 @@ function Seller({ products }: { products: any[] }) {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto p-8">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6 mb-12">
           <TabsTrigger value="orders">

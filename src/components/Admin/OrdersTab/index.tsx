@@ -113,13 +113,14 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="font-semibold">Product</TableHead>
+              <TableHead className="font-semibold">Número de orden</TableHead>
+              <TableHead className="font-semibold">Producto</TableHead>
               <TableHead className="font-semibold">Total</TableHead>
-              <TableHead className="font-semibold">Status</TableHead>
-              <TableHead className="font-semibold">Seller</TableHead>
-              <TableHead className="font-semibold">Client</TableHead>
-              <TableHead className="font-semibold">Created</TableHead>
-              <TableHead className="font-semibold">Actions</TableHead>
+              <TableHead className="font-semibold">Estado</TableHead>
+              <TableHead className="font-semibold">Vendedor</TableHead>
+              <TableHead className="font-semibold">Cliente</TableHead>
+              <TableHead className="font-semibold">Fecha de la orden</TableHead>
+              <TableHead className="font-semibold">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -128,6 +129,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
                 key={order._id}
                 className="hover:bg-muted/50 transition-colors"
               >
+                <TableCell className="font-medium">{order._id}</TableCell>
                 <TableCell className="font-medium">
                   {order.productName}
                 </TableCell>

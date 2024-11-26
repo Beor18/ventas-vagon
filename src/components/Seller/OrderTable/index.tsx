@@ -58,6 +58,7 @@ const OrderTable = ({
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
+                <TableHead className="font-semibold">Número de orden</TableHead>
                 <TableHead>Producto</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Descuento</TableHead>
@@ -72,6 +73,7 @@ const OrderTable = ({
             <TableBody>
               {filteredOrders.map((order) => (
                 <TableRow key={order._id}>
+                  <TableCell className="font-medium">{order._id}</TableCell>
                   <TableCell className="hover:bg-muted/50 transition-colors">
                     {order.productName}
                   </TableCell>

@@ -66,9 +66,11 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">All Clients ({clients.length})</h2>
+        <h2 className="text-3xl font-bold">
+          Lista clientes ({clients.length})
+        </h2>
         <Button onClick={() => openClientForm()} size="lg">
-          <PlusCircle className="mr-2 h-5 w-5" /> Create New Client
+          <PlusCircle className="mr-2 h-5 w-5" /> Crear cliente
         </Button>
       </div>
       <div className="flex items-center space-x-2">
@@ -86,15 +88,15 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
       <Card className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="font-semibold">Name</TableHead>
+            <TableRow className="bg-muted/50">
+              <TableHead className="font-semibold">Nombre</TableHead>
               <TableHead className="font-semibold">Email</TableHead>
-              <TableHead className="font-semibold">Phone</TableHead>
+              <TableHead className="font-semibold">Télefono</TableHead>
               <TableHead className="font-semibold">
-                Residential Address
+                Dirección residencial
               </TableHead>
-              <TableHead className="font-semibold">Unit Address</TableHead>
-              <TableHead className="font-semibold">Actions</TableHead>
+              <TableHead className="font-semibold">Dirección unidad</TableHead>
+              <TableHead className="font-semibold">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -116,14 +118,14 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => editClient(client)}>
-                        Edit Client
+                        Editar Cliente
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => deleteClient(client._id)}
                         className="text-red-600"
                       >
-                        Delete Client
+                        Eliminar Cliente
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

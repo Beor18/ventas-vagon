@@ -13,12 +13,26 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-import { FileText } from "lucide-react";
+import { FileText, MoreVertical } from "lucide-react";
 
 import { format } from "date-fns";
 import { handleExportToPDFManufacture } from "@/lib/exportToPdfManufacture";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
 
 function Manufacture() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -120,33 +134,67 @@ function Manufacture() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <div className="container mx-auto p-8 flex-grow">
-        <h1 className="text-2xl font-bold mb-4">Manufacture Orders</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {orders.map((order: any) => (
-            <div key={order._id} className="bg-white p-4 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold">{order.productName}</h2>
-              <p>Status: {order.status}</p>
-              <p>Customer: {order.vendedorName}</p>
-              <p>Creado el: {format(new Date(order.createdAt), "PPpp")}</p>
-              <div className="flex flex-row gap-4 items-center mt-4">
-                <Button
-                  className="flex items-center"
-                  onClick={() => openDialog(order)}
-                >
-                  Ver Orden
-                </Button>
+        <h1 className="text-2xl font-bold mb-4">Lista de Ordenes</h1>
+        <Card className="rounded-md border shadow-sm overflow-hidden">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead>Número de orden</TableHead>
+                  <TableHead>Producto</TableHead>
+                  {/* <TableHead>Total</TableHead>
+                  <TableHead>Descuento</TableHead>
+                  <TableHead>Tax</TableHead> */}
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Cliente</TableHead>
 
-                <Button
-                  className="flex items-center"
-                  onClick={() => handleExportToPDFManufacture(order)}
-                >
-                  <FileText className="h-4 w-4" />
-                  Exportar a PDF
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+                  <TableHead>Fecha de la Orden</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orders.map((order: any) => (
+                  <TableRow key={order._id}>
+                    <TableCell>{order._id}</TableCell>
+                    <TableCell>{order.productName}</TableCell>
+                    {/* <TableCell>${order.total}</TableCell>
+                    <TableCell>{order.discount || "0"}%</TableCell>
+                    <TableCell>{order.tax || "0"}%</TableCell> */}
+                    <TableCell>
+                      <span className="inline-flex items-center rounded-full px-2 py-1 text-xs bg-yellow-100 text-yellow-800">
+                        {order.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>{order.vendedorName}</TableCell>
+                    <TableCell>
+                      {format(new Date(order.createdAt), "PP")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openDialog(order)}>
+                            Ver Orden
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleExportToPDFManufacture(order)}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Exportar a PDF
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>

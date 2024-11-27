@@ -63,7 +63,7 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Manage Color Options</h3>
+      <h3 className="text-lg font-semibold">Manage Frame Color</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {product.colorOptions &&
           product.colorOptions.map((colorOption, index) => (

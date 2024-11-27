@@ -194,7 +194,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
   // Add color options
   if (order.colorOptions && order.colorOptions.length > 0) {
     checkSpace(30);
-    yOffset += addText("Color Options", yOffset, 18, "left", "#2980b9");
+    yOffset += addText("Frame color", yOffset, 18, "left", "#2980b9");
     yOffset += 5;
 
     autoTable(doc, {

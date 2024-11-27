@@ -347,7 +347,7 @@ export default function SelectComponent({ product, onClose }: any) {
           </div>
           <Separator />
           <div>
-            <h3 className="text-lg font-semibold mb-2">Color Options:</h3>
+            <h3 className="text-lg font-semibold mb-2">Frame Color:</h3>
             <ScrollArea className="h-[200px] border rounded-md p-4">
               {product?.colorOptions?.map((colorOption: ColorOption) => (
                 <div

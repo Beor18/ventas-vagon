@@ -315,9 +315,22 @@ function Seller({ products }: { products: any[] }) {
 }
 
 export async function getServerSideProps() {
-  await connectToDatabase();
-  const products = await Product.find().lean();
-  return { props: { products: JSON.parse(JSON.stringify(products)) } };
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/products`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch products: ${response.statusText}`);
+    }
+
+    const products = await response.json();
+
+    return { props: { products } };
+  } catch (error) {
+    console.error("Error fetching products in getServerSideProps:", error);
+    return { props: { products: [] } };
+  }
 }
 
 export default withAuth(Seller, ["Administrador", "Vendedor"]);

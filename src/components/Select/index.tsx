@@ -237,7 +237,7 @@ export default function SelectComponent({ product, onClose }: any) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          //Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(order),
       });

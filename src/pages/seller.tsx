@@ -57,11 +57,11 @@ const FullScreenImage: React.FC<FullScreenImageProps> = ({
   );
 };
 
-function Seller({ products }: { products: any[] }) {
+function Seller({ products, orders }: { products: any[]; orders: any[] }) {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [orders, setOrders] = useState<any[]>([]);
+  //const [orders, setOrders] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState("orders");
@@ -73,7 +73,8 @@ function Seller({ products }: { products: any[] }) {
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const { fabricante, ordersList, editOrder, loading } = useOrderManagement();
+  const { fabricante, ordersList, editOrder, loading } =
+    useOrderManagement(orders);
 
   useEffect(() => {
     if (session) {
@@ -316,20 +317,30 @@ function Seller({ products }: { products: any[] }) {
 
 export async function getServerSideProps() {
   try {
-    const response = await fetch(
+    // Fetch products
+    const productsResponse = await fetch(
       `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/products`
     );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch products: ${response.statusText}`);
+    if (!productsResponse.ok) {
+      throw new Error(
+        `Failed to fetch products: ${productsResponse.statusText}`
+      );
     }
+    const products = await productsResponse.json();
 
-    const products = await response.json();
+    // Fetch orders
+    const ordersResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/orders`
+    );
+    if (!ordersResponse.ok) {
+      throw new Error(`Failed to fetch orders: ${ordersResponse.statusText}`);
+    }
+    const orders = await ordersResponse.json();
 
-    return { props: { products } };
+    return { props: { products, orders } };
   } catch (error) {
-    console.error("Error fetching products in getServerSideProps:", error);
-    return { props: { products: [] } };
+    console.error("Error in getServerSideProps:", error);
+    return { props: { products: [], orders: [] } };
   }
 }
 

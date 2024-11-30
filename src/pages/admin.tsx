@@ -221,18 +221,32 @@ const Admin = ({ initialProducts, orders }) => {
 };
 
 export async function getServerSideProps() {
-  await connectToDatabase();
+  try {
+    // Fetch products
+    const productsResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/products`
+    );
+    if (!productsResponse.ok) {
+      throw new Error(
+        `Failed to fetch products: ${productsResponse.statusText}`
+      );
+    }
+    const products = await productsResponse.json();
 
-  const clients = await Client.find().lean();
-  const products = await Product.find().lean();
-  const orders = await Order.find().populate("cliente").lean();
+    // Fetch orders
+    const ordersResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/orders`
+    );
+    if (!ordersResponse.ok) {
+      throw new Error(`Failed to fetch orders: ${ordersResponse.statusText}`);
+    }
+    const orders = await ordersResponse.json();
 
-  return {
-    props: {
-      initialProducts: JSON.parse(JSON.stringify(products)),
-      orders: JSON.parse(JSON.stringify(orders)),
-    },
-  };
+    return { props: { initialProducts: products, orders } };
+  } catch (error) {
+    console.error("Error in getServerSideProps:", error);
+    return { props: { initialProducts: [], orders: [] } };
+  }
 }
 
 export default withAuth(Admin, ["Administrador"]);

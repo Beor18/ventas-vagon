@@ -12,12 +12,12 @@ export default async function handler(
   await connectToDatabase();
 
   // Extraer el token del header
-  const token = await getToken({ req, secret });
+  // const token = await getToken({ req, secret });
 
-  // Verificar si el token es válido
-  if (!token) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+  // // Verificar si el token es válido
+  // if (!token) {
+  //   return res.status(401).json({ error: "Unauthorized" });
+  // }
 
   if (req.method === "GET") {
     const { id, status, fabricanteEmail } = req.query;

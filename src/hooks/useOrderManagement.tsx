@@ -1,8 +1,8 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from "react";
 
-export const useOrderManagement = () => {
-  const [ordersList, setOrdersList] = useState([]);
+export const useOrderManagement = (initialOrders) => {
+  const [ordersList, setOrdersList] = useState(initialOrders);
   const [fabricante, setFabricante] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();

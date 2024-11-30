@@ -73,7 +73,7 @@ function Seller({ products }: { products: any[] }) {
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const { fabricante, ordersList, editOrder, loading } = useOrderManagement([]);
+  const { fabricante, ordersList, editOrder, loading } = useOrderManagement();
 
   useEffect(() => {
     if (session) {

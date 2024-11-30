@@ -79,6 +79,7 @@ export const useOrderManagement = (initialOrders) => {
             )
           );
           await fetchOrdersById(orderId);
+          await fetchOrders();
         }
       } catch (error) {
         console.error("Error editing order:", error);
@@ -86,7 +87,7 @@ export const useOrderManagement = (initialOrders) => {
         setLoading(false);
       }
     },
-    [fetchOrdersById]
+    [fetchOrders, fetchOrdersById]
   );
 
   const fetchFabricante = useCallback(async () => {

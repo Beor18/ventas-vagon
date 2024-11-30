@@ -38,7 +38,7 @@ export default async function handler(
     }
 
     // Obtener las órdenes filtradas y los datos del cliente
-    const orders = await Order.find(query).populate("cliente").lean();
+    const orders = await Order.find(query).lean();
     res.status(200).json(orders);
   } else if (req.method === "POST") {
     try {

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, PlusCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,6 +22,9 @@ export default function ClientsTable({
 }: any) {
   return (
     <div className="rounded-md border">
+      <Button onClick={() => openClientFormModal()} size="lg">
+        <PlusCircle className="mr-2 h-5 w-5" /> Crear cliente
+      </Button>
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">

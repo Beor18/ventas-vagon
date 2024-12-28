@@ -177,7 +177,7 @@ export function OrderEditModal({
                     <div className="flex flex-col gap-4 mb-8">
                       <p>
                         <span className="font-semibold">Cliente:</span>{" "}
-                        {formData?.cliente?.nombre}
+                        {formData?.cliente}
                       </p>
                     </div>
                     <Separator />

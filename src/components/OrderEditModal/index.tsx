@@ -77,7 +77,7 @@ export function OrderEditModal({
 
   const handleOptionChange = (optionIndex: number, suboptionIndex: number) => {
     setFormData((prev) => {
-      const newOptions = [...prev.options];
+      const newOptions = [...(prev.options || [])];
       const productOption = prev.product?.options?.[optionIndex];
       const productSuboption = productOption?.suboptions?.[suboptionIndex];
 
@@ -86,12 +86,14 @@ export function OrderEditModal({
       const existingOptionIndex = newOptions.findIndex(
         (o) => o.name === productOption.name
       );
-      if (existingOptionIndex > -1) {
+
+      if (existingOptionIndex >= 0) {
         const existingSuboptionIndex = newOptions[
           existingOptionIndex
         ].suboptions.findIndex((s) => s._id === productSuboption._id);
-        if (existingSuboptionIndex > -1) {
-          // Deseleccionar: Eliminar la subopción
+
+        if (existingSuboptionIndex >= 0) {
+          // Remover la subopción al deseleccionar
           newOptions[existingOptionIndex].suboptions.splice(
             existingSuboptionIndex,
             1
@@ -100,37 +102,62 @@ export function OrderEditModal({
             newOptions.splice(existingOptionIndex, 1);
           }
         } else {
-          // Seleccionar: Agregar la subopción
-          newOptions[existingOptionIndex].suboptions.push({
-            ...productSuboption,
-            selected: true,
-          });
+          // Agregar la subopción al seleccionar
+          newOptions[existingOptionIndex].suboptions.push(productSuboption);
         }
       } else {
-        // Seleccionar: Agregar nueva opción con la subopción
+        // Agregar nueva opción con la subopción
         newOptions.push({
           ...productOption,
-          suboptions: [{ ...productSuboption, selected: true }],
+          suboptions: [productSuboption],
         });
       }
+
       return { ...prev, options: newOptions };
     });
   };
 
   const handleColorChange = (color: any) => {
     setFormData((prev) => {
-      const newColorOptions = prev.colorOptions.some((c) => c._id === color._id)
-        ? prev.colorOptions.filter((c) => c._id !== color._id)
-        : [...prev.colorOptions, { ...color, selected: true }];
-      return { ...prev, colorOptions: newColorOptions };
+      const existingIndex = prev.colorOptions.findIndex(
+        (c) => c._id === color._id
+      );
+      if (existingIndex >= 0) {
+        // Remover el color al deseleccionar
+        const newColorOptions = prev.colorOptions.filter(
+          (c) => c._id !== color._id
+        );
+        return { ...prev, colorOptions: newColorOptions };
+      } else {
+        // Agregar el color al seleccionar
+        return {
+          ...prev,
+          colorOptions: [...prev.colorOptions, color],
+        };
+      }
     });
   };
 
   const handleDesignChange = (design: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      designs: [{ ...design, selected: true }],
-    }));
+    setFormData((prev) => {
+      const isCurrentlySelected = prev.designs?.some(
+        (d) => d._id === design._id
+      );
+
+      if (isCurrentlySelected) {
+        // Remover el diseño al deseleccionar
+        return {
+          ...prev,
+          designs: [],
+        };
+      } else {
+        // Establecer el nuevo diseño al seleccionar
+        return {
+          ...prev,
+          designs: [design],
+        };
+      }
+    });
   };
 
   const handleClose = () => {
@@ -262,7 +289,8 @@ export function OrderEditModal({
                 </div>
               </TabsContent>
               <TabsContent value="options" className="mt-0 space-y-4">
-                {(formData.product?.options || []).map(
+                {console.log("options", formData)}
+                {(formData.product?.options || formData?.options || []).map(
                   (option: any, optionIndex: number) => (
                     <Card key={optionIndex} className="w-full">
                       <CardHeader>
@@ -341,46 +369,49 @@ export function OrderEditModal({
                   </CardHeader>
                   <div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {(formData.product?.colorOptions || []).map(
-                        (color: any, index: number) => {
-                          const isSelected = formData.colorOptions?.some(
-                            (c) => c._id === color._id
-                          );
-                          return (
-                            <div
-                              key={index}
-                              className="relative rounded-lg overflow-hidden shadow-md border transition-all duration-300 hover:shadow-lg"
-                            >
-                              <div className="aspect-square relative">
-                                <img
-                                  src={color.imageUrl}
-                                  alt={color.colorName}
-                                  className="rounded-t-lg bg-cover"
-                                />
-                                {isSelected && (
-                                  <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
-                                    Seleccionado
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="p-4 bg-card">
-                                <h3 className="font-semibold text-lg mb-3 text-center">
-                                  {color.colorName}
-                                </h3>
-                                <Button
-                                  type="button"
-                                  variant={isSelected ? "default" : "outline"}
-                                  size="sm"
-                                  className="w-full"
-                                  onClick={() => handleColorChange(color)}
-                                >
-                                  {isSelected ? "Deseleccionar" : "Seleccionar"}
-                                </Button>
-                              </div>
+                      {console.log("color", formData)}
+                      {(
+                        formData.product?.colorOptions ||
+                        formData?.colorOptions ||
+                        []
+                      ).map((color: any, index: number) => {
+                        const isSelected = formData.colorOptions?.some(
+                          (c) => c._id === color._id
+                        );
+                        return (
+                          <div
+                            key={index}
+                            className="relative rounded-lg overflow-hidden shadow-md border transition-all duration-300 hover:shadow-lg"
+                          >
+                            <div className="aspect-square relative">
+                              <img
+                                src={color.imageUrl}
+                                alt={color.colorName}
+                                className="rounded-t-lg bg-cover"
+                              />
+                              {isSelected && (
+                                <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                  Seleccionado
+                                </Badge>
+                              )}
                             </div>
-                          );
-                        }
-                      )}
+                            <div className="p-4 bg-card">
+                              <h3 className="font-semibold text-lg mb-3 text-center">
+                                {color.colorName}
+                              </h3>
+                              <Button
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                className="w-full"
+                                onClick={() => handleColorChange(color)}
+                              >
+                                {isSelected ? "Deseleccionar" : "Seleccionar"}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -392,45 +423,49 @@ export function OrderEditModal({
                   </CardHeader>
                   <div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {(formData.product?.designs || []).map(
-                        (design: any, index: number) => {
-                          const isSelected =
-                            formData.designs?.[0]?._id === design._id;
-                          return (
-                            <div
-                              key={index}
-                              className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
-                            >
-                              <div className="aspect-square relative">
-                                <img
-                                  src={design.imageUrl}
-                                  alt={design.designType}
-                                  className="rounded-t-lg bg-cover"
-                                />
-                                {isSelected && (
-                                  <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
-                                    Seleccionado
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="p-4 bg-card">
-                                <h3 className="font-semibold text-lg mb-3 text-center">
-                                  {design.designType}
-                                </h3>
-                                <Button
-                                  type="button"
-                                  variant={isSelected ? "default" : "outline"}
-                                  size="sm"
-                                  className="w-full"
-                                  onClick={() => handleDesignChange(design)}
-                                >
-                                  {isSelected ? "Seleccionado" : "Seleccionar"}
-                                </Button>
-                              </div>
+                      {(
+                        formData.product?.designs ||
+                        formData?.designs ||
+                        []
+                      ).map((design: any, index: number) => {
+                        const isSelected = formData.designs?.some(
+                          (d) => d._id === design._id
+                        );
+
+                        return (
+                          <div
+                            key={index}
+                            className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
+                          >
+                            <div className="aspect-square relative">
+                              <img
+                                src={design.imageUrl}
+                                alt={design.designType}
+                                className="rounded-t-lg bg-cover"
+                              />
+                              {isSelected && (
+                                <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                  Seleccionado
+                                </Badge>
+                              )}
                             </div>
-                          );
-                        }
-                      )}
+                            <div className="p-4 bg-card">
+                              <h3 className="font-semibold text-lg mb-3 text-center">
+                                {design.designType}
+                              </h3>
+                              <Button
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                className="w-full"
+                                onClick={() => handleDesignChange(design)}
+                              >
+                                {isSelected ? "Deseleccionar" : "Seleccionar"}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

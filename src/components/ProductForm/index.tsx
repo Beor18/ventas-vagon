@@ -63,6 +63,8 @@ interface ProductFormProps {
   saveProduct: () => void;
   setModalOpen: (open: boolean) => void;
   loading: boolean;
+  galleryImages: any[];
+  loadGalleryImages: () => Promise<void>;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -97,6 +99,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   saveProduct,
   setModalOpen,
   loading,
+  galleryImages,
+  loadGalleryImages,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -153,6 +157,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   handleProductChange={handleProductChange}
                   handleImagePreview={handleImagePreview}
                   setProduct={setProduct}
+                  galleryImages={galleryImages}
+                  loadGalleryImages={loadGalleryImages}
                 />
               </TabsContent>
               <TabsContent value="designs">
@@ -165,6 +171,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   addDesign={addDesign}
                   removeDesign={removeDesign}
                   handleImagePreview={handleImagePreview}
+                  galleryImages={galleryImages}
+                  loadGalleryImages={loadGalleryImages}
                 />
               </TabsContent>
               <TabsContent value="options">
@@ -182,6 +190,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   removeSubOption={removeSubOption}
                   handleImagePreview={handleImagePreview}
                   handleGallerySelect={handleGallerySelect}
+                  galleryImages={galleryImages}
+                  loadGalleryImages={loadGalleryImages}
                 />
               </TabsContent>
               <TabsContent value="color-options">
@@ -195,6 +205,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   editColorOption={editColorOption}
                   removeColorOption={removeColorOption}
                   handleImagePreview={handleImagePreview}
+                  galleryImages={galleryImages}
+                  loadGalleryImages={loadGalleryImages}
                 />
               </TabsContent>
             </ScrollArea>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   InputField,
   TextAreaField,
@@ -17,6 +17,8 @@ interface ProductInfoProps {
     setPreviewCallback: (url: string) => void
   ) => void;
   setProduct: (product: any) => void;
+  galleryImages: any[];
+  loadGalleryImages: () => Promise<void>;
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({
@@ -24,7 +26,13 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   handleProductChange,
   handleImagePreview,
   setProduct,
+  galleryImages,
+  loadGalleryImages,
 }) => {
+  useEffect(() => {
+    loadGalleryImages();
+  }, []);
+
   const handleGallerySelect = (url: any) => {
     // Asegura que usamos la URL de descarga
     const downloadUrl =
@@ -79,6 +87,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         preview={product.imageUrl}
         handleGallerySelect={handleGallerySelect}
         setProduct={setProduct}
+        galleryImages={galleryImages}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField

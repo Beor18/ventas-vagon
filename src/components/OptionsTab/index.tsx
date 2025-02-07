@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import OptionCard from "@/components/OptionCard";
 import { ProductType, OptionType } from "@/types/types";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { ImageUploadField } from "@/components/FormFields";
 
 interface OptionsTabProps {
   product: ProductType;
@@ -30,6 +31,8 @@ interface OptionsTabProps {
     setPreviewCallback: (url: string) => void
   ) => void;
   handleGallerySelect: any;
+  galleryImages: any[];
+  loadGalleryImages: () => Promise<void>;
 }
 
 const OptionsTab: React.FC<OptionsTabProps> = ({
@@ -43,7 +46,11 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
   removeSubOption,
   handleImagePreview,
   handleGallerySelect,
+  galleryImages,
+  loadGalleryImages,
 }) => {
+  const [preview, setPreview] = useState<string>("");
+
   const onDragEnd = (result: any) => {
     const { source, destination } = result;
 
@@ -55,6 +62,10 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
 
     setProduct({ ...product, options: items });
   };
+
+  useEffect(() => {
+    loadGalleryImages();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -90,6 +101,7 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
                         handleSubOptionChange={handleSubOptionChange}
                         removeSubOption={removeSubOption}
                         handleGallerySelect={handleGallerySelect}
+                        galleryImages={galleryImages}
                       />
                     </div>
                   )}
@@ -103,6 +115,13 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
       <Button onClick={addOption} className="w-full">
         <Plus className="mr-2 h-4 w-4" /> Add Option
       </Button>
+      <ImageUploadField
+        label="Image"
+        onChange={handleImagePreview}
+        preview={preview}
+        handleGallerySelect={handleGallerySelect}
+        galleryImages={galleryImages}
+      />
     </div>
   );
 };

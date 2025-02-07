@@ -29,11 +29,11 @@ interface OptionCardProps {
   ) => void;
   removeSubOption: (optionIndex: number, subOptionIndex: number) => void;
   handleGallerySelect: (
-    url: any,
-    isSubOption: boolean,
+    image: any,
     optionIndex: number,
     subOptionIndex?: number
   ) => void;
+  galleryImages: any[];
 }
 
 const OptionCard: React.FC<OptionCardProps> = ({
@@ -41,13 +41,14 @@ const OptionCard: React.FC<OptionCardProps> = ({
   optionIndex,
   handleOptionChange,
   handleImagePreview,
+  setProduct,
+  product,
   addSubOption,
   removeOption,
   handleSubOptionChange,
   removeSubOption,
-  setProduct,
-  product,
   handleGallerySelect,
+  galleryImages,
 }) => {
   return (
     <div className="grid-cols-1 gap-4">
@@ -83,34 +84,22 @@ const OptionCard: React.FC<OptionCardProps> = ({
             />
             <ImageUploadField
               label="Option Image"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e) =>
                 handleImagePreview(
                   e,
-                  (url: string) => {
-                    const updatedOptions = [...product.options];
-                    updatedOptions[optionIndex] = {
-                      ...updatedOptions[optionIndex],
-                      imageUrl: url,
-                    };
-                    setProduct({
-                      ...product,
-                      options: updatedOptions,
-                    });
-                  },
-                  (url: string) => {
+                  (url) => {
                     const updatedOptions = [...product.options];
                     updatedOptions[optionIndex].imageUrl = url;
-                    setProduct({
-                      ...product,
-                      options: updatedOptions,
-                    });
-                  }
+                    setProduct({ ...product, options: updatedOptions });
+                  },
+                  () => {}
                 )
               }
               preview={option.imageUrl}
-              handleGallerySelect={(url: any) =>
-                handleGallerySelect(url, false, optionIndex)
+              handleGallerySelect={(image) =>
+                handleGallerySelect(image, optionIndex)
               }
+              galleryImages={galleryImages}
             />
             <InputField
               label="Option Type"
@@ -139,18 +128,41 @@ const OptionCard: React.FC<OptionCardProps> = ({
             <h6 className="text-lg font-semibold">Suboptions</h6>
             {option.suboptions.map(
               (suboption: SubOptionType, subOptionIndex: number) => (
-                <SuboptionCard
-                  key={subOptionIndex}
-                  suboption={suboption}
-                  optionIndex={optionIndex}
-                  subOptionIndex={subOptionIndex}
-                  handleSubOptionChange={handleSubOptionChange}
-                  removeSubOption={removeSubOption}
-                  handleImagePreview={handleImagePreview}
-                  setProduct={setProduct}
-                  product={product}
-                  handleGallerySelect={handleGallerySelect}
-                />
+                <div key={subOptionIndex}>
+                  <SuboptionCard
+                    suboption={suboption}
+                    optionIndex={optionIndex}
+                    subOptionIndex={subOptionIndex}
+                    handleSubOptionChange={handleSubOptionChange}
+                    removeSubOption={removeSubOption}
+                    handleImagePreview={handleImagePreview}
+                    setProduct={setProduct}
+                    product={product}
+                    handleGallerySelect={handleGallerySelect}
+                    galleryImages={galleryImages}
+                  />
+                  <ImageUploadField
+                    label="SubOption Image"
+                    onChange={(e) =>
+                      handleImagePreview(
+                        e,
+                        (url) => {
+                          const updatedOptions = [...product.options];
+                          updatedOptions[optionIndex].suboptions[
+                            subOptionIndex
+                          ].imageUrl = url;
+                          setProduct({ ...product, options: updatedOptions });
+                        },
+                        () => {}
+                      )
+                    }
+                    preview={suboption.imageUrl}
+                    handleGallerySelect={(image) =>
+                      handleGallerySelect(image, optionIndex, subOptionIndex)
+                    }
+                    galleryImages={galleryImages}
+                  />
+                </div>
               )
             )}
             <Button

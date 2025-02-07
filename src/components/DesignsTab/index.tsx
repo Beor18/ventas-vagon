@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { InputField, ImageUploadField } from "@/components/FormFields";
@@ -18,6 +18,8 @@ interface DesignsTabProps {
     setImageUrlCallback: (url: string) => void,
     setPreviewCallback: (url: string) => void
   ) => void;
+  galleryImages: any[];
+  loadGalleryImages: () => Promise<void>;
 }
 
 const DesignsTab: React.FC<DesignsTabProps> = ({
@@ -29,7 +31,13 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
   addDesign,
   removeDesign,
   handleImagePreview,
+  galleryImages,
+  loadGalleryImages,
 }) => {
+  useEffect(() => {
+    loadGalleryImages();
+  }, []);
+
   return (
     <div className="space-y-6">
       {product.designs &&
@@ -53,6 +61,7 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
             setProduct={setProduct}
             product={product}
             removeDesign={removeDesign}
+            galleryImages={galleryImages}
           />
         ))}
       <div className="space-y-4">

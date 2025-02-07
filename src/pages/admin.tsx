@@ -73,6 +73,8 @@ const Admin = ({ initialProducts, orders }) => {
     handleImagePreview,
     handleGallerySelect,
     duplicateProduct,
+    galleryImages,
+    loadGalleryImages,
   } = useProductManagement(initialProducts);
 
   const {
@@ -175,6 +177,8 @@ const Admin = ({ initialProducts, orders }) => {
           saveProduct={handleSaveProduct}
           setModalOpen={closeProductModal}
           loading={loading}
+          galleryImages={galleryImages}
+          loadGalleryImages={loadGalleryImages}
         />
       )}
 

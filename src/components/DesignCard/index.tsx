@@ -20,6 +20,7 @@ interface DesignCardProps {
   setProduct: (product: ProductType) => void;
   product: ProductType;
   removeDesign: (designIndex: number) => void;
+  galleryImages: any[];
 }
 
 const DesignCard: React.FC<DesignCardProps> = ({
@@ -30,6 +31,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
   setProduct,
   product,
   removeDesign,
+  galleryImages,
 }) => {
   const handleGallerySelect = (url: any, designIndex: number) => {
     // Obtiene la URL de descarga
@@ -128,6 +130,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
             handleGallerySelect={(url: any) =>
               handleGallerySelect(url, designIndex)
             }
+            galleryImages={galleryImages}
           />
         </div>
       </CardContent>

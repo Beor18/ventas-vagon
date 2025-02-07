@@ -69,9 +69,18 @@ export const TextAreaField: React.FC<TextAreaFieldProps> = ({
 
 interface ImageUploadFieldProps {
   label: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setImageUrlCallback: (url: string) => void,
+    setPreviewCallback: (url: string) => void
+  ) => void;
   preview: any;
-  handleGallerySelect: (url: string) => void;
+  handleGallerySelect: (
+    image: any,
+    optionIndex?: number,
+    subOptionIndex?: number
+  ) => void;
+  galleryImages: any[];
   setProduct?: React.Dispatch<React.SetStateAction<any>>;
 }
 
@@ -80,35 +89,22 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   onChange,
   preview,
   handleGallerySelect,
+  galleryImages = [],
 }) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<"upload" | "gallery">("gallery");
-  const [images, setImages] = useState<string[]>([]);
-  const [visibleImages, setVisibleImages] = useState<string[]>([]);
+  const [visibleImages, setVisibleImages] = useState<any[]>([]);
   const [page, setPage] = useState(0);
-  const imagesPerPage = 9; // Define cuántas imágenes cargar por página
-
+  const imagesPerPage = 9;
   useEffect(() => {
-    async function fetchImages() {
-      const response = await fetch("/api/upload/list", { cache: "no-cache" });
-      const data = await response.json();
-
-      // Ordenar imágenes por fecha de subida en orden descendente
-      const sortedImages = (data?.blobs || []).sort(
-        (a: any, b: any) =>
-          new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-      );
-
-      setImages(sortedImages);
-      setVisibleImages(sortedImages.slice(0, imagesPerPage));
+    if (galleryImages?.length > 0) {
+      setVisibleImages(galleryImages.slice(0, imagesPerPage));
     }
-
-    fetchImages();
-  }, []);
+  }, [galleryImages]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
-    const nextImages = images.slice(
+    const nextImages = galleryImages.slice(
       nextPage * imagesPerPage,
       (nextPage + 1) * imagesPerPage
     );
@@ -116,8 +112,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
     setPage(nextPage);
   };
 
-  const handleGalleryImageSelect = (imageUrl: any) => {
-    handleGallerySelect(imageUrl);
+  const handleGalleryImageSelect = (image: any) => {
+    handleGallerySelect(image);
   };
 
   return (
@@ -138,7 +134,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                   <div
                     key={index}
                     className={`cursor-pointer border-2 rounded-md overflow-hidden ${
-                      preview === image.downloadUrl
+                      preview === image?.downloadUrl || preview === image?.url
                         ? "border-blue-600"
                         : "border-gray-300"
                     }`}
@@ -148,7 +144,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                       fallback={<div className="w-full h-auto bg-gray-200" />}
                     >
                       <img
-                        src={image?.downloadUrl}
+                        src={image?.downloadUrl || image?.url}
                         alt={`Gallery image ${index}`}
                         className="w-full h-auto object-cover aspect-square"
                         loading="lazy"
@@ -157,7 +153,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                   </div>
                 ))}
               </div>
-              {visibleImages.length < images.length && (
+              {visibleImages.length < galleryImages.length && (
                 <button
                   onClick={handleLoadMore}
                   className="w-full mt-4 text-blue-500"

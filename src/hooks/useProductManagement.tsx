@@ -17,6 +17,8 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   const [activeTab, setActiveTab] = useState("products");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [galleryImages, setGalleryImages] = useState<any[]>([]);
+  const [isLoadingGallery, setIsLoadingGallery] = useState(false);
 
   // Estado de datos del producto y sus opciones
   const [product, setProduct] = useState<ProductType>({
@@ -68,6 +70,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
 
   const openProductModal = () => {
     resetProductForm();
+    loadGalleryImages();
     setModalOpen(true);
   };
 
@@ -290,49 +293,26 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   };
 
   const handleGallerySelect = (
-    url: any,
-    isSubOption: boolean,
-    optionIndex: number,
-    subOptionIndex: number = 0
+    image: any,
+    optionIndex?: number,
+    subOptionIndex?: number
   ) => {
-    const downloadUrl =
-      typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
+    const imageUrl = image?.downloadUrl || image?.url;
 
-    let fileName =
-      typeof downloadUrl === "string"
-        ? decodeURIComponent(downloadUrl.split("/").pop() || "")
-        : "";
+    if (optionIndex !== undefined) {
+      const updatedOptions = [...product.options];
 
-    let nameWithoutExtension = fileName
-      .substring(0, fileName.lastIndexOf("."))
-      .replace(/[^\w\s]/g, " ")
-      .replace(/\s+/g, " ")
-      .split(" ")
-      .slice(0, 3)
-      .join(" ");
+      if (subOptionIndex !== undefined) {
+        // Actualizar subopción
+        updatedOptions[optionIndex].suboptions[subOptionIndex].imageUrl =
+          imageUrl;
+      } else {
+        // Actualizar opción
+        updatedOptions[optionIndex].imageUrl = imageUrl;
+      }
 
-    const updatedOptions = [...product.options];
-
-    if (isSubOption) {
-      updatedOptions[optionIndex].suboptions[subOptionIndex] = {
-        ...updatedOptions[optionIndex].suboptions[subOptionIndex],
-        imageUrl: downloadUrl,
-        name:
-          nameWithoutExtension ||
-          updatedOptions[optionIndex].suboptions[subOptionIndex].name,
-      };
-    } else {
-      updatedOptions[optionIndex] = {
-        ...updatedOptions[optionIndex],
-        imageUrl: downloadUrl,
-        name: nameWithoutExtension || updatedOptions[optionIndex].name,
-      };
+      setProduct({ ...product, options: updatedOptions });
     }
-
-    setProduct({
-      ...product,
-      options: updatedOptions,
-    });
   };
 
   const handleSaveProduct = async () => {
@@ -420,6 +400,32 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     }
   };
 
+  const loadGalleryImages = async () => {
+    setIsLoadingGallery(true);
+    try {
+      const response = await fetch("/api/upload/list");
+      const data = await response.json();
+      console.log("Loading gallery images:", data);
+
+      if (!data?.blobs?.length) {
+        console.warn("No images found in gallery");
+        return;
+      }
+
+      const processedImages = data.blobs.map((img: any) => ({
+        ...img,
+        url: img.downloadUrl,
+      }));
+
+      setGalleryImages(processedImages);
+      console.log("Gallery images loaded:", processedImages);
+    } catch (error) {
+      console.error("Error loading gallery images:", error);
+    } finally {
+      setIsLoadingGallery(false);
+    }
+  };
+
   return {
     products,
     activeTab,
@@ -465,5 +471,8 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     setNewDesign,
     newColorOption,
     setNewColorOption,
+    galleryImages,
+    loadGalleryImages,
+    isLoadingGallery,
   };
 };

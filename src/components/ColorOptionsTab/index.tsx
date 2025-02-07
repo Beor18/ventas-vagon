@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,8 @@ interface ColorOptionsTabProps {
     setImageUrlCallback: (url: string) => void,
     setPreviewCallback: (url: string) => void
   ) => void;
+  galleryImages: any[];
+  loadGalleryImages: () => Promise<void>;
 }
 
 const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
@@ -33,7 +35,13 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
   removeColorOption,
   editColorOption,
   handleImagePreview,
+  galleryImages,
+  loadGalleryImages,
 }) => {
+  useEffect(() => {
+    loadGalleryImages();
+  }, []);
+
   const handleGallerySelect = (url: any, index: number) => {
     const downloadUrl =
       typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
@@ -152,6 +160,7 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
                       handleGallerySelect(url, index)
                     }
                     setProduct={setProduct}
+                    galleryImages={galleryImages}
                   />
                 </div>
               </CardContent>

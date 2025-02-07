@@ -5,7 +5,7 @@ import { Minus, Plus } from "lucide-react";
 import { InputField, ImageUploadField } from "@/components/FormFields";
 import { ProductType, OptionType, SubOptionType } from "@/types/types";
 
-const SuboptionCard: React.FC<{
+interface SuboptionCardProps {
   suboption: SubOptionType;
   optionIndex: number;
   subOptionIndex: number;
@@ -23,12 +23,14 @@ const SuboptionCard: React.FC<{
   setProduct: (product: ProductType) => void;
   product: ProductType;
   handleGallerySelect: (
-    url: any,
-    isSubOption: boolean,
+    image: any,
     optionIndex: number,
-    subOptionIndex: number
+    subOptionIndex?: number
   ) => void;
-}> = ({
+  galleryImages: any[];
+}
+
+const SuboptionCard: React.FC<SuboptionCardProps> = ({
   suboption,
   optionIndex,
   subOptionIndex,
@@ -38,6 +40,7 @@ const SuboptionCard: React.FC<{
   setProduct,
   product,
   handleGallerySelect,
+  galleryImages,
 }) => (
   <Card>
     <CardHeader>
@@ -102,38 +105,8 @@ const SuboptionCard: React.FC<{
             )
           }
           preview={suboption.imageUrl}
-          handleGallerySelect={(url: any) => {
-            const downloadUrl =
-              typeof url === "object" && url.downloadUrl
-                ? url.downloadUrl
-                : url;
-
-            let fileName =
-              typeof downloadUrl === "string"
-                ? decodeURIComponent(downloadUrl.split("/").pop() || "")
-                : "";
-
-            let nameWithoutExtension = fileName
-              .substring(0, fileName.lastIndexOf("."))
-              .replace(/[^\w\s]/g, " ")
-              .replace(/\s+/g, " ")
-              .split(" ")
-              .slice(0, 3)
-              .join(" ");
-
-            const updatedOptions = [...product.options];
-
-            updatedOptions[optionIndex].suboptions[subOptionIndex] = {
-              ...updatedOptions[optionIndex].suboptions[subOptionIndex],
-              name: nameWithoutExtension,
-              imageUrl: downloadUrl,
-            };
-
-            setProduct({
-              ...product,
-              options: updatedOptions,
-            });
-          }}
+          handleGallerySelect={handleGallerySelect}
+          galleryImages={galleryImages}
           setProduct={(updatedProduct) => {
             const updatedOptions = [...product.options];
             if (updatedProduct.imageUrl) {

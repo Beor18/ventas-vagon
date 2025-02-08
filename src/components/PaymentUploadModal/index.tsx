@@ -50,9 +50,16 @@ export function PaymentUploadModal({
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("/api/orders");
+      const response = await fetch(
+        `/api/orders?vendedorEmail=${session?.user?.email}`
+      );
       const data = await response.json();
-      setOrders(data);
+      // Ordenar las órdenes por fecha, más recientes primero
+      const sortedOrders = data.sort(
+        (a: any, b: any) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setOrders(sortedOrders);
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast({
@@ -156,7 +163,9 @@ export function PaymentUploadModal({
               <SelectContent>
                 {orders.map((order) => (
                   <SelectItem key={order._id} value={order._id}>
-                    {`Orden #${order._id.slice(-6)} - ${order.productName}`}
+                    {`Orden #${order._id.slice(-6)} - ${order.productName} - ${
+                      order.cliente?.nombre || "N/A"
+                    }`}
                   </SelectItem>
                 ))}
               </SelectContent>

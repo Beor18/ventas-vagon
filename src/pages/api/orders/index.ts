@@ -20,7 +20,7 @@ export default async function handler(
   // }
 
   if (req.method === "GET") {
-    const { id, status, fabricanteEmail } = req.query;
+    const { id, status, fabricanteEmail, vendedorEmail } = req.query;
     let query: any = {};
 
     // Filtrar por estado si está presente
@@ -28,17 +28,22 @@ export default async function handler(
       query.status = status;
     }
 
-    // Filtrar por fabricanteEmail si está presente en la consulta
+    // Filtrar por fabricanteEmail si está presente
     if (fabricanteEmail) {
       query.fabricanteEmail = fabricanteEmail;
+    }
+
+    // Filtrar por vendedorEmail si está presente
+    if (vendedorEmail) {
+      query.vendedorEmail = vendedorEmail;
     }
 
     if (id) {
       query.id = id;
     }
 
-    // Obtener las órdenes filtradas y los datos del cliente
-    const orders = await Order.find(query).lean();
+    // Obtener las órdenes filtradas y popular el campo cliente
+    const orders = await Order.find(query).populate("cliente").lean();
     res.status(200).json(orders);
   } else if (req.method === "POST") {
     try {

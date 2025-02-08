@@ -42,48 +42,26 @@ export default async function handler(
     res.status(200).json(orders);
   } else if (req.method === "POST") {
     try {
-      const {
-        productId,
-        productName,
-        options,
-        colorOptions,
-        designs,
-        total,
-        discount,
-        tax,
-        vendedorEmail,
-        vendedorName,
-        fabricanteEmail,
-        fabricanteName,
-        comentaries,
-        cliente,
-        signatureImage,
-      } = req.body;
+      const orderData = req.body;
 
-      const newOrder = new Order({
-        productId,
-        productName,
-        options,
-        colorOptions,
-        designs,
-        total,
-        discount,
-        tax,
-        status: "Pending",
-        vendedorEmail,
-        vendedorName,
-        fabricanteEmail,
-        fabricanteName,
-        comentaries,
-        cliente,
-        signatureImage,
+      // Asegurarnos que las opciones incluyan los comentarios
+      const processedOptions = orderData.options.map((option: any) => ({
+        ...option,
+        suboptions: option.suboptions.map((suboption: any) => ({
+          ...suboption,
+          comentarios: suboption.comentarios || "", // Asegurar que siempre haya un valor
+        })),
+      }));
+
+      const order = new Order({
+        ...orderData,
+        options: processedOptions,
       });
 
-      await newOrder.save();
-      res.status(201).json(newOrder);
+      await order.save();
+      res.status(201).json(order);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error" });
+      res.status(500).json({ error: "Error creating order" });
     }
   } else if (req.method === "PUT") {
     try {

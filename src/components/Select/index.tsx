@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Minus, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProductOption {
   _id: string;
@@ -79,6 +80,9 @@ export default function SelectComponent({ product, onClose }: any) {
   const [termsAccepted, setTermsAccepted] = useState(false);
   // const [clarification, setClarification] = useState("");
   const sigCanvasRef = useRef<SignatureCanvas | null>(null);
+  const [subOptionComments, setSubOptionComments] = useState<{
+    [optionId: string]: { [subOptionId: string]: string };
+  }>({});
 
   useEffect(() => {
     if (session) {
@@ -137,8 +141,16 @@ export default function SelectComponent({ product, onClose }: any) {
     setSelectedSubOptions({
       ...selectedSubOptions,
       [optionId]: {
-        ...selectedSubOptions[optionId],
+        ...(selectedSubOptions[optionId] || {}),
         [subOption._id]: subOption,
+      },
+    });
+
+    setSubOptionComments({
+      ...subOptionComments,
+      [optionId]: {
+        ...(subOptionComments[optionId] || {}),
+        [subOption._id]: "",
       },
     });
   };
@@ -152,6 +164,20 @@ export default function SelectComponent({ product, onClose }: any) {
       }
     }
     setSelectedSubOptions(newSelectedSubOptions);
+  };
+
+  const handleCommentChange = (
+    optionId: string,
+    subOptionId: string,
+    comment: string
+  ) => {
+    setSubOptionComments({
+      ...subOptionComments,
+      [optionId]: {
+        ...(subOptionComments[optionId] || {}),
+        [subOptionId]: comment,
+      },
+    });
   };
 
   const handleColorOptionSelect = (colorOption: ColorOption) => {
@@ -212,7 +238,10 @@ export default function SelectComponent({ product, onClose }: any) {
     const preparedOptions = Object.values(selectedOptions).map((option) => ({
       ...option,
       suboptions: selectedSubOptions[option._id]
-        ? Object.values(selectedSubOptions[option._id])
+        ? Object.values(selectedSubOptions[option._id]).map((subOption) => ({
+            ...subOption,
+            comentarios: subOptionComments[option._id]?.[subOption._id] || "",
+          }))
         : [],
     }));
 
@@ -300,43 +329,66 @@ export default function SelectComponent({ product, onClose }: any) {
                       {option.suboptions.map((subOption: ProductSubOption) => (
                         <div
                           key={subOption._id}
-                          className="flex items-center justify-between p-2 bg-muted rounded-md"
+                          className="flex flex-col space-y-2 p-2 bg-muted rounded-md"
                         >
-                          <div className="flex items-center space-x-2">
-                            <img
-                              src={subOption.imageUrl}
-                              alt={subOption.name}
-                              className="w-10 h-10 rounded-md object-cover"
-                            />
-                            <span className="font-medium">
-                              {subOption.name}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <img
+                                src={subOption.imageUrl}
+                                alt={subOption.name}
+                                className="w-10 h-10 rounded-md object-cover"
+                              />
+                              <span className="font-medium">
+                                {subOption.name}
+                              </span>
+                            </div>
+                            <span className="text-muted-foreground">
+                              ${subOption.price}
                             </span>
+                            <Button
+                              variant={
+                                selectedSubOptions[option._id]?.[subOption._id]
+                                  ? "destructive"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() =>
+                                selectedSubOptions[option._id]?.[subOption._id]
+                                  ? handleSubOptionDeselect(
+                                      option._id,
+                                      subOption._id
+                                    )
+                                  : handleSubOptionSelect(option._id, subOption)
+                              }
+                            >
+                              {selectedSubOptions[option._id]?.[
+                                subOption._id
+                              ] ? (
+                                <X className="h-4 w-4" />
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )}
+                            </Button>
                           </div>
-                          <span className="text-muted-foreground">
-                            ${subOption.price}
-                          </span>
-                          <Button
-                            variant={
-                              selectedSubOptions[option._id]?.[subOption._id]
-                                ? "destructive"
-                                : "outline"
-                            }
-                            size="sm"
-                            onClick={() =>
-                              selectedSubOptions[option._id]?.[subOption._id]
-                                ? handleSubOptionDeselect(
-                                    option._id,
-                                    subOption._id
-                                  )
-                                : handleSubOptionSelect(option._id, subOption)
-                            }
-                          >
-                            {selectedSubOptions[option._id]?.[subOption._id] ? (
-                              <X className="h-4 w-4" />
-                            ) : (
-                              <Plus className="h-4 w-4" />
-                            )}
-                          </Button>
+
+                          {selectedSubOptions[option._id]?.[subOption._id] && (
+                            <Textarea
+                              placeholder="Agregar comentarios para esta opción..."
+                              value={
+                                subOptionComments[option._id]?.[
+                                  subOption._id
+                                ] || ""
+                              }
+                              onChange={(e) =>
+                                handleCommentChange(
+                                  option._id,
+                                  subOption._id,
+                                  e.target.value
+                                )
+                              }
+                              className="mt-2"
+                            />
+                          )}
                         </div>
                       ))}
                     </div>

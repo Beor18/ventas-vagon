@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "../ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 
 interface OrderEditModalProps {
   fabricante?: any;
@@ -102,14 +103,22 @@ export function OrderEditModal({
             newOptions.splice(existingOptionIndex, 1);
           }
         } else {
-          // Agregar la subopción al seleccionar
-          newOptions[existingOptionIndex].suboptions.push(productSuboption);
+          // Agregar la subopción al seleccionar, incluyendo el campo comentarios
+          newOptions[existingOptionIndex].suboptions.push({
+            ...productSuboption,
+            comentarios: "", // Inicializar comentarios vacío
+          });
         }
       } else {
-        // Agregar nueva opción con la subopción
+        // Agregar nueva opción con la subopción, incluyendo el campo comentarios
         newOptions.push({
           ...productOption,
-          suboptions: [productSuboption],
+          suboptions: [
+            {
+              ...productSuboption,
+              comentarios: "", // Inicializar comentarios vacío
+            },
+          ],
         });
       }
 
@@ -289,50 +298,92 @@ export function OrderEditModal({
                 </div>
               </TabsContent>
               <TabsContent value="options" className="mt-0 space-y-4">
-                {console.log("options", formData)}
-                {(formData.product?.options || formData?.options || []).map(
-                  (option: any, optionIndex: number) => (
-                    <Card key={optionIndex} className="w-full">
-                      <CardHeader>
-                        <CardTitle className="text-2xl font-bold">
-                          {option.name}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
-                          {option.suboptions?.map(
+                <div>
+                  <CardHeader>
+                    <CardTitle>Opciones</CardTitle>
+                  </CardHeader>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {(formData.product?.options || []).map(
+                      (option: any, optionIndex: number) => (
+                        <div key={optionIndex}>
+                          <h3 className="font-semibold mb-2">{option.name}</h3>
+                          {option.suboptions.map(
                             (suboption: any, suboptionIndex: number) => {
                               const isSelected = formData.options?.some(
                                 (o) =>
                                   o.name === option.name &&
-                                  o.suboptions?.some(
+                                  o.suboptions.some(
                                     (s) => s._id === suboption._id
                                   )
                               );
+
                               return (
                                 <div
                                   key={suboptionIndex}
-                                  className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
+                                  className="mb-4 p-4 border rounded-md"
                                 >
-                                  <div className="aspect-square relative">
-                                    <img
-                                      src={suboption.imageUrl}
-                                      alt={suboption.name}
-                                      className="rounded-t-lg bg-cover"
-                                    />
-                                    {isSelected && (
-                                      <Badge className="absolute top-2 right-2 bg-primary text-white">
-                                        Seleccionado
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="p-4 bg-card">
-                                    <h3 className="font-semibold text-lg mb-1">
+                                  <div className="flex flex-col gap-2">
+                                    <div className="aspect-square relative">
+                                      <img
+                                        src={suboption.imageUrl}
+                                        alt={suboption.name}
+                                        className="rounded-t-lg bg-cover"
+                                      />
+                                      {isSelected && (
+                                        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                          Seleccionado
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <h4 className="font-medium">
                                       {suboption.name}
-                                    </h3>
-                                    <p className="text-muted-foreground mb-3">
-                                      $ {suboption.price}
-                                    </p>
+                                    </h4>
+                                    {isSelected && (
+                                      <Textarea
+                                        placeholder="Agregar comentarios para esta opción..."
+                                        value={
+                                          formData.options
+                                            ?.find(
+                                              (o) => o.name === option.name
+                                            )
+                                            ?.suboptions?.find(
+                                              (s) => s._id === suboption._id
+                                            )?.comentarios || ""
+                                        }
+                                        onChange={(e) => {
+                                          setFormData((prev) => {
+                                            const newOptions = [
+                                              ...(prev.options || []),
+                                            ];
+                                            const optionIndex =
+                                              newOptions.findIndex(
+                                                (o) => o.name === option.name
+                                              );
+                                            if (optionIndex >= 0) {
+                                              const suboptionIndex = newOptions[
+                                                optionIndex
+                                              ].suboptions.findIndex(
+                                                (s) => s._id === suboption._id
+                                              );
+                                              if (suboptionIndex >= 0) {
+                                                newOptions[
+                                                  optionIndex
+                                                ].suboptions[suboptionIndex] = {
+                                                  ...newOptions[optionIndex]
+                                                    .suboptions[suboptionIndex],
+                                                  comentarios: e.target.value,
+                                                };
+                                              }
+                                            }
+                                            return {
+                                              ...prev,
+                                              options: newOptions,
+                                            };
+                                          });
+                                        }}
+                                        className="min-h-[80px]"
+                                      />
+                                    )}
                                     <Button
                                       type="button"
                                       variant={
@@ -357,10 +408,10 @@ export function OrderEditModal({
                             }
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  )
-                )}
+                      )
+                    )}
+                  </div>
+                </div>
               </TabsContent>
               <TabsContent value="colors" className="mt-0 space-y-4">
                 <div>

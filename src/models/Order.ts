@@ -8,6 +8,7 @@ const subOptionSchema = new Schema({
   imageUrl: String,
   details: String,
   name: String,
+  comentarios: String,
 });
 
 const optionSchema = new Schema({

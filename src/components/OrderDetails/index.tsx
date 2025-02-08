@@ -155,54 +155,46 @@ export function OrderDetail({ isOpen, onClose, order }: OrderDetailProps) {
                             )}
                             {option.suboptions &&
                               option.suboptions.length > 0 && (
-                                <div className="mt-4">
-                                  <h5 className="font-semibold mb-2">
-                                    Subopciones:
-                                  </h5>
+                                <div className="mt-4 space-y-4">
+                                  <h5 className="font-medium">Subopciones:</h5>
                                   {option.suboptions.map(
                                     (suboption: any, subIndex: number) => (
                                       <div
                                         key={subIndex}
-                                        className="ml-4 mb-2 p-2 border-l"
+                                        className="ml-4 p-3 bg-muted rounded-md"
                                       >
-                                        <p>
-                                          <span className="font-medium">
-                                            Nombre:
-                                          </span>{" "}
-                                          {suboption.name}
-                                        </p>
-                                        <p>
-                                          <span className="font-medium">
-                                            Código:
-                                          </span>{" "}
-                                          {suboption.code}
-                                        </p>
-                                        <p>
-                                          <span className="font-medium">
-                                            Precio:
-                                          </span>{" "}
-                                          ${suboption.price}
-                                        </p>
-                                        <p>
-                                          <span className="font-medium">
-                                            Detalles:
-                                          </span>{" "}
-                                          {suboption.details || "N/A"}
-                                        </p>
-                                        {suboption.imageUrl && (
-                                          <div className="mt-2">
+                                        <div className="flex items-center gap-4">
+                                          {suboption.imageUrl && (
                                             <img
                                               src={suboption.imageUrl}
                                               alt={suboption.name}
-                                              className="rounded-md w-20 h-20 object-cover cursor-pointer"
+                                              className="w-16 h-16 object-cover rounded-md"
                                               onClick={() =>
                                                 openFullScreenImage(
                                                   suboption.imageUrl
                                                 )
                                               }
                                             />
+                                          )}
+                                          <div className="flex-1">
+                                            <p className="font-medium">
+                                              {suboption.name}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                              Precio: ${suboption.price}
+                                            </p>
+                                            {suboption.comentarios && (
+                                              <div className="mt-2">
+                                                <p className="text-sm font-medium text-muted-foreground">
+                                                  Comentarios:
+                                                </p>
+                                                <p className="text-sm bg-background p-2 rounded-md">
+                                                  {suboption.comentarios}
+                                                </p>
+                                              </div>
+                                            )}
                                           </div>
-                                        )}
+                                        </div>
                                       </div>
                                     )
                                   )}

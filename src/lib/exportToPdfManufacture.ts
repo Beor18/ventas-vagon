@@ -130,7 +130,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
     bodyStyles: { fillColor: [245, 245, 245] },
     alternateRowStyles: { fillColor: [255, 255, 255] },
     styles: { fontSize: 10, cellPadding: 5 },
-    didDrawPage: (data) => {
+    didDrawPage: (data: any) => {
       yOffset = data.cursor.y + 10;
     },
   });
@@ -183,7 +183,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
       bodyStyles: { fillColor: [245, 245, 245] },
       alternateRowStyles: { fillColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
+      didDrawPage: (data: any) => {
         yOffset = data.cursor.y + 10;
       },
     });
@@ -210,7 +210,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
       bodyStyles: { fillColor: [245, 245, 245] },
       alternateRowStyles: { fillColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
+      didDrawPage: (data: any) => {
         yOffset = data.cursor.y + 5;
       },
     });
@@ -244,7 +244,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
         theme: "striped",
         headStyles: { fillColor: [41, 128, 185], textColor: 255 },
         styles: { fontSize: 10, cellPadding: 5 },
-        didDrawPage: (data) => {
+        didDrawPage: (data: any) => {
           yOffset = data.cursor.y + 5;
         },
       });
@@ -264,7 +264,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
           bodyStyles: { fillColor: [245, 245, 245] },
           alternateRowStyles: { fillColor: [255, 255, 255] },
           styles: { fontSize: 9, cellPadding: 3 },
-          didDrawPage: (data) => {
+          didDrawPage: (data: any) => {
             yOffset = data.cursor.y + 5;
           },
         });
@@ -294,7 +294,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
       bodyStyles: { fillColor: [245, 245, 245] },
       alternateRowStyles: { fillColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
+      didDrawPage: (data: any) => {
         yOffset = data.cursor.y + 5;
       },
     });
@@ -318,7 +318,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
       body: [[order.comentaries || "N/A"]],
       theme: "plain",
       styles: { fontSize: 10, cellPadding: 5 },
-      didDrawPage: (data) => {
+      didDrawPage: (data: any) => {
         yOffset = data.cursor.y + 10;
       },
     });

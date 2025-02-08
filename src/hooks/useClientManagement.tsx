@@ -8,8 +8,8 @@ export const useClientManagement = () => {
 
   const { data: session } = useSession();
 
-  const openClientForm = (client = null) => {
-    setCurrentClient(client);
+  const openClientForm = (client?: any) => {
+    setCurrentClient(client || null);
     setIsClientFormModalOpen(true);
   };
 
@@ -18,21 +18,23 @@ export const useClientManagement = () => {
     setIsClientFormModalOpen(false);
   };
 
-  const handleCreateClient = async (clientData) => {
+  const handleCreateClient = async (clientData: any) => {
     try {
-      const response = await fetch(`/api/client`, {
+      if (!session) return; // Early return si no hay sesión
+
+      const response = await fetch("/api/client", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...clientData, vendedor: session.user?.email }),
+        body: JSON.stringify({ ...clientData, vendedor: session?.user?.email }),
       });
       if (response.ok) {
-        await fetchClients(); // Refresca la lista de clientes
-        closeClientForm();
-      } else {
-        console.error("Failed to create client");
+        await fetchClients();
+        return true;
       }
+      return false;
     } catch (error) {
       console.error("Error creating client:", error);
+      return false;
     }
   };
 

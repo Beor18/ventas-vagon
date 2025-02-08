@@ -14,8 +14,17 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 
+interface ColorOption {
+  name: string;
+  additionalPrice: number;
+  hex: string;
+  colorCode: string;
+  colorName: string;
+  imageUrl: string;
+}
+
 export function ProductDetails({ product }) {
-  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
   const [selectedOptions, setSelectedOptions] = useState({});
 
   const handleColorSelect = (color) => {

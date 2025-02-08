@@ -50,10 +50,16 @@ export function OrderEditModal({
     options: initialData?.options || [],
     colorOptions: initialData?.colorOptions || [],
     designs: initialData?.designs || [],
+    cliente:
+      typeof initialData?.cliente === "object"
+        ? initialData.cliente.nombre
+        : initialData?.cliente,
   }));
 
   // const [fabricante, setFabricante] = useState<any[]>([]);
-  const [selectedFabricante, setSelectedFabricante] = useState("");
+  const [selectedFabricante, setSelectedFabricante] = useState(
+    initialData?.fabricanteEmail || ""
+  );
 
   useEffect(() => {
     setFormData({
@@ -213,7 +219,9 @@ export function OrderEditModal({
                     <div className="flex flex-col gap-4 mb-8">
                       <p>
                         <span className="font-semibold">Cliente:</span>{" "}
-                        {formData?.cliente}
+                        {typeof initialData?.cliente === "object"
+                          ? initialData.cliente.nombre
+                          : "N/A"}
                       </p>
                     </div>
                     <Separator />
@@ -535,7 +543,9 @@ export function OrderEditModal({
                       <SelectContent>
                         {fabricante?.map((client: any) => (
                           <SelectItem key={client._id} value={client.email}>
-                            {client.name}
+                            {typeof client === "object" && client
+                              ? client.name || client.nombre
+                              : "N/A"}
                           </SelectItem>
                         ))}
                       </SelectContent>

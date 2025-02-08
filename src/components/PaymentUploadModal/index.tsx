@@ -164,7 +164,9 @@ export function PaymentUploadModal({
                 {orders.map((order) => (
                   <SelectItem key={order._id} value={order._id}>
                     {`Orden #${order._id.slice(-6)} - ${order.productName} - ${
-                      order.cliente?.nombre || "N/A"
+                      typeof order.cliente === "object" && order.cliente
+                        ? order.cliente.nombre
+                        : "N/A"
                     }`}
                   </SelectItem>
                 ))}

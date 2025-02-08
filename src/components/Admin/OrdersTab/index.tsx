@@ -66,9 +66,10 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
 
   const handleOpenOrderDetail = (orderId) => {
-    const order = orders.find((order) => order._id === orderId);
+    const order: any = orders.find((order) => order._id === orderId);
     setSelectedOrder({ ...order });
     setIsOrderDetailOpen(true);
   };
@@ -83,6 +84,10 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
       setSelectedOrder(orderToEdit);
       setIsEditModalOpen(true);
     }
+  };
+
+  const openFullScreenImage = (src: string) => {
+    setFullScreenImage(src);
   };
 
   const filteredOrders = orders.filter(
@@ -200,7 +205,7 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
         isOpen={isOrderDetailOpen}
         onClose={handleCloseOrderDetail}
         order={selectedOrder}
-        //openFullScreenImage={openFullScreenImage}
+        openFullScreenImage={openFullScreenImage}
       />
 
       <OrderEditModal

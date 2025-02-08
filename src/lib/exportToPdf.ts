@@ -212,17 +212,21 @@ export const handleExportToPDFSeller = async (order: any) => {
         checkSpace(20);
         autoTable(doc, {
           startY: yOffset,
-          head: [["Suboption", "Code", "Details"]],
+          head: [["Suboption", "Code", "Details", "Comments"]],
           body: option.suboptions.map((suboption: any) => [
             suboption.name || "N/A",
             suboption.code || "N/A",
             suboption.details || "N/A",
+            suboption.comentarios || "N/A",
           ]),
           theme: "striped",
           headStyles: { fillColor: [52, 152, 219], textColor: 255 },
           bodyStyles: { fillColor: [245, 245, 245] },
           alternateRowStyles: { fillColor: [255, 255, 255] },
           styles: { fontSize: 9, cellPadding: 3 },
+          columnStyles: {
+            3: { cellWidth: "auto" },
+          },
           didDrawPage: (data) => {
             yOffset = data.cursor.y + 5;
           },
@@ -553,17 +557,21 @@ export const handleExportToPDFAdmin = async (order: any) => {
         checkSpace(20);
         autoTable(doc, {
           startY: yOffset,
-          head: [["Suboption", "Code", "Details"]],
+          head: [["Suboption", "Code", "Details", "Comments"]],
           body: option.suboptions.map((suboption: any) => [
             suboption.name || "N/A",
             suboption.code || "N/A",
             suboption.details || "N/A",
+            suboption.comentarios || "N/A",
           ]),
           theme: "striped",
           headStyles: { fillColor: [52, 152, 219], textColor: 255 },
           bodyStyles: { fillColor: [245, 245, 245] },
           alternateRowStyles: { fillColor: [255, 255, 255] },
           styles: { fontSize: 9, cellPadding: 3 },
+          columnStyles: {
+            3: { cellWidth: "auto" },
+          },
           didDrawPage: (data) => {
             yOffset = data.cursor.y + 5;
           },

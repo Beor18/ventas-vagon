@@ -141,7 +141,7 @@ export function OrderDetail({ isOpen, onClose, order }: OrderDetailProps) {
                                 {option.pcs || "N/A"}
                               </p>
                             </div>
-                            {option.imageUrl && (
+                            {/* {option.imageUrl && (
                               <div className="mt-2">
                                 <img
                                   src={option.imageUrl}
@@ -152,7 +152,7 @@ export function OrderDetail({ isOpen, onClose, order }: OrderDetailProps) {
                                   }
                                 />
                               </div>
-                            )}
+                            )} */}
                             {option.suboptions &&
                               option.suboptions.length > 0 && (
                                 <div className="mt-4 space-y-4">

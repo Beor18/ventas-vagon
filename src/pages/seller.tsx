@@ -11,7 +11,14 @@ import withAuth from "../lib/withAuth";
 import ClientForm from "@/components/ClientForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Package, Users, ClipboardList, X } from "lucide-react";
+import {
+  Package,
+  Users,
+  ClipboardList,
+  X,
+  Upload,
+  FileText,
+} from "lucide-react";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { OrderDetail } from "@/components/OrderDetails";
 import InsurancePolicies from "@/components/Insurance";
@@ -24,6 +31,8 @@ import ProductList from "@/components/Seller/ProductList";
 import { useOrderManagement } from "@/hooks/useOrderManagement";
 import { OrderEditModal } from "@/components/OrderEditModal";
 import ClientsTable from "@/components/Seller/ClientTable";
+import { PaymentUploadModal } from "@/components/PaymentUploadModal";
+import { PaymentsTable } from "@/components/Seller/PaymentsTable";
 
 interface FullScreenImageProps {
   src: string;
@@ -72,9 +81,13 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
 
   const [isOrderDetailOpen, setIsOrderDetailOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const { fabricante, ordersList, editOrder, loading } =
     useOrderManagement(orders);
+
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
 
   useEffect(() => {
     if (session) {
@@ -215,7 +228,7 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
   //   setSelectedOrder(null);
   // };
 
-  const openFullScreenImage = (src: string) => {
+  const openFullScreenImage = (src: any) => {
     setFullScreenImage(src);
   };
 
@@ -223,10 +236,27 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
     setFullScreenImage(null);
   };
 
+  const fetchPayments = async () => {
+    setLoadingPayments(true);
+    try {
+      const response = await fetch("/api/payments");
+      const data = await response.json();
+      setPayments(data);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
   return (
     <div className="container mx-auto p-8">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6 mb-12">
+        <TabsList className="grid w-full grid-cols-7 mb-12">
           <TabsTrigger value="orders">
             <ClipboardList className="mr-2 h-4 w-4" />
             Mis Órdenes
@@ -241,8 +271,39 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
           </TabsTrigger>
           <TabsTrigger value="insurance">Seguros</TabsTrigger>
           <TabsTrigger value="financiamiento">Financiamiento</TabsTrigger>
+          <TabsTrigger value="payments">
+            <FileText className="mr-2 h-4 w-4" />
+            Pagos
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="orders">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold">
+              Mis Ordenes (
+              {
+                orders.filter(
+                  (order: any) => order.vendedorEmail === session?.user?.email
+                ).length
+              }
+              )
+            </h2>
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <Button onClick={() => setIsPaymentModalOpen(true)}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Registrar Pago
+                </Button>
+                {/* <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search orders..."
+                  className="pl-8 pr-4"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                /> */}
+              </div>
+            </div>
+          </div>
           <OrderTable
             loading={loading}
             orders={ordersList}
@@ -267,6 +328,16 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
         </TabsContent>
         <TabsContent value="financiamiento">
           <Financiamiento />
+        </TabsContent>
+        <TabsContent value="payments">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold">Pagos Registrados</h2>
+            <Button onClick={() => setIsPaymentModalOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Registrar Pago
+            </Button>
+          </div>
+          <PaymentsTable payments={payments} loading={loadingPayments} />
         </TabsContent>
       </Tabs>
 
@@ -311,6 +382,11 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
           onClose={closeFullScreenImage}
         />
       )}
+
+      <PaymentUploadModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+      />
     </div>
   );
 }

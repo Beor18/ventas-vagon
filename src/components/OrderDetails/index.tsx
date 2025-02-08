@@ -22,14 +22,16 @@ interface OrderDetailProps {
   isOpen: boolean;
   onClose: () => void;
   order: any;
+  openFullScreenImage: (src: any) => void;
 }
 
-export function OrderDetail({ isOpen, onClose, order }: OrderDetailProps) {
+export function OrderDetail({
+  isOpen,
+  onClose,
+  order,
+  openFullScreenImage,
+}: OrderDetailProps) {
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
-
-  const openFullScreenImage = (imageUrl: string) => {
-    setFullScreenImage(imageUrl);
-  };
 
   const closeFullScreenImage = () => {
     setFullScreenImage(null);

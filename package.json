@@ -28,6 +28,7 @@
     "@radix-ui/react-toast": "^1.2.2",
     "@types/jspdf": "^2.0.0",
     "@vercel/blob": "^0.23.4",
+    "canvas": "^3.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

@@ -39,7 +39,7 @@ const OrderTable = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">
           Mis Ordenes (
           {
@@ -51,17 +51,17 @@ const OrderTable = ({
         </h2>
         <div className="flex items-center space-x-2">
           <div className="relative">
-            {/* <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
                   type="text"
                   placeholder="Search orders..."
                   className="pl-8 pr-4"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                /> */}
+                />
           </div>
         </div>
-      </div>
+      </div> */}
       <Card className="rounded-md border shadow-sm overflow-hidden">
         <div className="rounded-md border">
           <Table>

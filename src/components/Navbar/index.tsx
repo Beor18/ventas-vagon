@@ -4,7 +4,18 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  User,
+  LogOut,
+  Home,
+  Settings,
+  Package,
+  Users,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,186 +25,138 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const { data: session, status }: any = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
   const NavLink = ({
     href,
     children,
+    icon: Icon,
   }: {
     href: string;
     children: React.ReactNode;
+    icon?: any;
   }) => (
     <Link href={href} passHref>
       <Button
         variant="ghost"
-        className="text-white hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+        className="w-full justify-start gap-2 text-muted-foreground hover:text-primary hover:bg-muted"
       >
+        {Icon && <Icon className="h-4 w-4" />}
         {children}
       </Button>
     </Link>
   );
 
+  const navigationItems = [
+    { name: "Inicio", href: "/", icon: Home },
+    { name: "Administración", href: "/admin", icon: Settings },
+    { name: "Productos", href: "/products", icon: Package },
+    { name: "Clientes", href: "/clients", icon: Users },
+    { name: "Órdenes", href: "/orders", icon: FileText },
+  ];
+
   return (
-    <nav className="bg-gray-800">
-      <div className="container mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="relative flex items-center justify-between h-20">
-          <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            <Button
-              variant="ghost"
-              onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-            >
-              <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
-                <X className="block h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="block h-6 w-6" aria-hidden="true" />
-              )}
-            </Button>
-          </div>
-          <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex-shrink-0 flex items-center">
+    <nav className="bg-background border-b">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo y navegación desktop */}
+          <div className="flex items-center">
+            <Link href="/" className="flex-shrink-0">
               <Image
-                src="/vagon_5_Transparent.png"
+                src="/logo.png"
                 alt="Logo"
-                width={77}
-                height={140}
-                className="block h-8 w-auto"
+                width={40}
+                height={40}
+                className="rounded-full"
               />
-            </div>
-            <div className="hidden sm:block sm:ml-6">
-              <div className="flex space-x-4">
-                {status === "authenticated" && (
-                  <>
-                    {session?.user.role === "Vendedor" && (
-                      <NavLink href="/seller">Productos</NavLink>
-                    )}
-                    {session?.user.role === "Fabricante" && (
-                      <NavLink href="/manufacture">Fabricante</NavLink>
-                    )}
-                    {session?.user.role === "Administrador" && (
-                      <>
-                        <NavLink href="/admin">Administrador</NavLink>
-                        <NavLink href="/gallery">
-                          Subir Imagenes / Galeria
-                        </NavLink>
-                        <NavLink href="/register">Registrar Usuarios</NavLink>
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
+            </Link>
+            <div className="hidden md:ml-6 md:flex md:space-x-2">
+              {navigationItems.map((item) => (
+                <NavLink key={item.name} href={item.href} icon={item.icon}>
+                  {item.name}
+                </NavLink>
+              ))}
             </div>
           </div>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            {status === "authenticated" ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-sm text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md font-medium"
-                  >
-                    <Image
-                      src="/avatar_placeholder.png"
-                      alt="Avatar"
-                      width={32}
-                      height={32}
-                      className="rounded-full mr-2"
-                    />
-                    <span className="hidden md:inline">Mi Cuenta</span>
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <span className="font-medium">
-                      Hola, {session.user.email}
-                    </span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      signOut({
-                        callbackUrl: process.env.NEXT_PUBLIC_FRONTEND_BASE_URL,
-                      })
-                    }
-                  >
-                    Salir
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+          {/* Menú de usuario */}
+          <div className="flex items-center gap-4">
+            {session ? (
+              <>
+                <span className="hidden md:block text-sm text-muted-foreground">
+                  {session.user.email}
+                </span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-8 w-8 rounded-full"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={session.user.image || ""}
+                          alt={session.user.email}
+                        />
+                        <AvatarFallback>
+                          {session.user.email?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Cerrar Sesión</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
-              <NavLink href="/login">Login</NavLink>
+              <NavLink href="/login">Iniciar Sesión</NavLink>
             )}
+
+            {/* Menú móvil */}
+            <div className="flex md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right">
+                  <SheetHeader>
+                    <SheetTitle>Menú</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 flex flex-col space-y-2">
+                    {navigationItems.map((item) => (
+                      <NavLink
+                        key={item.name}
+                        href={item.href}
+                        icon={item.icon}
+                      >
+                        {item.name}
+                      </NavLink>
+                    ))}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>
-
-      {mobileMenuOpen && (
-        <div className="sm:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            {status === "authenticated" ? (
-              <>
-                {session?.user.role === "Vendedor" && (
-                  <NavLink href="/seller">Productos</NavLink>
-                )}
-                {session?.user.role === "Fabricante" && (
-                  <NavLink href="/manufacture">Fabricante</NavLink>
-                )}
-                {session?.user.role === "Administrador" && (
-                  <>
-                    <NavLink href="/admin">Administrador</NavLink>
-                    <NavLink href="/gallery">Subir Imagenes / Galeria</NavLink>
-                    <NavLink href="/register">Registrar Usuarios</NavLink>
-                  </>
-                )}
-                <div className="pt-4 pb-3 border-t border-gray-700">
-                  <div className="flex items-center px-5">
-                    <div className="flex-shrink-0">
-                      <Image
-                        src="/avatar_placeholder.png"
-                        alt="Avatar"
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                    </div>
-                    <div className="ml-3">
-                      <div className="text-base font-medium leading-none text-white">
-                        {session.user.email}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 px-2 space-y-1">
-                    <Button
-                      variant="ghost"
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
-                      onClick={() =>
-                        signOut({
-                          callbackUrl:
-                            process.env.NEXT_PUBLIC_FRONTEND_BASE_URL,
-                        })
-                      }
-                    >
-                      Salir
-                    </Button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <NavLink href="/login">Login</NavLink>
-            )}
-          </div>
-        </div>
-      )}
     </nav>
   );
 };

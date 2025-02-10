@@ -82,6 +82,7 @@ interface ImageUploadFieldProps {
   ) => void;
   galleryImages: any[];
   setProduct?: React.Dispatch<React.SetStateAction<any>>;
+  isUploading: boolean;
 }
 
 export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
@@ -90,6 +91,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   preview,
   handleGallerySelect,
   galleryImages = [],
+  isUploading,
 }) => {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<"upload" | "gallery">("gallery");
@@ -113,12 +115,19 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   };
 
   const handleGalleryImageSelect = (image: any) => {
+    console.log("image", image);
+    console.log("preview", preview);
     handleGallerySelect(image);
   };
 
   return (
     <Card className="w-full">
-      <CardContent className="p-6">
+      <CardContent className="p-6 relative">
+        {isUploading && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+          </div>
+        )}
         <Label>{label}</Label>
         <Tabs
           value={activeTab}

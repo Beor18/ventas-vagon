@@ -23,6 +23,7 @@ interface ColorOptionsTabProps {
   ) => void;
   galleryImages: any[];
   loadGalleryImages: () => Promise<void>;
+  isUploading: boolean;
 }
 
 const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
@@ -37,6 +38,7 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
   handleImagePreview,
   galleryImages,
   loadGalleryImages,
+  isUploading,
 }) => {
   useEffect(() => {
     loadGalleryImages();
@@ -161,6 +163,7 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
                     }
                     setProduct={setProduct}
                     galleryImages={galleryImages}
+                    isUploading={isUploading}
                   />
                 </div>
               </CardContent>

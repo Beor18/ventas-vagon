@@ -75,6 +75,8 @@ const Admin = ({ initialProducts, orders }) => {
     duplicateProduct,
     galleryImages,
     loadGalleryImages,
+    handleImageUpload,
+    isUploading,
   } = useProductManagement(initialProducts);
 
   const {
@@ -179,6 +181,8 @@ const Admin = ({ initialProducts, orders }) => {
           loading={loading}
           galleryImages={galleryImages}
           loadGalleryImages={loadGalleryImages}
+          handleImageUpload={handleImageUpload}
+          isUploading={isUploading}
         />
       )}
 

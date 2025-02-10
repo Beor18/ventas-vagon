@@ -7,8 +7,10 @@ import {
   ColorOptionType,
 } from "@/types/types";
 import { upload } from "@vercel/blob/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const useProductManagement = (initialProducts: ProductType[]) => {
+  const { toast } = useToast();
   const [products, setProducts] = useState<ProductType[]>(initialProducts);
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
     null
@@ -19,6 +21,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   const [message, setMessage] = useState("");
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [isLoadingGallery, setIsLoadingGallery] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Estado de datos del producto y sus opciones
   const [product, setProduct] = useState<ProductType>({
@@ -256,6 +259,22 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     }));
   };
 
+  const handleImageUpload = async (file: File): Promise<string> => {
+    try {
+      setIsUploading(true);
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload",
+      });
+      return blob.url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return "";
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleImagePreview = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setImageUrlCallback: (url: string) => void,
@@ -264,31 +283,8 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     const file = e.target.files?.[0];
     if (file) {
       setPreviewCallback(URL.createObjectURL(file));
-      await handleImageUpload(file, setImageUrlCallback);
-    }
-  };
-
-  const handleImageUpload = async (
-    file: File,
-    callback: (url: string) => void
-  ) => {
-    setLoading(true);
-    try {
-      const newBlob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
-      });
-
-      if (newBlob.url) {
-        callback(newBlob.url);
-      } else {
-        throw new Error("Image upload failed");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      setMessage("Error uploading image");
-    } finally {
-      setLoading(false);
+      const imageUrl = await handleImageUpload(file);
+      setImageUrlCallback(imageUrl);
     }
   };
 
@@ -298,26 +294,38 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     subOptionIndex?: number
   ) => {
     const imageUrl = image?.downloadUrl || image?.url;
+    if (!imageUrl) return;
 
-    if (optionIndex !== undefined) {
-      const updatedOptions = [...product.options];
-
-      if (subOptionIndex !== undefined) {
-        // Actualizar subopción
-        updatedOptions[optionIndex].suboptions[subOptionIndex].imageUrl =
-          imageUrl;
-      } else {
-        // Actualizar opción
-        updatedOptions[optionIndex].imageUrl = imageUrl;
-      }
-
-      setProduct({ ...product, options: updatedOptions });
+    if (typeof optionIndex === "number" && typeof subOptionIndex === "number") {
+      // Para subopciones
+      const newOptions = [...product.options];
+      newOptions[optionIndex].suboptions[subOptionIndex].imageUrl = imageUrl;
+      setProduct({ ...product, options: newOptions });
+    } else if (typeof optionIndex === "number") {
+      // Para opciones
+      const newOptions = [...product.options];
+      newOptions[optionIndex].imageUrl = imageUrl;
+      setProduct({ ...product, options: newOptions });
+    } else {
+      // Para el producto principal
+      setProduct({ ...product, imageUrl });
     }
   };
 
   const handleSaveProduct = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
+
+      // Validaciones
+      // if (!product.name || !product.description) {
+      //   toast({
+      //     title: "Error",
+      //     description: "Por favor complete todos los campos requeridos",
+      //     variant: "destructive",
+      //   });
+      //   return;
+      // }
+
       const method = product._id ? "PUT" : "POST";
       const endpoint = product._id
         ? `/api/products/${product._id}`
@@ -329,25 +337,33 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
         body: JSON.stringify(product),
       });
 
-      if (response.ok) {
-        const updatedProduct = await response.json();
-        setProducts((prevProducts) => {
-          if (product._id) {
-            return prevProducts.map((p) =>
-              p._id === updatedProduct._id ? updatedProduct : p
-            );
-          } else {
-            return [...prevProducts, updatedProduct];
-          }
-        });
-        setMessage("Product saved successfully");
-        closeProductModal();
+      if (!response.ok) throw new Error("Error al guardar el producto");
+
+      const savedProduct = await response.json();
+
+      if (product._id) {
+        setProducts(
+          products.map((p) => (p._id === product._id ? savedProduct : p))
+        );
       } else {
-        throw new Error("Failed to save product");
+        setProducts([...products, savedProduct]);
       }
+
+      toast({
+        title: "Éxito",
+        description: `Producto ${
+          product._id ? "actualizado" : "creado"
+        } correctamente`,
+      });
+
+      setModalOpen(false);
+      resetProductForm();
     } catch (error) {
-      console.error("Error saving product:", error);
-      setMessage("Error saving product");
+      toast({
+        title: "Error",
+        description: "Error al guardar el producto",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -474,5 +490,6 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     galleryImages,
     loadGalleryImages,
     isLoadingGallery,
+    isUploading,
   };
 };

@@ -28,6 +28,7 @@ interface SuboptionCardProps {
     subOptionIndex?: number
   ) => void;
   galleryImages: any[];
+  isUploading: boolean;
 }
 
 const SuboptionCard: React.FC<SuboptionCardProps> = ({
@@ -41,6 +42,7 @@ const SuboptionCard: React.FC<SuboptionCardProps> = ({
   product,
   handleGallerySelect,
   galleryImages,
+  isUploading,
 }) => (
   <Card>
     <CardHeader>
@@ -55,7 +57,12 @@ const SuboptionCard: React.FC<SuboptionCardProps> = ({
         </Button>
       </CardTitle>
     </CardHeader>
-    <CardContent>
+    <CardContent className="relative">
+      {isUploading && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         <InputField
           label="Suboption Name"
@@ -105,24 +112,11 @@ const SuboptionCard: React.FC<SuboptionCardProps> = ({
             )
           }
           preview={suboption.imageUrl}
-          handleGallerySelect={handleGallerySelect}
+          handleGallerySelect={(image) =>
+            handleGallerySelect(image, optionIndex, subOptionIndex)
+          }
           galleryImages={galleryImages}
-          setProduct={(updatedProduct) => {
-            const updatedOptions = [...product.options];
-            if (updatedProduct.imageUrl) {
-              updatedOptions[optionIndex].suboptions[subOptionIndex] = {
-                ...updatedOptions[optionIndex].suboptions[subOptionIndex],
-                imageUrl: updatedProduct.imageUrl,
-                name:
-                  updatedProduct.name ||
-                  updatedOptions[optionIndex].suboptions[subOptionIndex].name,
-              };
-              setProduct({
-                ...product,
-                options: updatedOptions,
-              });
-            }
-          }}
+          isUploading={isUploading}
         />
         <InputField
           label="Suboption Code"

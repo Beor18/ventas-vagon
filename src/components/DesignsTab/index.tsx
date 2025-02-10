@@ -20,6 +20,7 @@ interface DesignsTabProps {
   ) => void;
   galleryImages: any[];
   loadGalleryImages: () => Promise<void>;
+  isUploading: boolean;
 }
 
 const DesignsTab: React.FC<DesignsTabProps> = ({
@@ -33,6 +34,7 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
   handleImagePreview,
   galleryImages,
   loadGalleryImages,
+  isUploading,
 }) => {
   useEffect(() => {
     loadGalleryImages();
@@ -62,6 +64,7 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
             product={product}
             removeDesign={removeDesign}
             galleryImages={galleryImages}
+            isUploading={isUploading}
           />
         ))}
       <div className="space-y-4">
@@ -80,25 +83,27 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
           value={newDesign.cost}
           onChange={handleNewDesignChange}
           placeholder="Enter new design price"
-        />
-        <ImageUploadField
-          label="Design Image"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            handleImagePreview(
-              e,
-              (url: string) => setNewDesign({ ...newDesign, imageUrl: url }),
-              (url: string) => setNewDesign({ ...newDesign, imageUrl: url })
-            )
-          }
-          preview={newDesign.imageUrl}
-          handleGallerySelect={(url: string) => {
-            setNewDesign({ ...newDesign, imageUrl: url });
-          }}
         /> */}
         <Button onClick={addDesign} className="w-full">
           <Plus className="mr-2 h-4 w-4" /> Add Design
         </Button>
       </div>
+      <ImageUploadField
+        label="Design Image"
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          handleImagePreview(
+            e,
+            (url: string) => setNewDesign({ ...newDesign, imageUrl: url }),
+            (url: string) => setNewDesign({ ...newDesign, imageUrl: url })
+          )
+        }
+        preview={newDesign.imageUrl}
+        handleGallerySelect={(url: string) => {
+          setNewDesign({ ...newDesign, imageUrl: url });
+        }}
+        galleryImages={galleryImages}
+        isUploading={isUploading}
+      />
     </div>
   );
 };

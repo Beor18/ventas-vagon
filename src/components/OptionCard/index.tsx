@@ -34,6 +34,7 @@ interface OptionCardProps {
     subOptionIndex?: number
   ) => void;
   galleryImages: any[];
+  isUploading: boolean;
 }
 
 const OptionCard: React.FC<OptionCardProps> = ({
@@ -49,6 +50,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
   removeSubOption,
   handleGallerySelect,
   galleryImages,
+  isUploading,
 }) => {
   return (
     <div className="grid-cols-1 gap-4">
@@ -65,7 +67,12 @@ const OptionCard: React.FC<OptionCardProps> = ({
             </Button>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 relative">
+          {isUploading && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             <InputField
               label="Option Name"
@@ -100,6 +107,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                 handleGallerySelect(image, optionIndex)
               }
               galleryImages={galleryImages}
+              isUploading={isUploading}
             />
             <InputField
               label="Option Type"
@@ -140,6 +148,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                     product={product}
                     handleGallerySelect={handleGallerySelect}
                     galleryImages={galleryImages}
+                    isUploading={isUploading}
                   />
                   <ImageUploadField
                     label="SubOption Image"
@@ -161,6 +170,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                       handleGallerySelect(image, optionIndex, subOptionIndex)
                     }
                     galleryImages={galleryImages}
+                    isUploading={isUploading}
                   />
                 </div>
               )

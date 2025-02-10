@@ -16,24 +16,24 @@ interface ProductInfoProps {
     setImageUrlCallback: (url: string) => void,
     setPreviewCallback: (url: string) => void
   ) => void;
-  setProduct: (product: any) => void;
+  handleGallerySelect: any;
   galleryImages: any[];
-  loadGalleryImages: () => Promise<void>;
+  isUploading: boolean;
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({
   product,
   handleProductChange,
   handleImagePreview,
-  setProduct,
+  handleGallerySelect,
   galleryImages,
-  loadGalleryImages,
+  isUploading,
 }) => {
   useEffect(() => {
-    loadGalleryImages();
+    // loadGalleryImages();
   }, []);
 
-  const handleGallerySelect = (url: any) => {
+  const handleGallerySelection = (url: any) => {
     // Asegura que usamos la URL de descarga
     const downloadUrl =
       typeof url === "object" && url.downloadUrl ? url.downloadUrl : url;
@@ -52,11 +52,11 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       .slice(0, 3)
       .join(" ");
 
-    setProduct((prev) => ({
-      ...prev,
+    handleGallerySelect({
+      ...product,
       imageUrl: downloadUrl,
-      name: nameWithoutExtension || prev.name,
-    }));
+      name: nameWithoutExtension || product.name,
+    });
   };
 
   return (
@@ -80,14 +80,16 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           handleImagePreview(
             e,
-            (url: string) => setProduct((prev) => ({ ...prev, imageUrl: url })),
-            (url: string) => setProduct((prev) => ({ ...prev, imageUrl: url }))
+            (url: string) =>
+              handleGallerySelection({ ...product, imageUrl: url }),
+            (url: string) =>
+              handleGallerySelection({ ...product, imageUrl: url })
           )
         }
         preview={product.imageUrl}
-        handleGallerySelect={handleGallerySelect}
-        setProduct={setProduct}
+        handleGallerySelect={handleGallerySelection}
         galleryImages={galleryImages}
+        isUploading={isUploading}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField

@@ -16,9 +16,10 @@ interface OptionsTabProps {
     optionIndex: number
   ) => void;
   handleSubOptionChange: (
-    e: React.ChangeEvent<HTMLInputElement>,
     optionIndex: number,
-    subOptionIndex: number
+    subOptionIndex: number,
+    field: string,
+    value: string | File
   ) => void;
   handleNewOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   addOption: () => void;
@@ -33,6 +34,7 @@ interface OptionsTabProps {
   handleGallerySelect: any;
   galleryImages: any[];
   loadGalleryImages: () => Promise<void>;
+  isUploading: boolean;
 }
 
 const OptionsTab: React.FC<OptionsTabProps> = ({
@@ -48,6 +50,7 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
   handleGallerySelect,
   galleryImages,
   loadGalleryImages,
+  isUploading,
 }) => {
   const [preview, setPreview] = useState<string>("");
 
@@ -61,6 +64,19 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
     items.splice(destination.index, 0, reorderedItem);
 
     setProduct({ ...product, options: items });
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    optionIndex: number,
+    subOptionIndex: number
+  ) => {
+    handleSubOptionChange(
+      optionIndex,
+      subOptionIndex,
+      e.target.name,
+      e.target.value
+    );
   };
 
   useEffect(() => {
@@ -98,10 +114,11 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
                         product={product}
                         addSubOption={addSubOption}
                         removeOption={removeOption}
-                        handleSubOptionChange={handleSubOptionChange}
+                        handleSubOptionChange={handleChange}
                         removeSubOption={removeSubOption}
                         handleGallerySelect={handleGallerySelect}
                         galleryImages={galleryImages}
+                        isUploading={isUploading}
                       />
                     </div>
                   )}
@@ -121,6 +138,7 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
         preview={preview}
         handleGallerySelect={handleGallerySelect}
         galleryImages={galleryImages}
+        isUploading={isUploading}
       />
     </div>
   );

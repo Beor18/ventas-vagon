@@ -17,6 +17,7 @@ import {
   DesignType,
   ColorOptionType,
 } from "@/types/types";
+import { Input } from "@/components/ui/input";
 
 interface ProductFormProps {
   product: ProductType;
@@ -37,9 +38,10 @@ interface ProductFormProps {
     optionIndex: number
   ) => void;
   handleSubOptionChange: (
-    e: React.ChangeEvent<HTMLInputElement>,
-    optionIndex: number,
-    subOptionIndex: number
+    optionIndex: any,
+    subOptionIndex: any,
+    field: any,
+    value: any
   ) => void;
   handleNewOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewSubOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -65,6 +67,8 @@ interface ProductFormProps {
   loading: boolean;
   galleryImages: any[];
   loadGalleryImages: () => Promise<void>;
+  isUploading: boolean;
+  handleImageUpload: (file: File) => Promise<string>;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -101,6 +105,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   loading,
   galleryImages,
   loadGalleryImages,
+  isUploading,
+  handleImageUpload,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -113,7 +119,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center overflow-y-auto">
-      <Card className="w-full max-w-full mx-4 max-h-[100vh] flex flex-col p-0">
+      <Card className="w-full max-w-full mx-4 max-h-[90vh] flex flex-col p-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>{product._id ? "Edit Product" : "New Product"}</CardTitle>
           <Button
@@ -156,9 +162,9 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   product={product}
                   handleProductChange={handleProductChange}
                   handleImagePreview={handleImagePreview}
-                  setProduct={setProduct}
+                  handleGallerySelect={handleGallerySelect}
                   galleryImages={galleryImages}
-                  loadGalleryImages={loadGalleryImages}
+                  isUploading={isUploading}
                 />
               </TabsContent>
               <TabsContent value="designs">
@@ -173,6 +179,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   handleImagePreview={handleImagePreview}
                   galleryImages={galleryImages}
                   loadGalleryImages={loadGalleryImages}
+                  isUploading={isUploading}
                 />
               </TabsContent>
               <TabsContent value="options">
@@ -192,6 +199,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   handleGallerySelect={handleGallerySelect}
                   galleryImages={galleryImages}
                   loadGalleryImages={loadGalleryImages}
+                  isUploading={isUploading}
                 />
               </TabsContent>
               <TabsContent value="color-options">
@@ -207,6 +215,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   handleImagePreview={handleImagePreview}
                   galleryImages={galleryImages}
                   loadGalleryImages={loadGalleryImages}
+                  isUploading={isUploading}
                 />
               </TabsContent>
             </ScrollArea>
@@ -234,17 +243,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </Button>
           )}
         </div>
+        {(loading || isUploading) && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+          </div>
+        )}
       </Card>
-      {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-          <Card>
-            <CardContent className="flex items-center space-x-4 p-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
-              <CardTitle>Uploading...</CardTitle>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };

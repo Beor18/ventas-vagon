@@ -165,6 +165,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   handleGallerySelect={handleGallerySelect}
                   galleryImages={galleryImages}
                   isUploading={isUploading}
+                  loadGalleryImages={loadGalleryImages}
                 />
               </TabsContent>
               <TabsContent value="designs">

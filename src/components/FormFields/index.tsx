@@ -1,5 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useRef, useState, useEffect, Suspense } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  Suspense,
+  useCallback,
+} from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -8,6 +14,7 @@ import { Upload, Image as ImageIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
+import GalleryModal from "@/components/GalleryModal/index";
 
 interface InputFieldProps {
   label: string;
@@ -18,26 +25,30 @@ interface InputFieldProps {
   type?: string;
 }
 
-export const InputField: React.FC<InputFieldProps> = ({
-  label,
-  name,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}) => (
-  <div className="space-y-2">
-    <Label htmlFor={name}>{label}</Label>
-    <Input
-      type={type}
-      id={name}
-      name={name}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-    />
-  </div>
+export const InputField = React.memo(
+  ({
+    label,
+    name,
+    value,
+    onChange,
+    placeholder,
+    type = "text",
+  }: InputFieldProps) => (
+    <div className="space-y-2">
+      <Label htmlFor={name}>{label}</Label>
+      <Input
+        type={type}
+        id={name}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+      />
+    </div>
+  )
 );
+
+InputField.displayName = "InputField";
 
 interface TextAreaFieldProps {
   label: string;
@@ -83,6 +94,7 @@ interface ImageUploadFieldProps {
   galleryImages: any[];
   setProduct?: React.Dispatch<React.SetStateAction<any>>;
   isUploading: boolean;
+  loadGalleryImages: () => Promise<void>;
 }
 
 export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
@@ -92,88 +104,68 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   handleGallerySelect,
   galleryImages = [],
   isUploading,
+  loadGalleryImages,
 }) => {
-  const inputFileRef = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState<"upload" | "gallery">("gallery");
-  const [visibleImages, setVisibleImages] = useState<any[]>([]);
-  const [page, setPage] = useState(0);
-  const imagesPerPage = 9;
+  const [showGallery, setShowGallery] = useState(false);
+  const [localPreview, setLocalPreview] = useState(preview);
+
   useEffect(() => {
-    if (galleryImages?.length > 0) {
-      setVisibleImages(galleryImages.slice(0, imagesPerPage));
-    }
-  }, [galleryImages]);
+    setLocalPreview(preview);
+  }, [preview]);
 
-  const handleLoadMore = () => {
-    const nextPage = page + 1;
-    const nextImages = galleryImages.slice(
-      nextPage * imagesPerPage,
-      (nextPage + 1) * imagesPerPage
-    );
-    setVisibleImages((prev) => [...prev, ...nextImages]);
-    setPage(nextPage);
-  };
-
-  const handleGalleryImageSelect = (image: any) => {
-    console.log("image", image);
-    console.log("preview", preview);
-    handleGallerySelect(image);
-  };
+  const handleGallerySelection = useCallback(
+    (image: any) => {
+      const imageUrl = image?.downloadUrl || image?.url;
+      setLocalPreview(imageUrl);
+      handleGallerySelect(image);
+      setShowGallery(false);
+    },
+    [handleGallerySelect]
+  );
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-6 relative">
-        {isUploading && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="relative">
+        {localPreview ? (
+          <div className="relative aspect-video w-96 overflow-hidden rounded-lg border">
+            <img
+              src={localPreview}
+              alt={label}
+              className="h-full w-full object-cover"
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="absolute bottom-2 right-2"
+              onClick={() => setShowGallery(true)}
+            >
+              <ImageIcon className="h-4 w-4 mr-2" />
+              Cambiar Imagen
+            </Button>
           </div>
+        ) : (
+          <Button
+            variant="outline"
+            className="w-full h-32"
+            onClick={() => setShowGallery(true)}
+          >
+            <ImageIcon className="h-4 w-4 mr-2" />
+            Seleccionar Imagen
+          </Button>
         )}
-        <Label>{label}</Label>
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "gallery")}
-        >
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="gallery">Gallery</TabsTrigger>
-          </TabsList>
-          <TabsContent value="gallery">
-            <ScrollArea className="h-[300px]">
-              <div className="grid grid-cols-4 gap-4">
-                {visibleImages.map((image: any, index) => (
-                  <div
-                    key={index}
-                    className={`cursor-pointer border-2 rounded-md overflow-hidden ${
-                      preview === image?.downloadUrl || preview === image?.url
-                        ? "border-blue-600"
-                        : "border-gray-300"
-                    }`}
-                    onClick={() => handleGalleryImageSelect(image)}
-                  >
-                    <Suspense
-                      fallback={<div className="w-full h-auto bg-gray-200" />}
-                    >
-                      <img
-                        src={image?.downloadUrl || image?.url}
-                        alt={`Gallery image ${index}`}
-                        className="w-full h-auto object-cover aspect-square"
-                        loading="lazy"
-                      />
-                    </Suspense>
-                  </div>
-                ))}
-              </div>
-              {visibleImages.length < galleryImages.length && (
-                <button
-                  onClick={handleLoadMore}
-                  className="w-full mt-4 text-blue-500"
-                >
-                  Load More
-                </button>
-              )}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+      </div>
+
+      {showGallery && (
+        <GalleryModal
+          open={showGallery}
+          onClose={() => setShowGallery(false)}
+          onSelect={handleGallerySelection}
+          images={galleryImages}
+          isLoading={isUploading}
+          onOpen={loadGalleryImages}
+        />
+      )}
+    </div>
   );
 };

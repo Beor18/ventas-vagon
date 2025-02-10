@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import OptionCard from "@/components/OptionCard";
@@ -19,7 +19,7 @@ interface OptionsTabProps {
     optionIndex: number,
     subOptionIndex: number,
     field: string,
-    value: string | File
+    value: string | number
   ) => void;
   handleNewOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   addOption: () => void;
@@ -54,34 +54,36 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
 }) => {
   const [preview, setPreview] = useState<string>("");
 
-  const onDragEnd = (result: any) => {
-    const { source, destination } = result;
+  // Memoizamos las funciones de callback
+  const memoizedHandleSubOptionChange = useCallback(
+    (
+      optionIndex: number,
+      subOptionIndex: number,
+      field: string,
+      value: string | number
+    ) => {
+      handleSubOptionChange(optionIndex, subOptionIndex, field, value);
+    },
+    [handleSubOptionChange]
+  );
 
-    if (!destination) return;
+  const onDragEnd = useCallback(
+    (result: any) => {
+      const { source, destination } = result;
+      if (!destination) return;
 
-    const items = Array.from(product.options);
-    const [reorderedItem] = items.splice(source.index, 1);
-    items.splice(destination.index, 0, reorderedItem);
+      const items = Array.from(product.options);
+      const [reorderedItem] = items.splice(source.index, 1);
+      items.splice(destination.index, 0, reorderedItem);
 
-    setProduct({ ...product, options: items });
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    optionIndex: number,
-    subOptionIndex: number
-  ) => {
-    handleSubOptionChange(
-      optionIndex,
-      subOptionIndex,
-      e.target.name,
-      e.target.value
-    );
-  };
+      setProduct({ ...product, options: items });
+    },
+    [product, setProduct]
+  );
 
   useEffect(() => {
     loadGalleryImages();
-  }, []);
+  }, [loadGalleryImages]);
 
   return (
     <div className="space-y-6">
@@ -95,8 +97,8 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
             >
               {product.options.map((option, optionIndex) => (
                 <Draggable
-                  key={option.name + "-" + optionIndex || optionIndex}
-                  draggableId={`option-${option.name || optionIndex}`}
+                  key={`option-${optionIndex}`}
+                  draggableId={`option-${optionIndex}`}
                   index={optionIndex}
                 >
                   {(provided) => (
@@ -106,6 +108,7 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
                       {...provided.dragHandleProps}
                     >
                       <OptionCard
+                        key={option.id || optionIndex}
                         option={option}
                         optionIndex={optionIndex}
                         handleOptionChange={handleOptionChange}
@@ -114,11 +117,12 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
                         product={product}
                         addSubOption={addSubOption}
                         removeOption={removeOption}
-                        handleSubOptionChange={handleChange}
+                        handleSubOptionChange={memoizedHandleSubOptionChange}
                         removeSubOption={removeSubOption}
                         handleGallerySelect={handleGallerySelect}
                         galleryImages={galleryImages}
                         isUploading={isUploading}
+                        loadGalleryImages={loadGalleryImages}
                       />
                     </div>
                   )}
@@ -139,9 +143,10 @@ const OptionsTab: React.FC<OptionsTabProps> = ({
         handleGallerySelect={handleGallerySelect}
         galleryImages={galleryImages}
         isUploading={isUploading}
+        loadGalleryImages={loadGalleryImages}
       />
     </div>
   );
 };
 
-export default OptionsTab;
+export default React.memo(OptionsTab);

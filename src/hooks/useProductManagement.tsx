@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ProductType,
   OptionType,
@@ -22,6 +22,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   const [galleryImages, setGalleryImages] = useState<any[]>([]);
   const [isLoadingGallery, setIsLoadingGallery] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [galleryLoaded, setGalleryLoaded] = useState(false);
 
   // Estado de datos del producto y sus opciones
   const [product, setProduct] = useState<ProductType>({
@@ -71,17 +72,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     imageUrl: "",
   });
 
-  const openProductModal = () => {
-    resetProductForm();
-    loadGalleryImages();
-    setModalOpen(true);
-  };
-
-  const closeProductModal = () => {
-    setModalOpen(false);
-  };
-
-  const resetProductForm = () => {
+  const resetProductForm = useCallback(() => {
     setProduct({
       name: "",
       description: "",
@@ -97,7 +88,44 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
       colorOptions: [],
       designs: [],
     });
-  };
+  }, []);
+
+  const loadGalleryImages = useCallback(async () => {
+    if (galleryLoaded || isLoadingGallery) return;
+
+    setIsLoadingGallery(true);
+    try {
+      const response = await fetch("/api/upload/list");
+      if (!response.ok) {
+        throw new Error("Failed to fetch images");
+      }
+
+      const data = await response.json();
+
+      if (data?.blobs) {
+        const processedImages = data.blobs.map((img: any) => ({
+          ...img,
+          url: img.downloadUrl,
+        }));
+        setGalleryImages(processedImages);
+        setGalleryLoaded(true);
+      }
+    } catch (error) {
+      console.error("Error loading gallery images:", error);
+    } finally {
+      setIsLoadingGallery(false);
+    }
+  }, [galleryLoaded, isLoadingGallery]);
+
+  const openProductModal = useCallback(() => {
+    resetProductForm();
+    loadGalleryImages();
+    setModalOpen(true);
+  }, [resetProductForm, loadGalleryImages]);
+
+  const closeProductModal = useCallback(() => {
+    setModalOpen(false);
+  }, []);
 
   const handleProductChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -105,32 +133,47 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
   };
 
   // Funciones para manejar opciones, subopciones, diseño y colores
-  const handleOptionChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    optionIndex: number
-  ) => {
-    const { name, value } = e.target;
-    const updatedOptions = [...product.options];
-    updatedOptions[optionIndex] = {
-      ...updatedOptions[optionIndex],
-      [name]: value,
-    };
-    setProduct({ ...product, options: updatedOptions });
-  };
+  const handleOptionChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, optionIndex: number) => {
+      const { name, value } = e.target;
+      setProduct((prev) => {
+        const updatedOptions = [...prev.options];
+        updatedOptions[optionIndex] = {
+          ...updatedOptions[optionIndex],
+          [name]: value,
+        };
+        return { ...prev, options: updatedOptions };
+      });
+    },
+    []
+  );
 
-  const handleSubOptionChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    optionIndex: number,
-    subOptionIndex: number
-  ) => {
-    const { name, value } = e.target;
-    const updatedOptions = [...product.options];
-    updatedOptions[optionIndex].suboptions[subOptionIndex] = {
-      ...updatedOptions[optionIndex].suboptions[subOptionIndex],
-      [name]: value,
-    };
-    setProduct({ ...product, options: updatedOptions });
-  };
+  const handleSubOptionChange = useCallback(
+    (
+      optionIndex: number,
+      subOptionIndex: number,
+      field: string,
+      value: string | number
+    ) => {
+      setProduct((prev) => {
+        const updatedOptions = [...prev.options];
+        const updatedSuboptions = [...updatedOptions[optionIndex].suboptions];
+        updatedSuboptions[subOptionIndex] = {
+          ...updatedSuboptions[subOptionIndex],
+          [field]: value,
+        };
+        updatedOptions[optionIndex] = {
+          ...updatedOptions[optionIndex],
+          suboptions: updatedSuboptions,
+        };
+        return {
+          ...prev,
+          options: updatedOptions,
+        };
+      });
+    },
+    []
+  );
 
   const handleNewOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -413,32 +456,6 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
       setMessage("Error deleting product");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadGalleryImages = async () => {
-    setIsLoadingGallery(true);
-    try {
-      const response = await fetch("/api/upload/list");
-      const data = await response.json();
-      console.log("Loading gallery images:", data);
-
-      if (!data?.blobs?.length) {
-        console.warn("No images found in gallery");
-        return;
-      }
-
-      const processedImages = data.blobs.map((img: any) => ({
-        ...img,
-        url: img.downloadUrl,
-      }));
-
-      setGalleryImages(processedImages);
-      console.log("Gallery images loaded:", processedImages);
-    } catch (error) {
-      console.error("Error loading gallery images:", error);
-    } finally {
-      setIsLoadingGallery(false);
     }
   };
 

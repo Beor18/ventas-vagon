@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
@@ -23,9 +23,10 @@ interface OptionCardProps {
   addSubOption: (optionIndex: number) => void;
   removeOption: (optionIndex: number) => void;
   handleSubOptionChange: (
-    e: React.ChangeEvent<HTMLInputElement>,
     optionIndex: number,
-    subOptionIndex: number
+    subOptionIndex: number,
+    field: string,
+    value: string | number
   ) => void;
   removeSubOption: (optionIndex: number, subOptionIndex: number) => void;
   handleGallerySelect: (
@@ -35,6 +36,7 @@ interface OptionCardProps {
   ) => void;
   galleryImages: any[];
   isUploading: boolean;
+  loadGalleryImages: () => Promise<void>;
 }
 
 const OptionCard: React.FC<OptionCardProps> = ({
@@ -51,7 +53,16 @@ const OptionCard: React.FC<OptionCardProps> = ({
   handleGallerySelect,
   galleryImages,
   isUploading,
+  loadGalleryImages,
 }) => {
+  // Memoizamos los manejadores de eventos
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleOptionChange(e, optionIndex);
+    },
+    [handleOptionChange, optionIndex]
+  );
+
   return (
     <div className="grid-cols-1 gap-4">
       <Card>
@@ -78,7 +89,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
               label="Option Name"
               name="name"
               value={option.name}
-              onChange={(e) => handleOptionChange(e, optionIndex)}
+              onChange={handleInputChange}
               placeholder="Enter option name"
             />
             <InputField
@@ -86,7 +97,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
               name="price"
               type="number"
               value={option.price}
-              onChange={(e) => handleOptionChange(e, optionIndex)}
+              onChange={handleInputChange}
               placeholder="Enter option price"
             />
             <ImageUploadField
@@ -108,19 +119,20 @@ const OptionCard: React.FC<OptionCardProps> = ({
               }
               galleryImages={galleryImages}
               isUploading={isUploading}
+              loadGalleryImages={loadGalleryImages}
             />
             <InputField
               label="Option Type"
               name="type"
               value={option.type}
-              onChange={(e) => handleOptionChange(e, optionIndex)}
+              onChange={handleInputChange}
               placeholder="Enter option type"
             />
             <InputField
               label="Specification"
               name="specification"
               value={option.specification}
-              onChange={(e) => handleOptionChange(e, optionIndex)}
+              onChange={handleInputChange}
               placeholder="Enter specification"
             />
             <InputField
@@ -128,7 +140,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
               name="pcs"
               type="number"
               value={option.pcs}
-              onChange={(e) => handleOptionChange(e, optionIndex)}
+              onChange={handleInputChange}
               placeholder="Enter PCS"
             />
           </div>
@@ -149,6 +161,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                     handleGallerySelect={handleGallerySelect}
                     galleryImages={galleryImages}
                     isUploading={isUploading}
+                    loadGalleryImages={loadGalleryImages}
                   />
                   <ImageUploadField
                     label="SubOption Image"
@@ -171,6 +184,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                     }
                     galleryImages={galleryImages}
                     isUploading={isUploading}
+                    loadGalleryImages={loadGalleryImages}
                   />
                 </div>
               )
@@ -189,4 +203,11 @@ const OptionCard: React.FC<OptionCardProps> = ({
   );
 };
 
-export default OptionCard;
+// Optimizamos con memo y una función de comparación personalizada
+export default React.memo(OptionCard, (prevProps, nextProps) => {
+  return (
+    prevProps.option === nextProps.option &&
+    prevProps.optionIndex === nextProps.optionIndex &&
+    prevProps.isUploading === nextProps.isUploading
+  );
+});

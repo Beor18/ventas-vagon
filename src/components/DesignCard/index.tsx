@@ -22,6 +22,7 @@ interface DesignCardProps {
   removeDesign: (designIndex: number) => void;
   galleryImages: any[];
   isUploading: boolean;
+  loadGalleryImages: () => Promise<void>;
 }
 
 const DesignCard: React.FC<DesignCardProps> = ({
@@ -34,6 +35,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
   removeDesign,
   galleryImages,
   isUploading,
+  loadGalleryImages,
 }) => {
   const handleGallerySelect = (url: any, designIndex: number) => {
     // Obtiene la URL de descarga
@@ -134,6 +136,7 @@ const DesignCard: React.FC<DesignCardProps> = ({
             }
             galleryImages={galleryImages}
             isUploading={isUploading}
+            loadGalleryImages={loadGalleryImages}
           />
         </div>
       </CardContent>

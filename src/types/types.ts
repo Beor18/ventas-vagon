@@ -16,6 +16,7 @@ export interface ProductType {
 }
 
 export interface OptionType {
+  id?: string | number;
   name: string;
   price: number;
   imageUrl: string;
@@ -37,24 +38,6 @@ export interface DesignType {
   designType: string;
   cost: number;
   imageUrl: string;
-}
-
-export interface OptionType {
-  name: string;
-  price: number;
-  imageUrl: string;
-  type: string;
-  specification: string;
-  pcs: number;
-  suboptions: SubOptionType[];
-}
-
-export interface SubOptionType {
-  code: string;
-  price: number;
-  imageUrl: string;
-  details: string;
-  name: string;
 }
 
 export interface ColorOptionType {

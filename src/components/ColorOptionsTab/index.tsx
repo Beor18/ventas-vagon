@@ -164,6 +164,7 @@ const ColorOptionsTab: React.FC<ColorOptionsTabProps> = ({
                     setProduct={setProduct}
                     galleryImages={galleryImages}
                     isUploading={isUploading}
+                    loadGalleryImages={loadGalleryImages}
                   />
                 </div>
               </CardContent>

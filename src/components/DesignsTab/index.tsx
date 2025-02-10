@@ -65,6 +65,7 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
             removeDesign={removeDesign}
             galleryImages={galleryImages}
             isUploading={isUploading}
+            loadGalleryImages={loadGalleryImages}
           />
         ))}
       <div className="space-y-4">
@@ -103,6 +104,7 @@ const DesignsTab: React.FC<DesignsTabProps> = ({
         }}
         galleryImages={galleryImages}
         isUploading={isUploading}
+        loadGalleryImages={loadGalleryImages}
       />
     </div>
   );

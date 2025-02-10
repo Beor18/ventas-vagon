@@ -19,6 +19,7 @@ interface ProductInfoProps {
   handleGallerySelect: any;
   galleryImages: any[];
   isUploading: boolean;
+  loadGalleryImages: () => Promise<void>;
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({
@@ -28,6 +29,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   handleGallerySelect,
   galleryImages,
   isUploading,
+  loadGalleryImages,
 }) => {
   useEffect(() => {
     // loadGalleryImages();
@@ -90,6 +92,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         handleGallerySelect={handleGallerySelection}
         galleryImages={galleryImages}
         isUploading={isUploading}
+        loadGalleryImages={loadGalleryImages}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField

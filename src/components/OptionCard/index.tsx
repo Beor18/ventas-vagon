@@ -163,7 +163,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                     isUploading={isUploading}
                     loadGalleryImages={loadGalleryImages}
                   />
-                  <ImageUploadField
+                  {/* <ImageUploadField
                     label="SubOption Image"
                     onChange={(e) =>
                       handleImagePreview(
@@ -185,7 +185,7 @@ const OptionCard: React.FC<OptionCardProps> = ({
                     galleryImages={galleryImages}
                     isUploading={isUploading}
                     loadGalleryImages={loadGalleryImages}
-                  />
+                  /> */}
                 </div>
               )
             )}

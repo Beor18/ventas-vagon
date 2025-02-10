@@ -156,16 +156,16 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
       value: string | number
     ) => {
       setProduct((prev) => {
-        const updatedOptions = [...prev.options];
-        const updatedSuboptions = [...updatedOptions[optionIndex].suboptions];
-        updatedSuboptions[subOptionIndex] = {
-          ...updatedSuboptions[subOptionIndex],
+        const updatedOptions = JSON.parse(JSON.stringify(prev.options));
+        const currentSuboption =
+          updatedOptions[optionIndex].suboptions[subOptionIndex];
+
+        // Solo actualizar el campo específico, manteniendo el resto de propiedades
+        updatedOptions[optionIndex].suboptions[subOptionIndex] = {
+          ...currentSuboption,
           [field]: value,
         };
-        updatedOptions[optionIndex] = {
-          ...updatedOptions[optionIndex],
-          suboptions: updatedSuboptions,
-        };
+
         return {
           ...prev,
           options: updatedOptions,
@@ -331,29 +331,36 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     }
   };
 
-  const handleGallerySelect = (
-    image: any,
-    optionIndex?: number,
-    subOptionIndex?: number
-  ) => {
-    const imageUrl = image?.downloadUrl || image?.url;
-    if (!imageUrl) return;
+  const handleGallerySelect = useCallback(
+    (image: any, optionIndex?: number, subOptionIndex?: number) => {
+      const imageUrl = image?.downloadUrl || image?.url;
+      if (!imageUrl) return;
 
-    if (typeof optionIndex === "number" && typeof subOptionIndex === "number") {
-      // Para subopciones
-      const newOptions = [...product.options];
-      newOptions[optionIndex].suboptions[subOptionIndex].imageUrl = imageUrl;
-      setProduct({ ...product, options: newOptions });
-    } else if (typeof optionIndex === "number") {
-      // Para opciones
-      const newOptions = [...product.options];
-      newOptions[optionIndex].imageUrl = imageUrl;
-      setProduct({ ...product, options: newOptions });
-    } else {
-      // Para el producto principal
-      setProduct({ ...product, imageUrl });
-    }
-  };
+      setProduct((prev) => {
+        // Crear una copia profunda del estado anterior
+        const updatedProduct = JSON.parse(JSON.stringify(prev));
+
+        if (
+          typeof optionIndex === "number" &&
+          typeof subOptionIndex === "number"
+        ) {
+          // Para subopciones
+          updatedProduct.options[optionIndex].suboptions[
+            subOptionIndex
+          ].imageUrl = imageUrl;
+        } else if (typeof optionIndex === "number") {
+          // Para opciones
+          updatedProduct.options[optionIndex].imageUrl = imageUrl;
+        } else {
+          // Para el producto principal
+          updatedProduct.imageUrl = imageUrl;
+        }
+
+        return updatedProduct;
+      });
+    },
+    []
+  );
 
   const handleSaveProduct = async () => {
     try {

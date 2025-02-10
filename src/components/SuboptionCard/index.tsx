@@ -70,20 +70,17 @@ const SuboptionCard: React.FC<SuboptionCardProps> = ({
             options: updatedOptions,
           });
         },
-        (previewUrl: string) => {
-          const updatedOptions = [...product.options];
-          updatedOptions[optionIndex].suboptions[subOptionIndex] = {
-            ...updatedOptions[optionIndex].suboptions[subOptionIndex],
-            imageUrl: previewUrl,
-          };
-          setProduct({
-            ...product,
-            options: updatedOptions,
-          });
-        }
+        () => {}
       );
     },
     [handleImagePreview, optionIndex, subOptionIndex, product, setProduct]
+  );
+
+  const handleGallerySelection = useCallback(
+    (image: any) => {
+      handleGallerySelect(image, optionIndex, subOptionIndex);
+    },
+    [handleGallerySelect, optionIndex, subOptionIndex]
   );
 
   return (
@@ -126,9 +123,7 @@ const SuboptionCard: React.FC<SuboptionCardProps> = ({
             label="Suboption Image"
             onChange={handleImageChange}
             preview={suboption.imageUrl}
-            handleGallerySelect={(image) =>
-              handleGallerySelect(image, optionIndex, subOptionIndex)
-            }
+            handleGallerySelect={handleGallerySelection}
             galleryImages={galleryImages}
             isUploading={isUploading}
             loadGalleryImages={loadGalleryImages}

@@ -213,18 +213,34 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     });
   };
 
-  const addSubOption = (optionIndex: number) => {
-    const updatedOptions = [...product.options];
-    updatedOptions[optionIndex].suboptions.push({ ...newSubOption });
-    setProduct({ ...product, options: updatedOptions });
-    setNewSubOption({
-      code: "",
-      price: 0,
-      imageUrl: "",
-      details: "",
-      name: "",
+  const addSubOption = useCallback((optionIndex: number) => {
+    setProduct((prevProduct) => {
+      const updatedOptions = [...prevProduct.options];
+      const newSubOption = {
+        name: "",
+        price: 0,
+        imageUrl: "",
+        code: "",
+        details: "",
+      };
+
+      // Asegurarse de que la opción existe y tiene un array de subopciones
+      if (updatedOptions[optionIndex]) {
+        updatedOptions[optionIndex] = {
+          ...updatedOptions[optionIndex],
+          suboptions: [
+            ...(updatedOptions[optionIndex].suboptions || []),
+            newSubOption,
+          ],
+        };
+      }
+
+      return {
+        ...prevProduct,
+        options: updatedOptions,
+      };
     });
-  };
+  }, []);
 
   const removeOption = (optionIndex: number) => {
     setProduct((prev) => ({

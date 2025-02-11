@@ -249,13 +249,30 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     }));
   };
 
-  const removeSubOption = (optionIndex: number, subOptionIndex: number) => {
-    const updatedOptions = [...product.options];
-    updatedOptions[optionIndex].suboptions = updatedOptions[
-      optionIndex
-    ].suboptions.filter((_, i) => i !== subOptionIndex);
-    setProduct({ ...product, options: updatedOptions });
-  };
+  const removeSubOption = useCallback(
+    (optionIndex: number, subOptionIndex: number) => {
+      setProduct((prevProduct) => {
+        const updatedOptions = [...prevProduct.options];
+
+        // Asegurarse de que la opción y subopción existen
+        if (updatedOptions[optionIndex]?.suboptions) {
+          // Filtrar la subopción específica
+          updatedOptions[optionIndex] = {
+            ...updatedOptions[optionIndex],
+            suboptions: updatedOptions[optionIndex].suboptions.filter(
+              (_, index) => index !== subOptionIndex
+            ),
+          };
+        }
+
+        return {
+          ...prevProduct,
+          options: updatedOptions,
+        };
+      });
+    },
+    []
+  );
 
   const handleNewDesignChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

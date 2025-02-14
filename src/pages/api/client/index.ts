@@ -24,10 +24,15 @@ export default async function handler(
   const user = await User.findOne({ email: token.email });
 
   if (req.method === "GET") {
-    const query = user.role === "Administrador" ? {} : { vendedor: user._id };
-
-    const clients = await Client.find(query).lean();
-    res.status(200).json(clients);
+    try {
+      const { vendedor } = req.query;
+      const query = vendedor ? { vendedor } : {};
+      const clients = await Client.find(query).lean();
+      res.status(200).json(clients);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      res.status(500).json({ error: "Error fetching clients" });
+    }
   } else if (req.method === "POST") {
     try {
       const {

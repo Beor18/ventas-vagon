@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { models } from "./models";
 
-const MONGODB_URI = process.env.MONGODB_URI || "";
+const MONGODB_URI = process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {
   throw new Error(
@@ -8,10 +9,42 @@ if (!MONGODB_URI) {
   );
 }
 
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+let cached = global.mongoose as MongooseCache;
+
+if (!cached) {
+  cached = global.mongoose = {
+    conn: null,
+    promise: null,
+  };
+}
+
 export async function connectToDatabase() {
-  if (mongoose.connection.readyState >= 1) {
-    return;
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  await mongoose.connect(MONGODB_URI);
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      Object.values(models);
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
 }

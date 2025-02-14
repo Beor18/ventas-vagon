@@ -18,11 +18,13 @@ import {
   X,
   Upload,
   FileText,
+  Wrench,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { OrderDetail } from "@/components/OrderDetails";
 import InsurancePolicies from "@/components/Insurance";
 import { handleExportToPDFSeller } from "@/lib/exportToPdf";
+import ServiceRequests from "@/components/ServiceRequests";
 
 import Financiamiento from "@/components/Financiamiento";
 
@@ -275,6 +277,10 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
             <FileText className="mr-2 h-4 w-4" />
             Pagos
           </TabsTrigger>
+          <TabsTrigger value="services">
+            <Wrench className="mr-2 h-4 w-4" />
+            Servicios
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="orders">
           <div className="flex justify-between items-center mb-8">
@@ -338,6 +344,9 @@ function Seller({ products, orders }: { products: any[]; orders: any[] }) {
             </Button>
           </div>
           <PaymentsTable payments={payments} loading={loadingPayments} />
+        </TabsContent>
+        <TabsContent value="services">
+          <ServiceRequests />
         </TabsContent>
       </Tabs>
 

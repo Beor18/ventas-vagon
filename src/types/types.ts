@@ -46,3 +46,39 @@ export interface ColorOptionType {
   additionalPrice: number;
   imageUrl: string;
 }
+
+export interface ServiceRequest {
+  _id?: string;
+  client: string; // ID del cliente
+  town: string;
+  problem: string;
+  installer: string; // ID del instalador
+  product: string; // ID del producto
+  seller: string; // ID del vendedor
+  assignedEquipment: string;
+  claimDate: Date;
+  assignmentDate: Date;
+  resolutionDate?: Date;
+  images: string[];
+  comments: Comment[];
+  status: "pending" | "approved" | "in_progress" | "completed" | "cancelled";
+  type: "delivery" | "installation" | "repair";
+  warranty: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Comment {
+  _id?: string;
+  text: string;
+  author: string; // ID del usuario
+  createdAt: Date;
+}
+
+export interface Installer {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  active: boolean;
+}

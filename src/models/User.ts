@@ -6,8 +6,13 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: {
     type: String,
-    required: true,
-    enum: ["Vendedor", "Administrador", "Fabricante"],
+    enum: ["admin", "seller", "installer"],
+    default: "seller",
+  },
+  phone: String,
+  active: {
+    type: Boolean,
+    default: true,
   },
 });
 

@@ -22,7 +22,10 @@ export default async function handler(
     try {
       const data = req.body;
 
-      if (data.status && !["admin", "installer"].includes(token.role)) {
+      if (
+        data.status &&
+        !["Administrador", "Instalador"].includes(token.role)
+      ) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
@@ -43,7 +46,7 @@ export default async function handler(
     }
   } else if (req.method === "DELETE") {
     try {
-      if (token.role !== "admin") {
+      if (token.role !== "Administrador") {
         return res.status(401).json({ error: "Unauthorized" });
       }
 

@@ -19,9 +19,9 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       let query = {};
-      if (token.role === "seller") {
+      if (token.role === "Vendedor") {
         query = { seller: token.id };
-      } else if (token.role === "installer") {
+      } else if (token.role === "Instalador") {
         query = { installer: token.id };
       }
 
@@ -39,7 +39,7 @@ export default async function handler(
     }
   } else if (req.method === "POST") {
     try {
-      if (token.role !== "seller") {
+      if (token.role !== "Vendedor") {
         return res.status(401).json({ error: "Unauthorized" });
       }
 

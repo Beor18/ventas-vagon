@@ -38,7 +38,7 @@ const formSchema = z
     name: z.string().min(2, {
       message: "El nombre debe tener al menos 2 caracteres.",
     }),
-    role: z.enum(["Vendedor", "Administrador", "Fabricante"]),
+    role: z.enum(["Vendedor", "Administrador", "Fabricante", "Instalador"]),
     password: z
       .string()
       .min(6, {
@@ -68,7 +68,11 @@ export default function EditUserModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: user.name,
-      role: user.role as "Vendedor" | "Administrador" | "Fabricante",
+      role: user.role as
+        | "Vendedor"
+        | "Administrador"
+        | "Fabricante"
+        | "Instalador",
       password: "",
       confirmPassword: "",
     },
@@ -155,6 +159,7 @@ export default function EditUserModal({
                         Administrador
                       </SelectItem>
                       <SelectItem value="Fabricante">Fabricante</SelectItem>
+                      <SelectItem value="Instalador">Instalador</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

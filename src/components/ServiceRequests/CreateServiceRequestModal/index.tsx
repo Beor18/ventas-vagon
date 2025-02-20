@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -33,6 +34,12 @@ interface CreateServiceRequestModalProps {
   onSubmit: (request: Omit<ServiceRequest, "_id">) => void;
 }
 
+interface Installer {
+  _id: string;
+  name: string;
+  email: string;
+}
+
 export function CreateServiceRequestModal({
   isOpen,
   onClose,
@@ -60,7 +67,7 @@ export function CreateServiceRequestModal({
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [installers, setInstallers] = useState([]);
+  const [installers, setInstallers] = useState<Installer[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 

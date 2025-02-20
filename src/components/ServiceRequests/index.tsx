@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CreateServiceRequestModal } from "./CreateServiceRequestModal";
+import { ServiceRequestDetailModal } from "./ServiceRequestDetailModal";
 
 const statusMap = {
   pending: { label: "Pendiente", variant: "secondary" as const },
@@ -32,6 +33,10 @@ export default function ServiceRequests() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { toast } = useToast();
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(
+    null
+  );
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const fetchRequests = async () => {
     try {
@@ -78,6 +83,11 @@ export default function ServiceRequests() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleViewDetails = (request: ServiceRequest) => {
+    setSelectedRequest(request);
+    setIsDetailModalOpen(true);
   };
 
   return (
@@ -129,7 +139,11 @@ export default function ServiceRequests() {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDetails(request)}
+                  >
                     Ver Detalles
                   </Button>
                 </TableCell>
@@ -143,6 +157,12 @@ export default function ServiceRequests() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateRequest}
+      />
+
+      <ServiceRequestDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        request={selectedRequest}
       />
     </div>
   );

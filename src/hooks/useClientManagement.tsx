@@ -64,6 +64,21 @@ export const useClientManagement = () => {
     }
   };
 
+  const handleDeleteClient = async (id: string) => {
+    try {
+      const response = await fetch(`/api/client?id=${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        await fetchClients();
+      } else {
+        console.error("Failed to delete client");
+      }
+    } catch (error) {
+      console.error("Error deleting client:", error);
+    }
+  };
+
   const fetchClients = async () => {
     try {
       const response = await fetch("/api/client");
@@ -87,5 +102,6 @@ export const useClientManagement = () => {
     handleCreateClient,
     handleUpdateClient,
     handleSaveClient,
+    handleDeleteClient,
   };
 };

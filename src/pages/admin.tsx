@@ -88,6 +88,7 @@ const Admin = ({ initialProducts, orders }) => {
     handleCreateClient,
     handleUpdateClient,
     handleSaveClient,
+    handleDeleteClient,
   } = useClientManagement();
 
   const { ordersList, deleteOrder, editOrder, fabricante } =
@@ -134,7 +135,7 @@ const Admin = ({ initialProducts, orders }) => {
             clients={clients}
             openClientForm={openClientForm}
             editClient={openClientForm}
-            deleteClient={handleSaveClient}
+            deleteClient={handleDeleteClient}
           />
         </TabsContent>
 

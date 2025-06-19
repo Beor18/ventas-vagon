@@ -253,7 +253,7 @@ export const handleExportToPDFManufacture = async (order: any) => {
         checkSpace(20);
         autoTable(doc, {
           startY: yOffset,
-          head: [["Suboption", "Code", "Details"]],
+          head: [["Name", "Code", "Details"]],
           body: option.suboptions.map((suboption: any) => [
             suboption.name || "N/A",
             suboption.code || "N/A",

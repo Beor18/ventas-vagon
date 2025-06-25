@@ -624,17 +624,25 @@ export default function SelectComponent({ product, onClose }: any) {
 
       {/* Agregar el modal para imagen en pantalla completa */}
       <Dialog open={!!fullScreenImage} onOpenChange={closeFullScreenImage}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <DialogContent className="max-w-[80vw] max-h-[80vh] p-4">
+          <DialogClose className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground bg-white shadow-md">
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </DialogClose>
           {fullScreenImage && (
-            <img
-              src={fullScreenImage}
-              alt="Full size image"
-              className="w-full h-full object-contain"
-            />
+            <div className="flex items-center justify-center w-full h-full">
+              <img
+                src={fullScreenImage}
+                alt="Full size image"
+                className="max-w-full max-h-full object-contain rounded-md"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "calc(80vh - 2rem)",
+                  width: "auto",
+                  height: "auto",
+                }}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>

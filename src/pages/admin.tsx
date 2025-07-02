@@ -52,6 +52,8 @@ const Admin = ({ initialProducts, orders }) => {
     setNewSubOption,
     newDesign,
     setNewDesign,
+    newFloorPlan,
+    setNewFloorPlan,
     newColorOption,
     setNewColorOption,
     handleProductChange,
@@ -60,15 +62,18 @@ const Admin = ({ initialProducts, orders }) => {
     handleNewOptionChange,
     handleNewSubOptionChange,
     handleNewDesignChange,
+    handleNewFloorPlanChange,
     handleNewColorOptionChange,
     addOption,
     addSubOption,
     addDesign,
+    addFloorPlan,
     addColorOption,
     editColorOption,
     removeOption,
     removeSubOption,
     removeDesign,
+    removeFloorPlan,
     removeColorOption,
     handleImagePreview,
     handleGallerySelect,
@@ -157,6 +162,8 @@ const Admin = ({ initialProducts, orders }) => {
           setNewSubOption={setNewSubOption}
           newDesign={newDesign}
           setNewDesign={setNewDesign}
+          newFloorPlan={newFloorPlan}
+          setNewFloorPlan={setNewFloorPlan}
           newColorOption={newColorOption}
           setNewColorOption={setNewColorOption}
           handleProductChange={handleProductChange}
@@ -165,15 +172,18 @@ const Admin = ({ initialProducts, orders }) => {
           handleNewOptionChange={handleNewOptionChange}
           handleNewSubOptionChange={handleNewSubOptionChange}
           handleNewDesignChange={handleNewDesignChange}
+          handleNewFloorPlanChange={handleNewFloorPlanChange}
           handleNewColorOptionChange={handleNewColorOptionChange}
           addOption={addOption}
           addSubOption={addSubOption}
           addDesign={addDesign}
+          addFloorPlan={addFloorPlan}
           addColorOption={addColorOption}
           editColorOption={editColorOption}
           removeOption={removeOption}
           removeSubOption={removeSubOption}
           removeDesign={removeDesign}
+          removeFloorPlan={removeFloorPlan}
           removeColorOption={removeColorOption}
           handleImagePreview={handleImagePreview}
           handleGallerySelect={handleGallerySelect}

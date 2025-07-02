@@ -50,6 +50,7 @@ export function OrderEditModal({
     options: initialData?.options || [],
     colorOptions: initialData?.colorOptions || [],
     designs: initialData?.designs || [],
+    floorPlans: initialData?.floorPlans || [],
     cliente:
       typeof initialData?.cliente === "object"
         ? initialData.cliente.nombre
@@ -68,6 +69,7 @@ export function OrderEditModal({
       options: initialData?.options || [],
       colorOptions: initialData?.colorOptions || [],
       designs: initialData?.designs || [],
+      floorPlans: initialData?.floorPlans || [],
     });
   }, [initialData]);
 
@@ -175,6 +177,28 @@ export function OrderEditModal({
     });
   };
 
+  const handleFloorPlanChange = (floorPlan: any) => {
+    setFormData((prev) => {
+      const isCurrentlySelected = prev.floorPlans?.some(
+        (f) => f._id === floorPlan._id
+      );
+
+      if (isCurrentlySelected) {
+        // Remover el floor plan al deseleccionar
+        return {
+          ...prev,
+          floorPlans: [],
+        };
+      } else {
+        // Establecer el nuevo floor plan al seleccionar
+        return {
+          ...prev,
+          floorPlans: [floorPlan],
+        };
+      }
+    });
+  };
+
   const handleClose = () => {
     setFormData(initialData);
     onClose();
@@ -187,6 +211,7 @@ export function OrderEditModal({
       options: formData.options,
       colorOptions: formData.colorOptions,
       designs: formData.designs,
+      floorPlans: formData.floorPlans,
     };
     editOrder(orderId, updatedData);
     handleClose();
@@ -202,11 +227,12 @@ export function OrderEditModal({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex-grow overflow-hidden">
           <Tabs defaultValue="basic" className="w-full h-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="basic">Información Básica</TabsTrigger>
               <TabsTrigger value="options">Opciones</TabsTrigger>
               <TabsTrigger value="colors">Colores</TabsTrigger>
               <TabsTrigger value="designs">Diseños</TabsTrigger>
+              <TabsTrigger value="floorplans">Floor Plans</TabsTrigger>
               <TabsTrigger value="customer">Fabricante</TabsTrigger>
             </TabsList>
             <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
@@ -518,6 +544,60 @@ export function OrderEditModal({
                                 size="sm"
                                 className="w-full"
                                 onClick={() => handleDesignChange(design)}
+                              >
+                                {isSelected ? "Deseleccionar" : "Seleccionar"}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="floorplans" className="mt-0 space-y-4">
+                <div>
+                  <CardHeader>
+                    <CardTitle>Floor Plans</CardTitle>
+                  </CardHeader>
+                  <div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {(
+                        formData.product?.floorPlans ||
+                        formData?.floorPlans ||
+                        []
+                      ).map((floorPlan: any, index: number) => {
+                        const isSelected = formData.floorPlans?.some(
+                          (f) => f._id === floorPlan._id
+                        );
+
+                        return (
+                          <div
+                            key={index}
+                            className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
+                          >
+                            <div className="aspect-square relative">
+                              <img
+                                src={floorPlan.imageUrl}
+                                alt={floorPlan.planName}
+                                className="rounded-t-lg bg-cover"
+                              />
+                              {isSelected && (
+                                <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                  Seleccionado
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="p-4 bg-card">
+                              <h3 className="font-semibold text-lg mb-3 text-center">
+                                {floorPlan.planName}
+                              </h3>
+                              <Button
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                className="w-full"
+                                onClick={() => handleFloorPlanChange(floorPlan)}
                               >
                                 {isSelected ? "Deseleccionar" : "Seleccionar"}
                               </Button>

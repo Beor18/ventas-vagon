@@ -32,6 +32,13 @@ const houseDesignSchema = new mongoose.Schema({
   cost: { type: Number },
 });
 
+// Nuevo esquema para floor plans
+const floorPlanSchema = new mongoose.Schema({
+  planName: { type: String },
+  imageUrl: { type: String },
+  cost: { type: Number },
+});
+
 const productSchema = new mongoose.Schema({
   name: { type: String },
   description: { type: String },
@@ -46,6 +53,7 @@ const productSchema = new mongoose.Schema({
   options: [optionSchema],
   colorOptions: [colorOptionSchema],
   designs: [houseDesignSchema],
+  floorPlans: [floorPlanSchema],
 });
 
 const Product =

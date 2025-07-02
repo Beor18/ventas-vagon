@@ -5,6 +5,7 @@ import {
   SubOptionType,
   DesignType,
   ColorOptionType,
+  FloorPlanType,
 } from "@/types/types";
 import { upload } from "@vercel/blob/client";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     options: [],
     colorOptions: [],
     designs: [],
+    floorPlans: [],
   });
 
   const [newOption, setNewOption] = useState<OptionType>({
@@ -65,6 +67,12 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     imageUrl: "",
   });
 
+  const [newFloorPlan, setNewFloorPlan] = useState<FloorPlanType>({
+    planName: "",
+    cost: 0,
+    imageUrl: "",
+  });
+
   const [newColorOption, setNewColorOption] = useState<ColorOptionType>({
     colorName: "",
     colorCode: "",
@@ -87,6 +95,7 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
       options: [],
       colorOptions: [],
       designs: [],
+      floorPlans: [],
     });
   }, []);
 
@@ -291,6 +300,28 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     setProduct((prev) => ({
       ...prev,
       designs: prev.designs.filter((_, index) => index !== designIndex),
+    }));
+  };
+
+  const handleNewFloorPlanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewFloorPlan((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const addFloorPlan = () => {
+    setProduct((prev) => ({
+      ...prev,
+      floorPlans: [...(prev.floorPlans || []), newFloorPlan],
+    }));
+    setNewFloorPlan({ planName: "", cost: 0, imageUrl: "" });
+  };
+
+  const removeFloorPlan = (floorPlanIndex: number) => {
+    setProduct((prev) => ({
+      ...prev,
+      floorPlans: prev.floorPlans.filter(
+        (_, index) => index !== floorPlanIndex
+      ),
     }));
   };
 
@@ -522,6 +553,9 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     addDesign,
     removeDesign,
     handleNewDesignChange,
+    addFloorPlan,
+    removeFloorPlan,
+    handleNewFloorPlanChange,
     addColorOption,
     editColorOption,
     removeColorOption,
@@ -542,6 +576,8 @@ export const useProductManagement = (initialProducts: ProductType[]) => {
     setNewSubOption,
     newDesign,
     setNewDesign,
+    newFloorPlan,
+    setNewFloorPlan,
     newColorOption,
     setNewColorOption,
     galleryImages,

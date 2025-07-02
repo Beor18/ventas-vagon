@@ -302,6 +302,47 @@ export function OrderDetail({
                     </ScrollArea>
                   </AccordionContent>
                 </AccordionItem>
+                <AccordionItem value="floorPlans">
+                  <AccordionTrigger>Floor Plan</AccordionTrigger>
+                  <AccordionContent>
+                    <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                      {order.floorPlans && order.floorPlans.length > 0 ? (
+                        order.floorPlans.map(
+                          (floorPlan: any, index: number) => (
+                            <div
+                              key={index}
+                              className="mb-4 p-4 border rounded-md"
+                            >
+                              <h4 className="font-semibold text-lg mb-2">
+                                {floorPlan.planName}
+                              </h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                <p>
+                                  <span className="font-medium">Costo:</span> $
+                                  {floorPlan.cost}
+                                </p>
+                              </div>
+                              {floorPlan.imageUrl && (
+                                <div className="mt-2">
+                                  <img
+                                    src={floorPlan.imageUrl}
+                                    alt={floorPlan.planName}
+                                    className="rounded-md w-24 h-24 object-cover cursor-pointer"
+                                    onClick={() =>
+                                      openFullScreenImage(floorPlan.imageUrl)
+                                    }
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )
+                        )
+                      ) : (
+                        <p>No hay floor plan seleccionado para esta orden.</p>
+                      )}
+                    </ScrollArea>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
               <div>
                 {order.signatureImage ? (

@@ -34,12 +34,19 @@ const houseDesignSchema = new mongoose.Schema({
   cost: { type: Number },
 });
 
+const floorPlanSchema = new mongoose.Schema({
+  planName: { type: String },
+  imageUrl: { type: String },
+  cost: { type: Number },
+});
+
 const orderSchema = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: "Product" },
   productName: { type: String },
   options: [optionSchema],
   colorOptions: [colorOptionSchema],
   designs: [houseDesignSchema],
+  floorPlans: [floorPlanSchema],
   total: { type: Number },
   discount: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },

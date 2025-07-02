@@ -373,6 +373,36 @@ export const handleExportToPDFSeller = async (order: any) => {
     }
   }
 
+  // Add floor plans
+  if (order.floorPlans && order.floorPlans.length > 0) {
+    checkSpace(30);
+    yOffset += addText("Floor Plans", yOffset, 18, "left", "#2980b9");
+    yOffset += 5;
+
+    autoTable(doc, {
+      startY: yOffset,
+      head: [["Plan Name"]],
+      body: order.floorPlans.map((floorPlan: any) => [
+        floorPlan.planName || "N/A",
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      bodyStyles: { fillColor: [245, 245, 245] },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
+      styles: { fontSize: 10, cellPadding: 5 },
+      didDrawPage: (data: any) => {
+        yOffset = data.cursor.y + 5;
+      },
+    });
+
+    for (const floorPlan of order.floorPlans) {
+      if (floorPlan.imageUrl) {
+        checkSpace(150);
+        yOffset += await addImage(floorPlan.imageUrl, yOffset, 180, 140);
+      }
+    }
+  }
+
   // Add comments
   if (order.comentaries) {
     checkSpace(30);
@@ -816,6 +846,36 @@ export const handleExportToPDFAdmin = async (order: any) => {
       if (design.imageUrl) {
         checkSpace(150);
         yOffset += await addImage(design.imageUrl, yOffset, 180, 140);
+      }
+    }
+  }
+
+  // Add floor plans
+  if (order.floorPlans && order.floorPlans.length > 0) {
+    checkSpace(30);
+    yOffset += addText("Floor Plans", yOffset, 18, "left", "#2980b9");
+    yOffset += 5;
+
+    autoTable(doc, {
+      startY: yOffset,
+      head: [["Plan Name"]],
+      body: order.floorPlans.map((floorPlan: any) => [
+        floorPlan.planName || "N/A",
+      ]),
+      theme: "striped",
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      bodyStyles: { fillColor: [245, 245, 245] },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
+      styles: { fontSize: 10, cellPadding: 5 },
+      didDrawPage: (data: any) => {
+        yOffset = data.cursor.y + 5;
+      },
+    });
+
+    for (const floorPlan of order.floorPlans) {
+      if (floorPlan.imageUrl) {
+        checkSpace(150);
+        yOffset += await addImage(floorPlan.imageUrl, yOffset, 180, 140);
       }
     }
   }

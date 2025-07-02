@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SignatureCanvas from "react-signature-canvas";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Minus, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import { upload } from "@vercel/blob/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductOption {
   _id: string;
@@ -51,6 +53,13 @@ interface HouseDesign {
   cost: number;
 }
 
+interface FloorPlan {
+  _id?: string;
+  planName: string;
+  imageUrl: string;
+  cost: number;
+}
+
 interface SelectedOptions {
   [key: string]: ProductOption;
 }
@@ -70,6 +79,9 @@ export default function SelectComponent({ product, onClose }: any) {
   const [selectedDesign, setSelectedDesign] = useState<HouseDesign | null>(
     null
   );
+  const [selectedFloorPlan, setSelectedFloorPlan] = useState<FloorPlan | null>(
+    null
+  );
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
   const [clients, setClients] = useState<any[]>([]);
@@ -85,6 +97,7 @@ export default function SelectComponent({ product, onClose }: any) {
     [optionId: string]: { [subOptionId: string]: string };
   }>({});
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (session) {
@@ -209,8 +222,22 @@ export default function SelectComponent({ product, onClose }: any) {
       ? selectedColorOption.additionalPrice
       : 0;
     const designPrice = selectedDesign ? selectedDesign.cost : 0;
+
+    // Solo incluir floor plan si está completo (tiene nombre, precio e imagen)
+    const floorPlanPrice =
+      selectedFloorPlan?.planName &&
+      selectedFloorPlan?.cost > 0 &&
+      selectedFloorPlan?.imageUrl
+        ? selectedFloorPlan.cost
+        : 0;
+
     const subtotal =
-      basePrice + optionsPrice + subOptionsPrice + colorPrice + designPrice;
+      basePrice +
+      optionsPrice +
+      subOptionsPrice +
+      colorPrice +
+      designPrice +
+      floorPlanPrice;
     const total = subtotal + subtotal * (tax / 100) - discount;
     return total.toFixed(2);
   };
@@ -253,6 +280,18 @@ export default function SelectComponent({ product, onClose }: any) {
       options: preparedOptions,
       colorOptions: selectedColorOption ? [selectedColorOption] : [],
       designs: selectedDesign ? [selectedDesign] : [],
+      floorPlans:
+        selectedFloorPlan?.planName &&
+        selectedFloorPlan?.cost > 0 &&
+        selectedFloorPlan?.imageUrl
+          ? [
+              {
+                planName: selectedFloorPlan.planName,
+                imageUrl: selectedFloorPlan.imageUrl,
+                cost: selectedFloorPlan.cost,
+              },
+            ]
+          : [],
       total: calculateTotal(),
       discount,
       tax,
@@ -292,6 +331,50 @@ export default function SelectComponent({ product, onClose }: any) {
 
   const closeFullScreenImage = () => {
     setFullScreenImage(null);
+  };
+
+  const handleFloorPlanImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        // Mostrar preview inmediatamente
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setSelectedFloorPlan((prev) => ({
+            planName: prev?.planName || "",
+            cost: prev?.cost || 0,
+            imageUrl: reader.result as string,
+          }));
+        };
+        reader.readAsDataURL(file);
+
+        // Subir imagen usando Vercel Blob
+        const blob = await upload(file.name, file, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+        });
+
+        setSelectedFloorPlan((prev) => ({
+          planName: prev?.planName || "",
+          cost: prev?.cost || 0,
+          imageUrl: blob.url,
+        }));
+
+        toast({
+          title: "Éxito",
+          description: "Imagen del plano subida correctamente",
+        });
+      } catch (error) {
+        console.error("Error uploading floor plan image:", error);
+        toast({
+          title: "Error",
+          description: "Error al subir la imagen del plano",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
@@ -504,6 +587,79 @@ export default function SelectComponent({ product, onClose }: any) {
                 ))}
               </ScrollArea>
             </div>
+            <Separator />
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Floor Plan:</h3>
+              <div className="border rounded-md p-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="floorPlanName">Nombre del Plano</Label>
+                    <Input
+                      id="floorPlanName"
+                      type="text"
+                      value={selectedFloorPlan?.planName || ""}
+                      onChange={(e) =>
+                        setSelectedFloorPlan((prev) => ({
+                          planName: e.target.value,
+                          cost: prev?.cost || 0,
+                          imageUrl: prev?.imageUrl || "",
+                        }))
+                      }
+                      placeholder="Ingrese nombre del plano"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="floorPlanPrice">Precio del Plano</Label>
+                    <Input
+                      id="floorPlanPrice"
+                      type="number"
+                      value={selectedFloorPlan?.cost || ""}
+                      onChange={(e) =>
+                        setSelectedFloorPlan((prev) => ({
+                          planName: prev?.planName || "",
+                          cost: Number(e.target.value),
+                          imageUrl: prev?.imageUrl || "",
+                        }))
+                      }
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="floorPlanImage">Imagen del Plano</Label>
+                  <Input
+                    id="floorPlanImage"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFloorPlanImageUpload}
+                    className="cursor-pointer"
+                  />
+                  {selectedFloorPlan?.imageUrl && (
+                    <div className="mt-2">
+                      <img
+                        src={selectedFloorPlan.imageUrl}
+                        alt={selectedFloorPlan.planName || "Floor Plan"}
+                        className="w-32 h-32 object-cover rounded-md cursor-pointer"
+                        onClick={() =>
+                          openFullScreenImage(selectedFloorPlan.imageUrl)
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+                {selectedFloorPlan?.planName && selectedFloorPlan?.cost > 0 && (
+                  <div className="flex justify-between items-center p-2 bg-muted rounded-md">
+                    <span className="font-medium">
+                      {selectedFloorPlan.planName}
+                    </span>
+                    <span className="text-muted-foreground">
+                      +${selectedFloorPlan.cost}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <Separator />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">

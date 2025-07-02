@@ -49,6 +49,10 @@ export default async function handler(
     try {
       const orderData = req.body;
 
+      // Debug: Ver qué datos llegan al API
+      console.log("API - Order data received:", orderData);
+      console.log("API - Floor plans received:", orderData.floorPlans);
+
       // Asegurarnos que las opciones incluyan los comentarios
       const processedOptions = orderData.options.map((option: any) => ({
         ...option,
@@ -58,14 +62,37 @@ export default async function handler(
         })),
       }));
 
+      // Procesar floor plans para asegurar que se guarden correctamente
+      const processedFloorPlans = orderData.floorPlans || [];
+
       const order = new Order({
-        ...orderData,
+        productId: orderData.productId,
+        productName: orderData.productName,
         options: processedOptions,
+        colorOptions: orderData.colorOptions || [],
+        designs: orderData.designs || [],
+        floorPlans: processedFloorPlans,
+        total: orderData.total,
+        discount: orderData.discount || 0,
+        tax: orderData.tax || 0,
+        vendedorEmail: orderData.vendedorEmail,
+        vendedorName: orderData.vendedorName,
+        fabricanteEmail: orderData.fabricanteEmail,
+        cliente: orderData.cliente,
+        signatureImage: orderData.signatureImage,
       });
 
+      console.log("API - Order before save:", order);
+      console.log("API - Order floor plans before save:", order.floorPlans);
+
       await order.save();
+
+      console.log("API - Order after save:", order);
+      console.log("API - Order floor plans after save:", order.floorPlans);
+
       res.status(201).json(order);
     } catch (error) {
+      console.error("API - Error creating order:", error);
       res.status(500).json({ error: "Error creating order" });
     }
   } else if (req.method === "PUT") {

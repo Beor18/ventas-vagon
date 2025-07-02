@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ProductInfo from "@/components/ProductInfo";
 import DesignsTab from "@/components/DesignsTab";
+import FloorPlansTab from "@/components/FloorPlansTab";
 import OptionsTab from "@/components/OptionsTab";
 import ColorOptionsTab from "@/components/ColorOptionsTab";
 import {
@@ -15,6 +16,7 @@ import {
   OptionType,
   SubOptionType,
   DesignType,
+  FloorPlanType,
   ColorOptionType,
 } from "@/types/types";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,8 @@ interface ProductFormProps {
   setNewSubOption: (subOption: SubOptionType) => void;
   newDesign: DesignType;
   setNewDesign: (design: DesignType) => void;
+  newFloorPlan: FloorPlanType;
+  setNewFloorPlan: (floorPlan: FloorPlanType) => void;
   newColorOption: ColorOptionType;
   setNewColorOption: (colorOption: ColorOptionType) => void;
   handleProductChange: (
@@ -46,15 +50,18 @@ interface ProductFormProps {
   handleNewOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewSubOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewDesignChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleNewFloorPlanChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNewColorOptionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   addOption: () => void;
   addSubOption: (optionIndex: number) => void;
   addDesign: () => void;
+  addFloorPlan: () => void;
   addColorOption: () => void;
   editColorOption: (optionIndex: any, updatedColorOption: any) => void;
   removeOption: (optionIndex: number) => void;
   removeSubOption: (optionIndex: number, subOptionIndex: number) => void;
   removeDesign: (designIndex: number) => void;
+  removeFloorPlan: (floorPlanIndex: number) => void;
   removeColorOption: (colorOptionIndex: number) => void;
   handleImagePreview: (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -80,6 +87,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   setNewSubOption,
   newDesign,
   setNewDesign,
+  newFloorPlan,
+  setNewFloorPlan,
   newColorOption,
   setNewColorOption,
   handleProductChange,
@@ -88,15 +97,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
   handleNewOptionChange,
   handleNewSubOptionChange,
   handleNewDesignChange,
+  handleNewFloorPlanChange,
   handleNewColorOptionChange,
   addOption,
   addSubOption,
   addDesign,
+  addFloorPlan,
   addColorOption,
   editColorOption,
   removeOption,
   removeSubOption,
   removeDesign,
+  removeFloorPlan,
   removeColorOption,
   handleImagePreview,
   handleGallerySelect,
@@ -113,6 +125,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const steps = [
     { title: "Información de producto", value: "product-info" },
     { title: "Agregar tipo de estructura", value: "designs" },
+    { title: "Floor Plans", value: "floor-plans" },
     { title: "Frame color", value: "color-options" },
     { title: "Opciones", value: "options" },
   ];
@@ -177,6 +190,21 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   handleNewDesignChange={handleNewDesignChange}
                   addDesign={addDesign}
                   removeDesign={removeDesign}
+                  handleImagePreview={handleImagePreview}
+                  galleryImages={galleryImages}
+                  loadGalleryImages={loadGalleryImages}
+                  isUploading={isUploading}
+                />
+              </TabsContent>
+              <TabsContent value="floor-plans">
+                <FloorPlansTab
+                  product={product}
+                  setProduct={setProduct}
+                  newFloorPlan={newFloorPlan}
+                  setNewFloorPlan={setNewFloorPlan}
+                  handleNewFloorPlanChange={handleNewFloorPlanChange}
+                  addFloorPlan={addFloorPlan}
+                  removeFloorPlan={removeFloorPlan}
                   handleImagePreview={handleImagePreview}
                   galleryImages={galleryImages}
                   loadGalleryImages={loadGalleryImages}

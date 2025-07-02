@@ -13,6 +13,7 @@ export interface ProductType {
   options: OptionType[];
   colorOptions: ColorOptionType[];
   designs: DesignType[];
+  floorPlans: FloorPlanType[];
 }
 
 export interface OptionType {
@@ -36,6 +37,12 @@ export interface SubOptionType {
 
 export interface DesignType {
   designType: string;
+  cost: number;
+  imageUrl: string;
+}
+
+export interface FloorPlanType {
+  planName: string;
   cost: number;
   imageUrl: string;
 }

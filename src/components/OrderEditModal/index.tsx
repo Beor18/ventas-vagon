@@ -57,21 +57,91 @@ export function OrderEditModal({
         : initialData?.cliente,
   }));
 
+  const [fullProduct, setFullProduct] = useState<any>(null);
+  const [loadingProduct, setLoadingProduct] = useState(false);
+  const [allOrderFloorPlans, setAllOrderFloorPlans] = useState<any[]>([]);
+  const [originalOrderFloorPlans, setOriginalOrderFloorPlans] = useState<any[]>(
+    []
+  );
+  const [currentOrderId, setCurrentOrderId] = useState<string>("");
+
   // const [fabricante, setFabricante] = useState<any[]>([]);
   const [selectedFabricante, setSelectedFabricante] = useState(
     initialData?.fabricanteEmail || ""
   );
 
+  // Obtener el producto completo cuando se abre el modal
+  useEffect(() => {
+    const fetchFullProduct = async () => {
+      if (isOpen && initialData?.productId && !fullProduct) {
+        setLoadingProduct(true);
+        try {
+          const response = await fetch(
+            `/api/products/${initialData.productId}`
+          );
+
+          if (response.ok) {
+            const product = await response.json();
+            setFullProduct(product);
+            // Actualizar formData con el producto completo
+            setFormData((prev) => ({
+              ...prev,
+              product: product,
+            }));
+          }
+        } catch (error) {
+          console.error("Error fetching full product:", error);
+        } finally {
+          setLoadingProduct(false);
+        }
+      }
+    };
+
+    fetchFullProduct();
+  }, [isOpen, initialData?.productId, fullProduct]);
+
   useEffect(() => {
     setFormData({
       ...initialData,
-      product: initialData?.product || {},
+      product: fullProduct || initialData?.product || {},
       options: initialData?.options || [],
       colorOptions: initialData?.colorOptions || [],
       designs: initialData?.designs || [],
       floorPlans: initialData?.floorPlans || [],
     });
-  }, [initialData]);
+  }, [initialData, fullProduct]);
+
+  // Efecto separado para gestionar floor plans originales
+  useEffect(() => {
+    if (isOpen && initialData?._id) {
+      // Si es una orden diferente, resetear floor plans originales
+      if (currentOrderId !== initialData._id) {
+        setCurrentOrderId(initialData._id);
+        setOriginalOrderFloorPlans([]);
+
+        // Establecer floor plans originales con los datos de esta orden
+        if (initialData.floorPlans && initialData.floorPlans.length > 0) {
+          setOriginalOrderFloorPlans(initialData.floorPlans);
+          setAllOrderFloorPlans(initialData.floorPlans);
+        } else {
+          setAllOrderFloorPlans([]);
+        }
+      } else {
+        // Misma orden, usar floor plans originales si existen
+        if (originalOrderFloorPlans.length > 0) {
+          setAllOrderFloorPlans(originalOrderFloorPlans);
+        } else if (
+          initialData.floorPlans &&
+          initialData.floorPlans.length > 0
+        ) {
+          setOriginalOrderFloorPlans(initialData.floorPlans);
+          setAllOrderFloorPlans(initialData.floorPlans);
+        } else {
+          setAllOrderFloorPlans([]);
+        }
+      }
+    }
+  }, [isOpen, initialData?._id, initialData?.floorPlans, currentOrderId]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -201,6 +271,10 @@ export function OrderEditModal({
 
   const handleClose = () => {
     setFormData(initialData);
+    setFullProduct(null); // Reset full product data
+    setAllOrderFloorPlans([]); // Reset order floor plans
+    // NO resetear originalOrderFloorPlans para mantener historial de la orden actual
+    // NO resetear currentOrderId para mantener tracking de la orden
     onClose();
   };
 
@@ -454,7 +528,6 @@ export function OrderEditModal({
                   </CardHeader>
                   <div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {console.log("color", formData)}
                       {(
                         formData.product?.colorOptions ||
                         formData?.colorOptions ||
@@ -562,49 +635,188 @@ export function OrderEditModal({
                   </CardHeader>
                   <div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {(
-                        formData.product?.floorPlans ||
-                        formData?.floorPlans ||
-                        []
-                      ).map((floorPlan: any, index: number) => {
-                        const isSelected = formData.floorPlans?.some(
-                          (f) => f._id === floorPlan._id
-                        );
+                      {loadingProduct ? (
+                        <div className="col-span-full text-center py-4">
+                          Cargando floor plans...
+                        </div>
+                      ) : !formData.product?.floorPlans ||
+                        formData.product.floorPlans.length === 0 ? (
+                        <div className="col-span-full">
+                          {allOrderFloorPlans &&
+                          allOrderFloorPlans.length > 0 ? (
+                            <div className="text-center py-2 text-blue-600 mb-4">
+                              <p className="text-sm font-medium">
+                                Floor plans personalizados para esta orden
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                El producto base no incluye floor plans, pero
+                                esta orden tiene floor plans personalizados
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="text-center py-4 text-gray-500 mb-4">
+                              <p className="text-sm">
+                                Este producto no tiene floor plans configurados.
+                              </p>
+                              <p className="text-xs">
+                                No hay floor plans disponibles para esta orden.
+                              </p>
+                            </div>
+                          )}
+                          {allOrderFloorPlans &&
+                            allOrderFloorPlans.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium mb-4">
+                                  Floor plans de esta orden:
+                                </p>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                  {allOrderFloorPlans.map(
+                                    (floorPlan: any, index: number) => {
+                                      const isSelected =
+                                        formData.floorPlans?.some(
+                                          (fp) =>
+                                            fp._id === floorPlan._id ||
+                                            (fp.planName ===
+                                              floorPlan.planName &&
+                                              fp.cost === floorPlan.cost)
+                                        );
 
-                        return (
-                          <div
-                            key={index}
-                            className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
-                          >
-                            <div className="aspect-square relative">
-                              <img
-                                src={floorPlan.imageUrl}
-                                alt={floorPlan.planName}
-                                className="rounded-t-lg bg-cover"
-                              />
-                              {isSelected && (
-                                <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
-                                  Seleccionado
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="p-4 bg-card">
-                              <h3 className="font-semibold text-lg mb-3 text-center">
-                                {floorPlan.planName}
-                              </h3>
-                              <Button
-                                type="button"
-                                variant={isSelected ? "default" : "outline"}
-                                size="sm"
-                                className="w-full"
-                                onClick={() => handleFloorPlanChange(floorPlan)}
+                                      return (
+                                        <div
+                                          key={floorPlan._id || index}
+                                          className={`relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg ${
+                                            isSelected
+                                              ? "border-2 border-primary"
+                                              : "border border-gray-300"
+                                          }`}
+                                        >
+                                          <div className="aspect-square relative">
+                                            {floorPlan.imageUrl ? (
+                                              <img
+                                                src={floorPlan.imageUrl}
+                                                alt={floorPlan.planName}
+                                                className="rounded-t-lg w-full h-full object-cover"
+                                              />
+                                            ) : (
+                                              <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-t-lg">
+                                                <span className="text-gray-500 text-sm">
+                                                  Sin imagen
+                                                </span>
+                                              </div>
+                                            )}
+                                            {isSelected && (
+                                              <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                                Seleccionado
+                                              </Badge>
+                                            )}
+                                          </div>
+                                          <div className="p-4 bg-card">
+                                            <h3 className="font-semibold text-lg mb-1 text-center">
+                                              {floorPlan.planName}
+                                            </h3>
+                                            <p className="text-sm text-gray-600 text-center mb-3">
+                                              Costo: ${floorPlan.cost}
+                                            </p>
+                                            <Button
+                                              type="button"
+                                              variant={
+                                                isSelected
+                                                  ? "destructive"
+                                                  : "default"
+                                              }
+                                              size="sm"
+                                              className="w-full"
+                                              onClick={() => {
+                                                if (isSelected) {
+                                                  // Deseleccionar: remover de floorPlans
+                                                  setFormData((prev) => ({
+                                                    ...prev,
+                                                    floorPlans:
+                                                      prev.floorPlans.filter(
+                                                        (fp) =>
+                                                          !(
+                                                            (fp._id &&
+                                                              fp._id ===
+                                                                floorPlan._id) ||
+                                                            (fp.planName ===
+                                                              floorPlan.planName &&
+                                                              fp.cost ===
+                                                                floorPlan.cost)
+                                                          )
+                                                      ),
+                                                  }));
+                                                } else {
+                                                  // Seleccionar: agregar a floorPlans
+                                                  setFormData((prev) => ({
+                                                    ...prev,
+                                                    floorPlans: [
+                                                      ...prev.floorPlans,
+                                                      floorPlan,
+                                                    ],
+                                                  }));
+                                                }
+                                              }}
+                                            >
+                                              {isSelected
+                                                ? "Deseleccionar"
+                                                : "Seleccionar"}
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                        </div>
+                      ) : (
+                        (formData.product.floorPlans || []).map(
+                          (floorPlan: any, index: number) => {
+                            const isSelected = formData.floorPlans?.some(
+                              (f) => f._id === floorPlan._id
+                            );
+
+                            return (
+                              <div
+                                key={index}
+                                className="relative rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-lg"
                               >
-                                {isSelected ? "Deseleccionar" : "Seleccionar"}
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
+                                <div className="aspect-square relative">
+                                  <img
+                                    src={floorPlan.imageUrl}
+                                    alt={floorPlan.planName}
+                                    className="rounded-t-lg bg-cover"
+                                  />
+                                  {isSelected && (
+                                    <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                                      Seleccionado
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="p-4 bg-card">
+                                  <h3 className="font-semibold text-lg mb-3 text-center">
+                                    {floorPlan.planName}
+                                  </h3>
+                                  <Button
+                                    type="button"
+                                    variant={isSelected ? "default" : "outline"}
+                                    size="sm"
+                                    className="w-full"
+                                    onClick={() =>
+                                      handleFloorPlanChange(floorPlan)
+                                    }
+                                  >
+                                    {isSelected
+                                      ? "Deseleccionar"
+                                      : "Seleccionar"}
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          }
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
